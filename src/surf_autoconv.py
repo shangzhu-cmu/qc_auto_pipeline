@@ -1,6 +1,5 @@
 from gpaw import GPAW
 from ase.constraints import FixAtoms
-from myscripts import *
 from ase import build
 from ase.io import write
 from ase.db import connect
@@ -8,6 +7,7 @@ import os
 import optimizer as opt
 from ase.parallel import parprint
 import numpy as np
+import re
 
 def surf_auto_conv(element,a,struc,num_of_layers=3,vac=8,fix_layer=2,h=0.14,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3)):
     dispatcher = {'fcc100':build.fcc100,'fcc110':build.fcc110,'fcc111':build.fcc111,
@@ -30,5 +30,9 @@ def surf_auto_conv(element,a,struc,num_of_layers=3,vac=8,fix_layer=2,h=0.14,k=6,
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
-        name=element+"_"+"surf"+'/'+'results_grid'
+        name=element+"_"+"surf"+'/'+'results_layers'
+        opt.surf_relax(slab, name, fmax=0.01, maxstep=0.04, replay_traj=None)
+        db_surf.write(slab)
+        layer=re.findall(r'\d+',str(slab.symbols))
+        ß
     #second optimize the vaccume layer
