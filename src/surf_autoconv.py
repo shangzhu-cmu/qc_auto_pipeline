@@ -34,5 +34,4 @@ def surf_auto_conv(element,a,struc,num_of_layers=3,vac=8,fix_layer=2,h=0.14,k=6,
         opt.surf_relax(slab, name, fmax=0.01, maxstep=0.04, replay_traj=None)
         db_surf.write(slab)
         layer=re.findall(r'\d+',str(slab.symbols))
-        ß
     #second optimize the vaccume layer

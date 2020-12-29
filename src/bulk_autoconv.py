@@ -11,9 +11,9 @@ import sys
 def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3)):
     ## TO-DO: need a better way to make directory without outputting error
     #os.makedirs(element+"_"+'bulk')
-    db_h=connect(element+"_"+'bulk'+'/'+'grid_converge.db')
-    db_k=connect(element+"_"+'bulk'+'/'+'kpts_converge.db')
-    db_sw=connect(element+"_"+'bulk'+'/'+'sw_converge.db')
+    db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
+    db_k=connect(element+"/"+'bulk'+'/'+'kpts_converge.db')
+    db_sw=connect(element+"/"+'bulk'+'/'+'sw_converge.db')
     diff_primary=100
     diff_second=100
     grid_iters=0
@@ -25,7 +25,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         atoms=bulk(element,a,struc)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
-        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"_"+'bulk'+'/'+'results_grid',extname='{}'.format(h))
+        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
         db_h.write(atoms,h=h)
         if grid_iters>=2:
             fst=db_h.get_atoms(id=grid_iters-1)
@@ -37,10 +37,11 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         h_ls.append(h)
         grid_iters+=1
     if grid_iters>=6:
-        parprint("WARNING: Max grid iterations reached! System may not converged.")
-        parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Grid Size.")
-        parprint("Computation Suspended!")
-        sys.exit()
+        if diff_primary>rela_tol or diff_second>rela_tol:
+            parprint("WARNING: Max grid iterations reached! System may not converged.")
+            parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Grid Size.")
+            parprint("Computation Suspended!")
+            sys.exit()
     h=h_ls[-3]
     #kpts convergence
     diff_primary=100
@@ -53,7 +54,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         atoms=bulk(element,a,struc)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
-        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"_"+'bulk'+'/'+'results_kpts',extname='{}'.format(k))
+        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k))
         db_k.write(atoms,kpts=k)
         if k_iters>=2:
             fst=db_h.get_atoms(id=k_iters-1)
@@ -65,10 +66,11 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         k_iters+=1
         k_ls.append(k)
     if k_iters>=6:
-        parprint("WARNING: Max kpts iterations reached! System may not converged.")
-        #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Kpts Size.")
-        parprint("Computation Suspended!")
-        sys.exit()
+        if diff_primary>rela_tol or diff_second>rela_tol:
+            parprint("WARNING: Max kpts iterations reached! System may not converged.")
+            #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Kpts Size.")
+            parprint("Computation Suspended!")
+            sys.exit()
     k=k_ls[-3]
     #smearing-width convergence test
     diff_primary=100
@@ -81,7 +83,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         atoms=bulk(element,a,struc)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
-        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"_"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
+        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
         db_sw.write(atoms,sw=sw)
         if sw_iters>=2:
             fst=db_h.get_atoms(id=sw_iters-1)
@@ -93,10 +95,11 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         sw_iters+=1
         sw_ls.append(sw)
     if sw_iters>=6:
-        parprint("WARNING: Max smearing-width iterations reached! System may not converged.")
-        #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Kpts Size.")
-        parprint("Computation Suspended!")
-        sys.exit()
+        if diff_primary>rela_tol or diff_second>rela_tol:
+            parprint("WARNING: Max smearing-width iterations reached! System may not converged.")
+            #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Kpts Size.")
+            parprint("Computation Suspended!")
+            sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
     parprint('converged h = {}'.format(h))
