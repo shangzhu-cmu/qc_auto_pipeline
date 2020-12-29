@@ -33,6 +33,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
         iters+=1
+    h=np.round(h+0.02,decimals=2)
 
     #kpts convergence
     diff_primary=100
