@@ -33,7 +33,7 @@ def create_dir(element,options=['bulk','surf','ads'],
         print("Creation Suspended")
         sys.exit()
     for struc in surf_struc:
-        create_surf_sub_dir(element,struc,starting_layer)
+        create_surf_sub_dir(element,struc,starting_layer))
         create_surf_vac_dir(element,struc,init_vac)
     print("surf directory complete!")
 
@@ -46,7 +46,7 @@ def create_surf_vac_dir(element,struc,init_vac):
         print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+'layer_optimized directory already exists!')
         print("Creation Suspended")
         sys.exit()
-    for vac in range(init_vac,init_vac+6):
+    for str(vac) in range(init_vac,init_vac+6):
         try:
             os.makedirs(element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+vac)
         except:
@@ -61,7 +61,7 @@ def create_surf_sub_dir(element,struc,starting_layer):
         print("ERROR: "+element+"/"+"surf"+"/"+"{} directory already exists!".format(struc))
         print("Creation Suspended")
         sys.exit()
-    for layer in range(starting_layer,starting_layer+8): #3-10
+    for str(layer) in range(starting_layer,starting_layer+8): #3-10
         try:
             os.makedirs(element+"/"+'surf'+'/'+struc+'/'+layer+"x1x1")
         except:
