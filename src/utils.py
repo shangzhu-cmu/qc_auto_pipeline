@@ -1,10 +1,11 @@
 import os
 import sys
-def create_dir(current_dir,element,options=['bulk','surf','ads'],
+def create_dir(element,options=['bulk','surf','ads'],
                 surf_struc=['100','110','111'],
                 optimized_parameters=['h','k','sw'],
                 starting_layer=3,
                 init_vac=5):
+    current_dir=os.getcwd()
     os.chdir(current_dir)
     #create the element dir
     if os.path.isdir(element):
