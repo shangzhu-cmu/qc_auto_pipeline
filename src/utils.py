@@ -3,7 +3,8 @@ import sys
 def create_dir(element,options=['bulk','surf','ads'],
                 surf_struc=['100','110','111'],
                 optimized_parameters=['h','k','sw'],
-                starting_layer=3):
+                starting_layer=3,
+                init_vac=5):
 
     #create the element dir
     try:
@@ -33,10 +34,25 @@ def create_dir(element,options=['bulk','surf','ads'],
         sys.exit()
     for struc in surf_struc:
         create_surf_sub_dir(element,struc,starting_layer)
+        create_surf_vac_dir(element,struc,init_vac)
     print("surf directory complete!")
 
     #TO-DO create adsorption dir
 
+def create_surf_vac_dir(element,struc,init_vac):
+    try:
+        os.makedirs(element+"/"+'surf'+'/'+struc+'/'+'layer_optimized')
+    except:
+        print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+'layer_optimized directory already exists!')
+        print("Creation Suspended")
+        sys.exit()
+    for vac in range(init_vac,init_vac+6):
+        try:
+            os.makedirs(element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+vac)
+        except:
+            print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+vac+" directory already exists!")
+            print("Creation Suspended")
+            sys.exit()   
 
 def create_surf_sub_dir(element,struc,starting_layer):
     try:
