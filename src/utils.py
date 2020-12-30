@@ -14,6 +14,7 @@ def create_dir(element,options=['bulk','surf','ads'],
         print("Creation Suspended")
         sys.exit()
     
+    
     #create the bulk dir
     try:
         os.makedirs(element+"/"+'bulk')
@@ -41,44 +42,45 @@ def create_dir(element,options=['bulk','surf','ads'],
 
 def create_surf_vac_dir(element,struc,init_vac):
     try:
-        os.makedirs(element+"/"+'surf'+'/'+struc+'/'+'layer_optimized')
+        os.makedirs(element+'/'+'surf'+'/'+struc+'/'+'layer_optimized')
     except:
-        print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+'layer_optimized directory already exists!')
-        print("Creation Suspended")
+        print('ERROR: '+element+'/'+'surf'+'/'+struc+'/'+'layer_optimized directory already exists!')
+        print('Creation Suspended')
         sys.exit()
     for vac in range(init_vac,init_vac+6):
         try:
-            os.makedirs(element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac))
+            os.makedirs(element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac))
         except:
-            print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)+" directory already exists!")
-            print("Creation Suspended")
+            print('ERROR: '+element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)+' directory already exists!')
+            print('Creation Suspended')
             sys.exit()   
 
 def create_surf_sub_dir(element,struc,starting_layer):
     try:
-        os.makedirs(element+"/"+'surf'+'/'+struc)
+        os.makedirs(element+'/'+'surf'+'/'+struc)
     except:
-        print("ERROR: "+element+"/"+"surf"+"/"+"{} directory already exists!".format(struc))
-        print("Creation Suspended")
+        print('ERROR: '+element+'/'+'surf'+'/'+'{} directory already exists!'.format(struc))
+        print('Creation Suspended')
         sys.exit()
     for layer in range(starting_layer,starting_layer+8): #3-10
         try:
-            os.makedirs(element+"/"+'surf'+'/'+struc+'/'+str(layer)+"x1x1")
+            os.makedirs(element+'/'+'surf'+'/'+struc+'/'+str(layer)+'x1x1')
         except:
-            print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+str(layer)+"x1x1"+" directory already exists!")
-            print("Creation Suspended")
+            print('ERROR: '+element+'/'+'surf'+'/'+struc+'/'+str(layer)+'x1x1'+' directory already exists!')
+            print('Creation Suspended')
             sys.exit()
         
 def create_bulk_sub_dir(element,par):
+    print(element+"/"+"bulk"+"/"+"results"+"_"+par)
     try:
-        os.makedirs(element+"/"+'bulk'+'/'+'results'+"_"+par)
+        os.makedirs(element+"/"+"bulk"+"/"+"results"+"_"+par)
     except:
-        print("ERROR: "+element+"/"+"bulk"+"/"+"results_{} directory already exists!".format(par))
-        print("Creation Suspended")
+        print('ERROR: '+element+'/'+'bulk'+'/'+'results_{} directory already exists!'.format(par))
+        print('Creation Suspended')
         sys.exit()
     try:
-        os.makedirs(element+"/"+'bulk'+'/'+'results'+"_"+par+'/'+'eos_fit')
+        os.makedirs(element+'/'+'bulk'+'/'+'results'+'_'+par+'/','eos_fit')
     except:
-        print("ERROR: "+element+"/"+'bulk'+'/'+'results'+"_"+par+'/'+'eos_fit'+"directory already exists!")
-        print("Creation Suspended")
+        print('ERROR: '+element+'/'+'bulk'+'/'+'results'+'_'+par+'/'+'eos_fit'+'directory already exists!')
+        print('Creation Suspended')
         sys.exit()
