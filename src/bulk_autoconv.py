@@ -38,7 +38,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         grid_iters+=1
     if grid_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint("WARNING: Max grid iterations reached! System may not converged.")
+            parprint("WARNING: Max GRID iterations reached! System may not converged.")
             parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Grid Size.")
             parprint("Computation Suspended!")
             sys.exit()
@@ -67,7 +67,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         k_ls.append(k)
     if k_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint("WARNING: Max kpts iterations reached! System may not converged.")
+            parprint("WARNING: Max Kpts iterations reached! System may not converged.")
             #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Kpts Size.")
             parprint("Computation Suspended!")
             sys.exit()
@@ -96,7 +96,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
         sw_ls.append(sw)
     if sw_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint("WARNING: Max smearing-width iterations reached! System may not converged.")
+            parprint("WARNING: Max Smearing-Width iterations reached! System may not converged.")
             #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Kpts Size.")
             parprint("Computation Suspended!")
             sys.exit()
