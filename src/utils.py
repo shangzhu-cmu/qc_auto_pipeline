@@ -33,7 +33,7 @@ def create_dir(element,options=['bulk','surf','ads'],
         print("Creation Suspended")
         sys.exit()
     for struc in surf_struc:
-        create_surf_sub_dir(element,struc,starting_layer))
+        create_surf_sub_dir(element,struc,starting_layer)
         create_surf_vac_dir(element,struc,init_vac)
     print("surf directory complete!")
 
@@ -46,11 +46,11 @@ def create_surf_vac_dir(element,struc,init_vac):
         print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+'layer_optimized directory already exists!')
         print("Creation Suspended")
         sys.exit()
-    for str(vac) in range(init_vac,init_vac+6):
+    for vac in range(init_vac,init_vac+6):
         try:
-            os.makedirs(element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+vac)
+            os.makedirs(element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac))
         except:
-            print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+vac+" directory already exists!")
+            print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)+" directory already exists!")
             print("Creation Suspended")
             sys.exit()   
 
@@ -61,11 +61,11 @@ def create_surf_sub_dir(element,struc,starting_layer):
         print("ERROR: "+element+"/"+"surf"+"/"+"{} directory already exists!".format(struc))
         print("Creation Suspended")
         sys.exit()
-    for str(layer) in range(starting_layer,starting_layer+8): #3-10
+    for layer in range(starting_layer,starting_layer+8): #3-10
         try:
-            os.makedirs(element+"/"+'surf'+'/'+struc+'/'+layer+"x1x1")
+            os.makedirs(element+"/"+'surf'+'/'+struc+'/'+str(layer)+"x1x1")
         except:
-            print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+layer+"x1x1"+" directory already exists!")
+            print("ERROR: "+element+"/"+'surf'+'/'+struc+'/'+str(layer)+"x1x1"+" directory already exists!")
             print("Creation Suspended")
             sys.exit()
         
