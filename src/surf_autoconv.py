@@ -14,17 +14,17 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
     dispatcher = {'fcc100':build.fcc100,'fcc110':build.fcc110,'fcc111':build.fcc111,
                   'bcc100':build.bcc100,'bcc110':build.bcc110,'bcc111':build.bcc111,
                   }
-    m_ind=re.findall(r'\d+',struc)
+    m_ind=re.findall(r'\d+',struc)[0]
     try:
-        db_bulk=connect(element+"/"+"bulk"+"/"+"sw_converge.db")
+        db_bulk=connect(element+'/'+'bulk'+'/'+'sw_converge.db')
         opt_bulk=db_bulk.get_atoms(id=len(db_bulk)-2)
         opt_bulk_e=opt_bulk.get_potential_energy()
         a=opt_bulk.get_cell()[0][1]*2
     except:
-        parprint("ERROR: No Optimized Bulk Object Found!")
-        parprint("Surface Convergence Computation Suspended!")
+        parprint('ERROR: No Optimized Bulk Object Found!')
+        parprint('Surface Convergence Computation Suspended!')
         sys.exit()
-    db_surf=connect(element+"/"+'surf'+'/'+'layer_converge.db')
+    db_surf=connect(element+'/'+'surf'+'/'+'layer_converge.db')
 
     #first optimize the layers
     diff_primary=100
@@ -43,7 +43,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
-        location=element+"/"+"surf"+'/'+m_ind+'/'+str(init_layer)+'x1x1'
+        location=element+'/'+'surf'+'/'+m_ind+'/'+str(init_layer)+'x1x1'
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
         db_surf.write(slab)
         if iters>=2:
@@ -56,14 +56,14 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         init_layer+=1
     if iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint("WARNING: Max Layer Íiterations reached! System may not converged.")
+            parprint('WARNING: Max Layer Íiterations reached! System may not converged.')
             #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Grid Size.")
-            parprint("Computation Suspended!")
+            parprint('Computation Suspended!')
             sys.exit()
     layer=layer_ls[-3]
 
     #second optimize the vaccum layer
-    db_vac=connect(element+"/"+'surf'+'/'+'vac_converge.db')
+    db_vac=connect(element+'/'+'surf'+'/'+'vac_converge.db')
     diff_primary=100
     diff_second=100
     iters=0
@@ -80,7 +80,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
-        location=element+"/"+"surf"+'/'+m_ind+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
+        location=element+'/'+'surf'+'/'+m_ind+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
         db_vac.write(slab)
         if iters>=2:
@@ -93,9 +93,9 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         vac=int(vac+1)
     if iters>=5:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint("WARNING: Max Vacuum Íiterations reached! System may not converged.")
+            parprint('WARNING: Max Vacuum Íiterations reached! System may not converged.')
             #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Grid Size.")
-            parprint("Computation Suspended!")
+            parprint('Computation Suspended!')
             sys.exit()
     vac=vac_ls[-3]    
     #final_slab=db_vac.get_atoms(id=len(db_vac)-2)
