@@ -8,7 +8,7 @@ from ase.parallel import parprint
 import numpy as np
 import sys
 
-def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3)):
+def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3)):
     ## TO-DO: need a better way to make directory without outputting error
     #os.makedirs(element+"_"+'bulk')
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
@@ -22,7 +22,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         if grid_iters>0:
             h=np.round(h-0.02,decimals=2)
-        atoms=bulk(element,a,struc)
+        atoms=bulk(element,struc,a=a0)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
@@ -51,7 +51,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
         if k_iters>0:
             k=int(k+2)
-        atoms=bulk(element,a,struc)
+        atoms=bulk(element,struc,a=a0)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k))
@@ -80,7 +80,7 @@ def bulk_auto_conv(element,a,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
         if sw_iters>0:
             sw=sw/2
-        atoms=bulk(element,a,struc)
+        atoms=bulk(element,struc,a=a0)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
