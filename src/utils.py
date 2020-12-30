@@ -5,7 +5,8 @@ def create_dir(element,options=['bulk','surf','ads'],
                 optimized_parameters=['h','k','sw'],
                 starting_layer=3,
                 init_vac=5):
-
+    current_dir=os.getcwd()
+    os.chdir(current_dir)
     #create the element dir
     if os.path.isdir(element):
         print("WARNING: {} directory already exists!".format(element))
