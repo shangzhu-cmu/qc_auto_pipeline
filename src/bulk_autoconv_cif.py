@@ -117,7 +117,7 @@ def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(
     parprint('converged final potential energy e = {} eV'.format(np.round(final_atom.get_potential_energy(),decimals=5)))
 
 def bulk_builder(element,cif,struc,a0):
-    if cif == True:
+    if cif == False:
         atoms=bulk(element,struc,a=a0)
     else:
         location='orig_cif_data'+'/'+element+'.cif'
