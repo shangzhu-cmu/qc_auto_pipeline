@@ -14,6 +14,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
     dispatcher = {'fcc100':build.fcc100,'fcc110':build.fcc110,'fcc111':build.fcc111,
                   'bcc100':build.bcc100,'bcc110':build.bcc110,'bcc111':build.bcc111,
                   }
+    m_ind=re.findall(r'\d+',struc)
     try:
         db_bulk=connect(element+"/"+"bulk"+"/"+"sw_converge.db")
         opt_bulk=db_bulk.get_atoms(id=len(db_bulk)-2)
@@ -42,7 +43,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
-        location=element+"/"+"surf"+'/'+struc+'/'+str(init_layer)+'x1x1'
+        location=element+"/"+"surf"+'/'+m_ind+'/'+str(init_layer)+'x1x1'
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
         db_surf.write(slab)
         if iters>=2:
@@ -79,7 +80,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
-        location=element+"/"+"surf"+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
+        location=element+"/"+"surf"+'/'+m_ind+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
         db_vac.write(slab)
         if iters>=2:
