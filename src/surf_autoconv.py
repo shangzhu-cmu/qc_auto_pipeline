@@ -42,7 +42,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
-        location=element+"/"+"surf"+'/'+struc+'/'+init_layer+'x1x1'
+        location=element+"/"+"surf"+'/'+struc+'/'+str(init_layer)+'x1x1'
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
         db_surf.write(slab)
         if iters>=2:
@@ -79,7 +79,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
-        location=element+"/"+"surf"+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+vac
+        location=element+"/"+"surf"+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
         db_vac.write(slab)
         if iters>=2:
