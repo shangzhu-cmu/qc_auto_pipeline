@@ -34,6 +34,12 @@ def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
+            parprint('Snd-Fst')
+            parprint(abs(snd.get_potential_energy()-fst.get_potential_energy()))
+            parprint('Trd-Fst')
+            parprint(abs(trd.get_potential_energy()-fst.get_potential_energy()))
+            parprint('Trd-Snd')
+            parprint(abs(trd.get_potential_energy()-snd.get_potential_energy()))
         h_ls.append(h)
         grid_iters+=1
     if grid_iters>=6:
@@ -92,12 +98,6 @@ def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
-            parprint('Snd-Fst')
-            parprint(abs(snd.get_potential_energy()-fst.get_potential_energy()))
-            parprint('Trd-Fst')
-            parprint(abs(trd.get_potential_energy()-fst.get_potential_energy()))
-            parprint('Trd-Snd')
-            parprint(abs(trd.get_potential_energy()-snd.get_potential_energy()))
         sw_iters+=1
         sw_ls.append(sw)
     if sw_iters>=6:
