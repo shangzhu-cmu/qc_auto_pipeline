@@ -118,4 +118,10 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         diff_primary=max(abs(snd_surf_e-fst_surf_e),
                         abs(trd_surf_e-fst_surf_e))
         diff_second=abs(trd_surf_e-snd_surf_e)
+        parprint('Snd-Fst')
+        parprint(abs(snd_surf_e-fst_surf_e))
+        parprint('Trd-Fst')
+        parprint(abs(trd_surf_e-fst_surf_e))
+        parprint('Trd-Snd')
+        parprint(abs(trd_surf_e-snd_surf_e)))
         return diff_primary, diff_second
