@@ -1,5 +1,6 @@
 import os
 import sys
+##TO-DO: options are not taken care of
 def create_dir(element,options=['bulk','surf','ads'],
                 surf_struc=['100','110','111'],
                 optimized_parameters=['h','k','sw'],
