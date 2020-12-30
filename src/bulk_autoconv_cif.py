@@ -116,10 +116,10 @@ def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(
     parprint('converged final lattice constant a = {} Ang'.format(np.rounud(final_atom.cell[0][1]*2),decimals=5)) ## TO-DO: NEED a comprehensive output
     parprint('converged final potential energy e = {} eV'.format(np.round(final_atom.get_potential_energy(),decimals=5)))
 
-    def bulk_builder(element,cif,struc,a0):
-        if cif == True:
-            atoms=bulk(element,struc,a=a0)
-        else:
-            location='orig_cif_data'+'/'+element+'.cif'
-            atoms=read(location)
-        return atoms
+def bulk_builder(element,cif,struc,a0):
+    if cif == True:
+        atoms=bulk(element,struc,a=a0)
+    else:
+        location='orig_cif_data'+'/'+element+'.cif'
+        atoms=read(location)
+    return atoms
