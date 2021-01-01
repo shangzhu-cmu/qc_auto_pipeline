@@ -65,7 +65,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
-            temp_output_printer(db_k,k_iters,'k',temp_print)
+            temp_output_printer(db_k,k_iters,'kpts',temp_print)
         k_iters+=1
         k_ls.append(k)
     if k_iters>=6:
