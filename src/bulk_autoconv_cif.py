@@ -9,7 +9,7 @@ import numpy as np
 import sys
 from ase.io import read
 
-def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False):
+def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
     db_k=connect(element+"/"+'bulk'+'/'+'kpts_converge.db')
     db_sw=connect(element+"/"+'bulk'+'/'+'sw_converge.db')
@@ -34,12 +34,7 @@ def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
-            # parprint('Snd-Fst')
-            # parprint(abs(snd.get_potential_energy()-fst.get_potential_energy()))
-            # parprint('Trd-Fst')
-            # parprint(abs(trd.get_potential_energy()-fst.get_potential_energy()))
-            # parprint('Trd-Snd')
-            # parprint(abs(trd.get_potential_energy()-snd.get_potential_energy()))
+            temp_output_printer(db_h,grid_iters,'h',temp_print)
         h_ls.append(h)
         grid_iters+=1
     if grid_iters>=6:
@@ -64,12 +59,13 @@ def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k))
         db_k.write(atoms,kpts=k)
         if k_iters>=2:
-            fst=db_h.get_atoms(id=k_iters-1)
-            snd=db_h.get_atoms(id=k_iters)
-            trd=db_h.get_atoms(id=k_iters+1)
+            fst=db_k.get_atoms(id=k_iters-1)
+            snd=db_k.get_atoms(id=k_iters)
+            trd=db_k.get_atoms(id=k_iters+1)
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
+            temp_output_printer(db_k,k_iters,'k',temp_print)
         k_iters+=1
         k_ls.append(k)
     if k_iters>=6:
@@ -94,12 +90,13 @@ def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
         db_sw.write(atoms,sw=sw)
         if sw_iters>=2:
-            fst=db_h.get_atoms(id=sw_iters-1)
-            snd=db_h.get_atoms(id=sw_iters)
-            trd=db_h.get_atoms(id=sw_iters+1)
+            fst=db_sw.get_atoms(id=sw_iters-1)
+            snd=db_sw.get_atoms(id=sw_iters)
+            trd=db_sw.get_atoms(id=sw_iters+1)
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
+            temp_output_printer(db_sw,sw_iters,'sw',temp_print)
         sw_iters+=1
         sw_ls.append(sw)
     if sw_iters>=6:
@@ -123,3 +120,18 @@ def bulk_builder(element,cif,struc,a0):
         location='orig_cif_data'+'/'+element+'.cif'
         atoms=read(location)
     return atoms
+
+def temp_output_printer(db,iters,key,option=False):
+    fst_r=db.get(iters-1)
+    snd_r=db.get(iters)
+    trd_r=db.get(iters+1)
+    if option==True:
+        parprint('2nd{}-1st{}'.format(snd_r[key],fst_r[key]),
+                '=',
+                np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5))
+        parprint('3rd{}-1st{}'.format(trd_r[key],fst_r[key]),
+                '=',
+                np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5))
+        parprint('3rd{}-2nd{}'.format(trd_r[key],snd_r[key]),
+                '=',
+                np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5))
