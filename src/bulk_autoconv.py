@@ -21,8 +21,11 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         if grid_iters>0:
             h=np.round(h-0.02,decimals=2)
+        parprint(h,a0,k,sw)
         atoms=bulk_builder(element,cif,struc,a0)
-        #atoms=bulk(element,struc,a=a0)
+        parprint(atoms.__dict__)
+        atoms=bulk(element,struc,a=a0)
+        parprint(atoms.__dict__)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
