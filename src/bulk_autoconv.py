@@ -9,7 +9,7 @@ import numpy as np
 import sys
 from ase.io import read
 
-def bulk_auto_conv(element,a0,struc,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
+def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
     db_k=connect(element+"/"+'bulk'+'/'+'kpts_converge.db')
     db_sw=connect(element+"/"+'bulk'+'/'+'sw_converge.db')
