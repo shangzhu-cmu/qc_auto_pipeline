@@ -127,10 +127,10 @@ def temp_output_printer(db,iters,key,option=False):
     if option==True:
         parprint('2nd{}-1st{}'.format(snd_r[key],fst_r[key]),
                 '=',
-                np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5))
+                np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5),'eV')
         parprint('3rd{}-1st{}'.format(trd_r[key],fst_r[key]),
                 '=',
-                np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5))
+                np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5),'eV')
         parprint('3rd{}-2nd{}'.format(trd_r[key],snd_r[key]),
                 '=',
-                np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5))
+                np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5),'eV')

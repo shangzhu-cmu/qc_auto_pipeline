@@ -22,8 +22,8 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         opt_bulk_e=opt_bulk.get_potential_energy()
         a=opt_bulk.get_cell()[0][1]*2
         parprint('Simulated Bulk Cell Quick Check:')
-        parprint('Lattice_Constant = ',np.round(a,decimals=5))
-        parprint('Potential_Energy = ',np.round(opt_bulk_e,decimals=5))
+        parprint('Lattice_Constant = ',np.round(a,decimals=5),'Ang')
+        parprint('Potential_Energy = ',np.round(opt_bulk_e,decimals=5),'eV')
     except:
         parprint('ERROR: No Optimized Bulk Object Found!')
         parprint('Surface Convergence Computation Suspended!')
@@ -176,13 +176,13 @@ def temp_output_printer(db,iters,key,opt_bulk_e,rela_tol,option=False):
         parprint(key)
         parprint('relative tol',
                 '=',
-                np.round(rela_tol,decimals=5))
+                np.round(rela_tol,decimals=5),'eV/Ang^2')
         parprint('2nd({})-1st({})'.format(snd_r[key],fst_r[key]),
                 '=',
-                np.round(surf_e_calc(db.get_atoms(iters),db.get_atoms(iters-1),opt_bulk_e),decimals=5))
+                np.round(surf_e_calc(db.get_atoms(iters),db.get_atoms(iters-1),opt_bulk_e),decimals=5),'eV/Ang^2')
         parprint('3rd({})-1st({})'.format(trd_r[key],fst_r[key]),
                 '=',
-                np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters-1),opt_bulk_e),decimals=5))
+                np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters-1),opt_bulk_e),decimals=5),'eV/Ang^2')
         parprint('3rd({})-2nd({})'.format(trd_r[key],snd_r[key]),
                 '=',
-                np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters),opt_bulk_e),decimals=5))
+                np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters),opt_bulk_e),decimals=5),'eV/Ang^2')
