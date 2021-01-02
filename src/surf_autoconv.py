@@ -104,7 +104,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             trd=db_vac.get_atoms(id=iters+1)
             diff_primary=max(surf_e_calc(fst,snd,opt_bulk_e),surf_e_calc(fst,trd,opt_bulk_e))
             diff_second=surf_e_calc(snd,trd,opt_bulk_e)
-            temp_output_printer(db_surf,iters,'vac',opt_bulk_e,temp_print)
+            temp_output_printer(db_vac,iters,'vac',opt_bulk_e,temp_print)
         vac_ls.append(vac)
         iters+=1
         vac=int(vac+1)
