@@ -21,8 +21,9 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         opt_bulk=db_bulk.get_atoms(id=len(db_bulk)-2)
         opt_bulk_e=opt_bulk.get_potential_energy()
         a=opt_bulk.get_cell()[0][1]*2
-        parprint('Lattice Constant = ',np.round(a,decimals=5))
-        parprint('Potential Energy = ',np.round(opt_bulk_e,decimals=5))
+        parprint('Simulated Bulk Cell Quick Check:')
+        parprint('Lattice_Constant = ',np.round(a,decimals=5))
+        parprint('Potential_Energy = ',np.round(opt_bulk_e,decimals=5))
     except:
         parprint('ERROR: No Optimized Bulk Object Found!')
         parprint('Surface Convergence Computation Suspended!')
@@ -55,8 +56,11 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             trd=db_surf.get_atoms(id=iters+1)
             diff_primary=max(surf_e_calc(fst,snd,opt_bulk_e),surf_e_calc(fst,trd,opt_bulk_e))
             diff_second=surf_e_calc(snd,trd,opt_bulk_e)
-            temp_output_printer(db_surf,iters,'layers',opt_bulk_e,temp_print)
-            
+            temp_output_printer(db_surf,iters,'layers',opt_bulk_e,rela_tol,temp_print)
+            area_average=np.mean([2*(fst.cell[0][0]*fst.cell[1][1]),
+                                2*(snd.cell[0][0]*snd.cell[1][1]),
+                                2*(trd.cell[0][0]*trd.cell[1][1])])
+            rela_tol=rela_tol/area_average
             #diff_primary, diff_second=surf_e_converge_calc(fst,snd,trd,opt_bulk_e)
         layer_ls.append(init_layer)
         iters+=1
@@ -104,7 +108,11 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             trd=db_vac.get_atoms(id=iters+1)
             diff_primary=max(surf_e_calc(fst,snd,opt_bulk_e),surf_e_calc(fst,trd,opt_bulk_e))
             diff_second=surf_e_calc(snd,trd,opt_bulk_e)
-            temp_output_printer(db_vac,iters,'vac',opt_bulk_e,temp_print)
+            temp_output_printer(db_vac,iters,'vac',opt_bulk_e,rela_tol,temp_print)
+            area_average=np.mean([2*(fst.cell[0][0]*fst.cell[1][1]),
+                                2*(snd.cell[0][0]*snd.cell[1][1]),
+                                2*(trd.cell[0][0]*trd.cell[1][1])])
+            rela_tol=rela_tol/area_average
         vac_ls.append(vac)
         iters+=1
         vac=int(vac+1)
@@ -156,12 +164,19 @@ def surf_e_calc(pre,post,opt_bulk_e):
 #     diff_second=abs(trd_surf_e-snd_surf_e)
 #     return diff_primary, diff_second
 
-def temp_output_printer(db,iters,key,opt_bulk_e,option=False):
+def temp_output_printer(db,iters,key,opt_bulk_e,rela_tol,option=False):
     fst_r=db.get(iters-1)
     snd_r=db.get(iters)
     trd_r=db.get(iters+1)
+    area_average=np.mean([2*(fst_r.cell[0][0]*fst_r.cell[1][1]),
+                        2*(snd_r.cell[0][0]*snd_r.cell[1][1]),
+                        2*(trd_r.cell[0][0]*trd_r.cell[1][1])])
+    rela_tol=rela_tol/area_average
     if option==True:
         parprint(key)
+        parprint('relative tol',
+                '=',
+                np.round(rela_tol,decimals=5))
         parprint('2nd({})-1st({})'.format(snd_r[key],fst_r[key]),
                 '=',
                 np.round(surf_e_calc(db.get_atoms(iters),db.get_atoms(iters-1),opt_bulk_e),decimals=5))
