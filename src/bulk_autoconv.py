@@ -109,7 +109,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     parprint('converged h = {}'.format(h))
     parprint('converged k = {}'.format(k))
     parprint('converged smearing width = {}'.format(sw))
-    parprint('converged final lattice constant a = {} Ang'.format(np.round(final_atom.cell[0][1]*2),decimals=5)) ## TO-DO: NEED a comprehensive output
+    parprint('converged final lattice constant a = {} Ang'.format(np.round(final_atom.cell[0][1]*2,decimals=5)) ## TO-DO: NEED a comprehensive output
     parprint('converged final potential energy e = {} eV'.format(np.round(final_atom.get_potential_energy(),decimals=5)))
 
 def bulk_builder(element,cif,struc,a0):
