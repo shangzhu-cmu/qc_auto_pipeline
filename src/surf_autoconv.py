@@ -20,6 +20,8 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         opt_bulk=db_bulk.get_atoms(id=len(db_bulk)-2)
         opt_bulk_e=opt_bulk.get_potential_energy()
         a=opt_bulk.get_cell()[0][1]*2
+        parprint('Lattice Constant = ',np.round(a,decimals=5))
+        parprint('Potential Energy = ',np.round(opt_bulk_e,decimals=5))
     except:
         parprint('ERROR: No Optimized Bulk Object Found!')
         parprint('Surface Convergence Computation Suspended!')
