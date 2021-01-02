@@ -9,6 +9,7 @@ from ase.parallel import parprint
 import numpy as np
 import re
 import sys
+import time
 
 def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),temp_print=True):
     dispatcher = {'fcc100':build.fcc100,'fcc110':build.fcc110,'fcc111':build.fcc111,
@@ -74,7 +75,11 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
     diff_second=100
     iters=0
     vac_ls=[]
+    time_ls=[]
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
+        if iters>1:
+            if np.diff(time_ls)[-1]>0 and (diff_primary<rela_tol and diff_second<rela_tol):
+                break
         slab = dispatcher[struc](element, size=(1, 1, layer),a=a,vacuum=vac)
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
@@ -87,15 +92,19 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
         location=element+'/'+'surf'+'/'+m_ind+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
+        start_t=time.time()
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
-        db_vac.write(slab)
+        end_t=time.time()
+        period=np.round(end_t-start_t,decimals=5)
+        time_ls.append(period)
+        db_vac.write(slab,vac=vac)
         if iters>=2:
             fst=db_vac.get_atoms(id=iters-1)
             snd=db_vac.get_atoms(id=iters)
             trd=db_vac.get_atoms(id=iters+1)
             diff_primary=max(surf_e_calc(fst,snd,opt_bulk_e),surf_e_calc(fst,trd,opt_bulk_e))
             diff_second=surf_e_calc(snd,trd,opt_bulk_e)
-            temp_output_printer(db_surf,iters,'layers',opt_bulk_e,temp_print)
+            temp_output_printer(db_surf,iters,'vac',opt_bulk_e,temp_print)
         vac_ls.append(vac)
         iters+=1
         vac=int(vac+1)
@@ -104,7 +113,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
             parprint('WARNING: Max Vacuum Íiterations reached! System may not converged.')
             parprint('Computation Suspended!')
             sys.exit()
-    vac=vac_ls[-3]    
+    vac=vac_ls[-2]    
     parprint('Simulation Results Output:')
     parprint('Element = {}'.format(element))
     parprint('Structure = {}'.format(struc))
@@ -113,6 +122,9 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
     parprint('converged smearing width = {}'.format(sw))
     parprint('converged layer = {}'.format(layer))
     parprint('converged vacuum = {} Ang'.format(vac))
+    parprint('computation time = {} s'.format(time_ls[-2]))
+    parprint(time_ls)
+    parprint(vac_ls)
 
 def surf_e_calc(pre,post,opt_bulk_e):
     pre_area=2*(pre.cell[0][0]*pre.cell[1][1])
