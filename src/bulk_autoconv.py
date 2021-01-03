@@ -29,8 +29,6 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     #start with grid spacing convergence
     h_ls=[]
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
-        if grid_iters>0:
-            h=np.round(h-0.02,decimals=2)
         atoms=bulk_builder(element,cif,struc,a0)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
@@ -46,6 +44,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
             if temp_print == True:
                 temp_output_printer(db_h,grid_iters,'h')
         h_ls.append(h)
+        h=np.round(h-0.02,decimals=2)
         grid_iters+=1
     if grid_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
@@ -56,13 +55,12 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     #kpts convergence
     diff_primary=100
     diff_second=100
-    k_iters=0
-    k_ls=[]
+    k_iters=1
+    k_ls=[k]
+    db_k.write(db_h.get_atoms(len(db_h)-2),kpts=k)
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
-        if k_iters>0:
-            k=int(k+2)
+        k=int(k+2)
         atoms=bulk_builder(element,cif,struc,a0)
-        #atoms=bulk(element,struc,a=a0)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k))
@@ -87,13 +85,12 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     #smearing-width convergence test
     diff_primary=100
     diff_second=100
-    sw_iters=0
-    sw_ls=[]
+    sw_iters=1
+    sw_ls=[sw]
+    db_sw.write(db_k.get_atoms(len(db_k)-2),sw=sw)
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
-        if sw_iters>0:
-            sw=sw/2
+        sw=sw/2
         atoms=bulk_builder(element,cif,struc,a0)
-        #atoms=bulk(element,struc,a=a0)
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
