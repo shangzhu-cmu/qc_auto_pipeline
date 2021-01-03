@@ -58,7 +58,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         slab = surface(opt_bulk, m_ind, layers=init_layer, vacuum=vac, periodic=False)
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
-        #slab.set_pbc([1,1,0])
+        slab.set_pbc([1,1,0])
         calc=GPAW(xc=xc,
             h=h,
             symmetry = {'point_group': False},
@@ -115,7 +115,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         slab = surface(opt_bulk, m_ind, layers=layer, vacuum=vac, periodic=False)
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
-        #slab.set_pbc([1,1,0])
+        slab.set_pbc([1,1,0])
         calc=GPAW(xc=xc,
             h=h,
             symmetry = {'point_group': False},
