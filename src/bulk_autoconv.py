@@ -10,7 +10,7 @@ from ase.io import read, write
 from ase.parallel import paropen, parprint, world
 
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
-    rep_location=(element+'/'+'/'+'results_report.txt')
+    rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
