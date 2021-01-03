@@ -8,7 +8,7 @@ import numpy as np
 import sys
 from ase.io import read, write
 
-def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
+def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
     parprint('Initial Parameters:')
     parprint('\t'+'Materials: '+element)
     parprint('\t'+'Starting cif: '+str(cif))
@@ -16,7 +16,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
         parprint('\t'+'a: '+str(a0)+'Ang')
     parprint('\t'+'xc: '+xc)
     parprint('\t'+'h: '+str(h))
-    parprint('\t'+'k: '+str(k))
+    parprint('\t'+'k_density: '+str(k_density))
     parprint('\t'+'sw: '+str(sw))
     parprint('\t'+'rela_tol: '+str(rela_tol)+'eV')
     #connecting to databse
@@ -30,7 +30,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     h_ls=[]
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         atoms=bulk_builder(element,cif,struc,a0)
-        calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
+        calc=GPAW(xc=xc,h=h,kpts={'density': k_density, 'even': True},occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
         db_h.write(atoms,h=h)
@@ -56,15 +56,15 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     diff_primary=100
     diff_second=100
     k_iters=1
-    k_ls=[k]
-    db_k.write(db_h.get_atoms(len(db_h)-2),kpts=k)
+    k_ls=[k_density]
+    db_k.write(db_h.get_atoms(len(db_h)-2),kpts=k_density)
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
-        k=int(k+2)
+        k_density=int(k_density+1)
         atoms=bulk_builder(element,cif,struc,a0)
-        calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
+        calc=GPAW(xc=xc,h=h,kpts={'density': k_density, 'even': True},occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
-        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k))
-        db_k.write(atoms,kpts=k)
+        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k_density))
+        db_k.write(atoms,kpts=k_density)
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
             snd=db_k.get_atoms(id=k_iters)
@@ -75,13 +75,13 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
             if temp_print == True:
                 temp_output_printer(db_k,k_iters,'kpts')
         k_iters+=1
-        k_ls.append(k)
+        k_ls.append(k_density)
     if k_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
             parprint("WARNING: Max KPTS iterations reached! System may not be converged.")
             parprint("Computation Suspended!")
             sys.exit()
-    k=k_ls[-3]
+    k_density=k_ls[-3]
     #smearing-width convergence test
     diff_primary=100
     diff_second=100
@@ -91,7 +91,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
         sw=sw/2
         atoms=bulk_builder(element,cif,struc,a0)
-        calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
+        calc=GPAW(xc=xc,h=h,kpts={'density': k_density, 'even': True},occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
         db_sw.write(atoms,sw=sw)
@@ -115,7 +115,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
     parprint('Final Parameters:')
     parprint('\t'+'h: '+str(h))
-    parprint('\t'+'k: '+str(k))
+    parprint('\t'+'k: '+str(k_density))
     parprint('\t'+'sw: '+str(sw))
     parprint('Final Output: ')
     parprint('\t'+'a: '+str(np.round(final_atom.cell[0][1]*2,decimals=5))+'Ang'+'\n')    
