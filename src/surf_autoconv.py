@@ -97,14 +97,14 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             f.close()
             sys.exit()
     layer=layer_ls[-3]
-    time=time_ls[-3]
+    time_layer=time_ls[-3]
     #second optimize the vaccum layer
     db_vac=connect(element+'/'+'surf'+'/'+'vac_converge.db')
     diff_primary=100
     diff_second=100
     iters=1
     vac_ls=[vac]
-    time_ls=[time]
+    time_ls=[time_layer]
     db_vac.write(db_layer.get_atoms(len(db_layer)-2),vac=vac)
     area_rela_tol=0
     #while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
