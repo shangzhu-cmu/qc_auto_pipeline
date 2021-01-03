@@ -168,7 +168,7 @@ def temp_output_printer(db,iters,key,opt_bulk_e,rela_tol,option=False):
                         2*(trd_r.cell[0][0]*trd_r.cell[1][1])])
     rela_tol/area_average
     parprint('Optimizing parameter: '+key)
-    parprint('Relative Tolerance: '+str(rela_tol/area_average)+'eV/Ang^2')
+    parprint('Relative Tolerance: '+str(np.round(rela_tol/area_average,decimals=5))+'eV/Ang^2')
     parprint('\t'+'1st: '+str(fst_r[key])+' 2nd: '+str(snd_r[key])+' 3rd: '+str(trd_r[key])+'\n')
     parprint('\t'+'2nd-1st: '+str(np.round(surf_e_calc(db.get_atoms(iters),db.get_atoms(iters-1),opt_bulk_e),decimals=5))+'eV/Ang^2')
     parprint('\t'+'3nd-1st: '+str(np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters-1),opt_bulk_e),decimals=5))+'eV/Ang^2')
