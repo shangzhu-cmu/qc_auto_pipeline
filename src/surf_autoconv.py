@@ -10,7 +10,7 @@ import numpy as np
 import re
 import sys
 import time
-
+import copy as cp
 def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),temp_print=True):
     dispatcher = {'fcc100':build.fcc100,'fcc110':build.fcc110,'fcc111':build.fcc111,
                   'bcc100':build.bcc100,'bcc110':build.bcc110,'bcc111':build.bcc111,
@@ -21,21 +21,31 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         opt_bulk=db_bulk.get_atoms(id=len(db_bulk)-2)
         opt_bulk_e=opt_bulk.get_potential_energy()
         a=opt_bulk.get_cell()[0][1]*2
-        parprint('Simulated Bulk Cell Quick Check:')
-        parprint('Lattice_Constant = ',np.round(a,decimals=5),'Ang')
-        parprint('Potential_Energy = ',np.round(opt_bulk_e,decimals=5),'eV')
     except:
         parprint('ERROR: No Optimized Bulk Object Found!')
         parprint('Surface Convergence Computation Suspended!')
         sys.exit()
     db_surf=connect(element+'/'+'surf'+'/'+'layer_converge.db')
-
+    parprint('Initial Parameters:')
+    parprint('\t'+'Materials: '+element)
+    parprint('\t'+'xc: '+xc)
+    parprint('\t'+'h: '+str(h))
+    parprint('\t'+'k: '+str(k))
+    parprint('\t'+'sw: '+str(sw))
+    parprint('\t'+'Miller Index: '+struc)
+    parprint('\t'+'Layer: '+str(init_layer))
+    parprint('\t'+'Vacuume length: '+str(vac))
+    parprint('\t'+'Fixed layer: '+str(fix_layer))
+    parprint('\t'+'a: '+str(np.round(a,decimals=5))+'Ang')
+    parprint('\t'+'pot_e: '+str(np.round(opt_bulk_e,decimals=5))+'eV')
+    parprint('\t'+'rela_tol'+str(rela_tol)+'eV')
     #first optimize the layers
     diff_primary=100
     diff_second=100
     iters=0
     layer_ls=[]
-    while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 6:
+    area_rela_tol=0
+    while (diff_primary>area_rela_tol or diff_second>area_rela_tol) and iters <= 6:
         slab = dispatcher[struc](element, size=(1, 1, init_layer),a=a,vacuum=vac)
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
@@ -51,24 +61,25 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
         db_surf.write(slab,layers=init_layer)
         if iters>=2:
+            area_rela_tol=cp.deepcopy(rela_tol)
             fst=db_surf.get_atoms(id=iters-1)
             snd=db_surf.get_atoms(id=iters)
             trd=db_surf.get_atoms(id=iters+1)
             diff_primary=max(surf_e_calc(fst,snd,opt_bulk_e),surf_e_calc(fst,trd,opt_bulk_e))
             diff_second=surf_e_calc(snd,trd,opt_bulk_e)
-            temp_output_printer(db_surf,iters,'layers',opt_bulk_e,rela_tol,temp_print)
+            if temp_print==True:
+                temp_output_printer(db_surf,iters,'layers',opt_bulk_e,rela_tol)
             area_average=np.mean([2*(fst.cell[0][0]*fst.cell[1][1]),
                                 2*(snd.cell[0][0]*snd.cell[1][1]),
                                 2*(trd.cell[0][0]*trd.cell[1][1])])
-            rela_tol=rela_tol/area_average
-            #diff_primary, diff_second=surf_e_converge_calc(fst,snd,trd,opt_bulk_e)
+            area_rela_tol=area_rela_tol/area_average
+            parprint('area_rela_tol',area_rela_tol)
         layer_ls.append(init_layer)
         iters+=1
         init_layer+=1
     if iters>=6:
-        if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint('WARNING: Max Layer Íiterations reached! System may not converged.')
-            #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Grid Size.")
+        if diff_primary>area_rela_tol or diff_second>area_rela_tol:
+            parprint('WARNING: Max LAYER Íiterations reached! System may not converged.')
             parprint('Computation Suspended!')
             sys.exit()
     layer=layer_ls[-3]
@@ -80,6 +91,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
     iters=0
     vac_ls=[]
     time_ls=[]
+    area_rela_tol=0
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
         if iters>1:
             if np.diff(time_ls)[-1]>0 and (diff_primary<rela_tol and diff_second<rela_tol):
@@ -103,34 +115,35 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
         time_ls.append(period)
         db_vac.write(slab,vac=vac)
         if iters>=2:
+            area_rela_tol=cp.deepcopy(rela_tol)
             fst=db_vac.get_atoms(id=iters-1)
             snd=db_vac.get_atoms(id=iters)
             trd=db_vac.get_atoms(id=iters+1)
             diff_primary=max(surf_e_calc(fst,snd,opt_bulk_e),surf_e_calc(fst,trd,opt_bulk_e))
             diff_second=surf_e_calc(snd,trd,opt_bulk_e)
-            temp_output_printer(db_vac,iters,'vac',opt_bulk_e,rela_tol,temp_print)
+            if temp_print==True:
+                temp_output_printer(db_vac,iters,'vac',opt_bulk_e,rela_tol)
             area_average=np.mean([2*(fst.cell[0][0]*fst.cell[1][1]),
                                 2*(snd.cell[0][0]*snd.cell[1][1]),
                                 2*(trd.cell[0][0]*trd.cell[1][1])])
-            rela_tol=rela_tol/area_average
+            area_rela_tol=area_rela_tol/area_average
+            parprint('area_rela_tol',area_rela_tol)
         vac_ls.append(vac)
         iters+=1
         vac=int(vac+1)
     if iters>=5:
-        if diff_primary>rela_tol or diff_second>rela_tol:
+        if diff_primary>area_rela_tol or diff_second>area_rela_tol:
             parprint('WARNING: Max Vacuum Íiterations reached! System may not converged.')
             parprint('Computation Suspended!')
             sys.exit()
     vac=vac_ls[-2]    
-    parprint('Simulation Results Output:')
-    parprint('Element = {}'.format(element))
-    parprint('Structure = {}'.format(struc))
-    parprint('converged h = {}'.format(h))
-    parprint('converged k = {}'.format(k))
-    parprint('converged smearing width = {}'.format(sw))
-    parprint('converged layer = {}'.format(layer))
-    parprint('converged vacuum = {} Ang'.format(vac))
-    parprint('computation time = {} s'.format(time_ls[-2]))
+    parprint('Final Parameters:')
+    parprint('\t'+'h: '+str(h))
+    parprint('\t'+'k: '+str(k))
+    parprint('\t'+'sw: '+str(sw))
+    parprint('\t'+'Layer: {}'.format(layer))
+    parprint('\t'+'Vacuum length: {} Ang'.format(vac))
+    parprint('\t'+'Fixed layer: '+str(fix_layer))
     parprint(time_ls)
     parprint(vac_ls)
 
@@ -146,24 +159,6 @@ def surf_e_calc(pre,post,opt_bulk_e):
     diff_surf_e=abs(post_surf_e-pre_surf_e)
     return diff_surf_e
 
-# def surf_e_converge_calc(fst,snd,trd,opt_bulk_e):
-#     fst_area=2*(fst.cell[0][0]*fst.cell[1][1])
-#     snd_area=2*(snd.cell[0][0]*snd.cell[1][1])
-#     trd_area=2*(trd.cell[0][0]*trd.cell[1][1])
-#     fst_e=fst.get_potential_energy()
-#     snd_e=snd.get_potential_energy()
-#     trd_e=trd.get_potential_energy()
-#     fst_num=float(re.findall(r'\d+',str(fst.symbols))[0])
-#     snd_num=float(re.findall(r'\d+',str(snd.symbols))[0])
-#     trd_num=float(re.findall(r'\d+',str(trd.symbols))[0])
-#     fst_surf_e=(1/fst_area)*(fst_e-fst_num*opt_bulk_e)
-#     snd_surf_e=(1/snd_area)*(snd_e-snd_num*opt_bulk_e)
-#     trd_surf_e=(1/trd_area)*(trd_e-trd_num*opt_bulk_e)
-#     diff_primary=max(abs(snd_surf_e-fst_surf_e),
-#                     abs(trd_surf_e-fst_surf_e))
-#     diff_second=abs(trd_surf_e-snd_surf_e)
-#     return diff_primary, diff_second
-
 def temp_output_printer(db,iters,key,opt_bulk_e,rela_tol,option=False):
     fst_r=db.get(iters-1)
     snd_r=db.get(iters)
@@ -171,18 +166,10 @@ def temp_output_printer(db,iters,key,opt_bulk_e,rela_tol,option=False):
     area_average=np.mean([2*(fst_r.cell[0][0]*fst_r.cell[1][1]),
                         2*(snd_r.cell[0][0]*snd_r.cell[1][1]),
                         2*(trd_r.cell[0][0]*trd_r.cell[1][1])])
-    rela_tol=rela_tol/area_average
-    if option==True:
-        parprint(key)
-        parprint('relative tol',
-                '=',
-                np.round(rela_tol,decimals=5),'eV/Ang^2')
-        parprint('2nd({})-1st({})'.format(snd_r[key],fst_r[key]),
-                '=',
-                np.round(surf_e_calc(db.get_atoms(iters),db.get_atoms(iters-1),opt_bulk_e),decimals=5),'eV/Ang^2')
-        parprint('3rd({})-1st({})'.format(trd_r[key],fst_r[key]),
-                '=',
-                np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters-1),opt_bulk_e),decimals=5),'eV/Ang^2')
-        parprint('3rd({})-2nd({})'.format(trd_r[key],snd_r[key]),
-                '=',
-                np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters),opt_bulk_e),decimals=5),'eV/Ang^2')
+    rela_tol/area_average
+    parprint('Optimizing parameter: '+key)
+    parprint('Relative Tolerance: '+str(rela_tol/area_average)+'eV/Ang^2')
+    parprint('\t'+'1st: '+str(fst_r[key])+' 2nd: '+str(snd_r[key])+' 3rd: '+str(trd_r[key])+'\n')
+    parprint('\t'+'2nd-1st: '+str(np.round(surf_e_calc(db.get_atoms(iters),db.get_atoms(iters-1),opt_bulk_e),decimals=5))+'eV/Ang^2')
+    parprint('\t'+'3nd-1st: '+str(np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters-1),opt_bulk_e),decimals=5))+'eV/Ang^2')
+    parprint('\t'+'3nd-2st: '+str(np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters),opt_bulk_e),decimals=5))+'eV/Ang^2')

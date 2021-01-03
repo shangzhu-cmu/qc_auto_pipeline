@@ -6,25 +6,20 @@ import optimizer as opt
 from ase.parallel import parprint
 import numpy as np
 import sys
-from ase.io import read as rd
+from ase.io import read, write
 
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
-    #create a file for results output
-    rep_location=element+'/'+'bulk'+'/'+'results_report.txt'
-    if os.path.isfile(rep_location):
-        os.remove(rep_location)
-    f=open(rep_location,'a')
-    f.write('Initial Parameters:'+'\n')
-    f.write('\t','Materials: '+element+'\n')
-    f.write('\t','Starting cif: '+cif+'\n')
+    parprint('Initial Parameters:')
+    parprint('\t'+'Materials: '+element)
+    parprint('\t'+'Starting cif: '+cif)
     if cif == False:
-        f.write('\t','a: '+str(a0)+'Ang'+'\n')
-    f.write('\t','XC: '+xc+'\n')
-    f.write('\t','h: '+str(h)+'\n')
-    f.write('\t','k: '+str(k)+'\n')
-    f.write('\t','sw: '+str(sw)+'\n')
-    f.write('\t','Progress printout: '+temp_print+'\n')
-    f.close()
+        parprint('\t'+'a: '+str(a0)+'Ang')
+    parprint('\t'+'xc: '+xc)
+    parprint('\t'+'h: '+str(h))
+    parprint('\t'+'k: '+str(k))
+    parprint('\t'+'sw: '+str(sw))
+    parprint('\t'+'rela_tol: '+str(rela_tol)+'eV')
+    parprint('\t'+'Progress printout: '+temp_print)
     #connecting to databse
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
     db_k=connect(element+"/"+'bulk'+'/'+'kpts_converge.db')
@@ -50,15 +45,13 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
             if temp_print == True:
-                temp_output_printer(db_h,grid_iters,'h',rep_location)
+                temp_output_printer(db_h,grid_iters,'h')
         h_ls.append(h)
         grid_iters+=1
     if grid_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            f=open(rep_location,'a')
-            f.write("WARNING: Max GRID iterations reached! System may not be converged."+'\n')
-            f.write("Computation Suspended!"+'\n')
-            f.close()
+            parprint("WARNING: Max GRID iterations reached! System may not be converged.")
+            parprint("Computation Suspended!")
             sys.exit()
     h=h_ls[-3]
     #kpts convergence
@@ -83,15 +76,13 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
             if temp_print == True:
-                temp_output_printer(db_k,k_iters,'kpts',rep_location)
+                temp_output_printer(db_k,k_iters,'kpts')
         k_iters+=1
         k_ls.append(k)
     if k_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            f=open(rep_location,'a')
-            f.write("WARNING: Max KPTS iterations reached! System may not be converged."+'\n')
-            f.write("Computation Suspended!"+'\n')
-            f.close()
+            parprint("WARNING: Max KPTS iterations reached! System may not be converged.")
+            parprint("Computation Suspended!")
             sys.exit()
     k=k_ls[-3]
     #smearing-width convergence test
@@ -116,44 +107,38 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
             if temp_print == True:
-                temp_output_printer(db_sw,sw_iters,'sw',rep_location)
+                temp_output_printer(db_sw,sw_iters,'sw')
         sw_iters+=1
         sw_ls.append(sw)
     if sw_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            f=open(rep_location,'a')
-            f.write("WARNING: Max SMEARING-WIDTH iterations reached! System may not be converged."+'\n')
-            f.write("Computation Suspended!"+'\n')
-            f.close()
+            parprint("WARNING: Max SMEARING-WIDTH iterations reached! System may not be converged.")
+            parprint("Computation Suspended!")
             sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
-    f=open(rep_location,'a')
-    f.write('Final Parameters:'+'\n')
-    f.write('\t h: '+str(h)+'\n')
-    f.write('\t k: '+str(k)+'\n')
-    f.write('\t sw: '+str(sw)+'\n')
-    f.write('Final Output: '+'\n')
-    f.write('\t a: '+str(np.round(final_atom.cell[0][1]*2,decimals=5))+'Ang'+'\n')    
-    f.write('\t pot_e: '+str(np.round(final_atom.get_potential_energy(),decimals=5))+'eV'+'\n')
-    f.close()
+    parprint('Final Parameters:')
+    parprint('\t'+'h: '+str(h))
+    parprint('\t'+'k: '+str(k))
+    parprint('\t'+'sw: '+str(sw))
+    parprint('Final Output: ')
+    parprint('\t'+'a: '+str(np.round(final_atom.cell[0][1]*2,decimals=5))+'Ang'+'\n')    
+    parprint('\t'+'pot_e: '+str(np.round(final_atom.get_potential_energy(),decimals=5))+'eV'+'\n')
 
 def bulk_builder(element,cif,struc,a0):
     if cif == False:
         atoms=bulk(element,struc,a=a0)
     else:
         location='orig_cif_data'+'/'+element+'.cif'
-        atoms=rd(location)
+        atoms=read(location)
     return atoms
 
-def temp_output_printer(db,iters,key,f_location):
+def temp_output_printer(db,iters,key):
     fst_r=db.get(iters-1)
     snd_r=db.get(iters)
     trd_r=db.get(iters+1)
-    f=open(f_location,'a')
-    f.write('Optimizing parameter: '+key+'\n')
-    f.write('\t'+'1st: '+str(fst_r[key])+' 2nd: '+str(snd_r[key])+' 3rd: '+str(trd_r[key])+'\n')
-    f.write('\t'+'2nd-1st: '+str(np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5))+'eV'+'\n')
-    f.write('\t'+'3rd-1st: '+str(np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5))+'eV'+'\n')
-    f.write('\t'+'3rd-2nd: '+str(np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5))+'eV'+'\n')
-    f.close()
+    parprint('Optimizing parameter: '+key)
+    parprint('\t'+'1st: '+str(fst_r[key])+' 2nd: '+str(snd_r[key])+' 3rd: '+str(trd_r[key]))
+    parprint('\t'+'2nd-1st: '+str(np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5))+'eV')
+    parprint('\t'+'3rd-1st: '+str(np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5))+'eV')
+    parprint('\t'+'3rd-2nd: '+str(np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5))+'eV')
