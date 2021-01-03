@@ -11,7 +11,7 @@ from ase.io import read, write
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
     parprint('Initial Parameters:')
     parprint('\t'+'Materials: '+element)
-    parprint('\t'+'Starting cif: '+cif)
+    parprint('\t'+'Starting cif: '+str(cif))
     if cif == False:
         parprint('\t'+'a: '+str(a0)+'Ang')
     parprint('\t'+'xc: '+xc)
@@ -19,7 +19,6 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     parprint('\t'+'k: '+str(k))
     parprint('\t'+'sw: '+str(sw))
     parprint('\t'+'rela_tol: '+str(rela_tol)+'eV')
-    parprint('\t'+'Progress printout: '+temp_print)
     #connecting to databse
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
     db_k=connect(element+"/"+'bulk'+'/'+'kpts_converge.db')
