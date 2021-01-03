@@ -7,18 +7,21 @@ from ase.parallel import parprint
 import numpy as np
 import sys
 from ase.io import read, write
+from ase.parallel import paropen, parprint
 
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
-    parprint('Initial Parameters:')
-    parprint('\t'+'Materials: '+element)
-    parprint('\t'+'Starting cif: '+str(cif))
-    if cif == False:
-        parprint('\t'+'a: '+str(a0)+'Ang')
-    parprint('\t'+'xc: '+xc)
-    parprint('\t'+'h: '+str(h))
-    parprint('\t'+'k_density: '+str(k_density))
-    parprint('\t'+'sw: '+str(sw))
-    parprint('\t'+'rela_tol: '+str(rela_tol)+'eV')
+    # parprint('Initial Parameters:')
+    # parprint('\t'+'Materials: '+element)
+    # parprint('\t'+'Starting cif: '+str(cif))
+    # if cif == False:
+    #     parprint('\t'+'a: '+str(a0)+'Ang')
+    # parprint('\t'+'xc: '+xc)
+    # parprint('\t'+'h: '+str(h))
+    # parprint('\t'+'k_density: '+str(k_density))
+    # parprint('\t'+'sw: '+str(sw))
+    # parprint('\t'+'rela_tol: '+str(rela_tol)+'eV')
+    f=paropen('results_report.txt','w')
+    f.write('Initial Parameters:')
     #connecting to databse
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
     db_k=connect(element+"/"+'bulk'+'/'+'kpts_converge.db')
