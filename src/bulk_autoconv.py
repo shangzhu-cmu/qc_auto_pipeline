@@ -1,6 +1,5 @@
 from gpaw import GPAW
 from ase.build import bulk
-from ase.io import write as wr
 from ase.db import connect
 import os
 import optimizer as opt
@@ -15,16 +14,16 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     if os.path.isfile(rep_location):
         os.remove(rep_location)
     f=open(rep_location,'a')
-    f.write('Initial Parameters:','\n')
-    f.write('\t','Materials:',element,'\n')
-    f.write('\t','Starting cif:',cif,'\n')
+    f.write('Initial Parameters:'+'\n')
+    f.write('\t','Materials: '+element+'\n')
+    f.write('\t','Starting cif: '+cif+'\n')
     if cif == False:
-        f.write('\t','a:',a0,'Ang','\n')
-    f.write('\t','XC:',xc,'\n')
-    f.write('\t','h:',h,'\n')
-    f.write('\t','k:',k,'\n')
-    f.write('\t','sw:',sw,'\n')
-    f.write('\t','Progress printout:',temp_print,'\n')
+        f.write('\t','a: '+str(a0)+'Ang'+'\n')
+    f.write('\t','XC: '+xc+'\n')
+    f.write('\t','h: '+str(h)+'\n')
+    f.write('\t','k: '+str(k)+'\n')
+    f.write('\t','sw: '+str(sw)+'\n')
+    f.write('\t','Progress printout: '+temp_print+'\n')
     f.close()
     #connecting to databse
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
@@ -42,7 +41,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
-        db_h.wr(atoms,h=h)
+        db_h.write(atoms,h=h)
         if grid_iters>=2:
             fst=db_h.get_atoms(id=grid_iters-1)
             snd=db_h.get_atoms(id=grid_iters)
@@ -57,8 +56,8 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     if grid_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
             f=open(rep_location,'a')
-            f.write("WARNING: Max GRID iterations reached! System may not be converged.",'\n')
-            f.write("Computation Suspended!",'\n')
+            f.write("WARNING: Max GRID iterations reached! System may not be converged."+'\n')
+            f.write("Computation Suspended!"+'\n')
             f.close()
             sys.exit()
     h=h_ls[-3]
@@ -75,7 +74,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k))
-        db_k.wr(atoms,kpts=k)
+        db_k.write(atoms,kpts=k)
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
             snd=db_k.get_atoms(id=k_iters)
@@ -90,8 +89,8 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     if k_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
             f=open(rep_location,'a')
-            f.write("WARNING: Max KPTS iterations reached! System may not be converged.",'\n')
-            f.write("Computation Suspended!",'\n')
+            f.write("WARNING: Max KPTS iterations reached! System may not be converged."+'\n')
+            f.write("Computation Suspended!"+'\n')
             f.close()
             sys.exit()
     k=k_ls[-3]
@@ -108,7 +107,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
-        db_sw.wr(atoms,sw=sw)
+        db_sw.write(atoms,sw=sw)
         if sw_iters>=2:
             fst=db_sw.get_atoms(id=sw_iters-1)
             snd=db_sw.get_atoms(id=sw_iters)
@@ -123,20 +122,20 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
     if sw_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
             f=open(rep_location,'a')
-            f.write("WARNING: Max SMEARING-WIDTH iterations reached! System may not be converged.",'\n')
-            f.write("Computation Suspended!",'\n')
+            f.write("WARNING: Max SMEARING-WIDTH iterations reached! System may not be converged."+'\n')
+            f.write("Computation Suspended!"+'\n')
             f.close()
             sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
     f=open(rep_location,'a')
-    f.write('Final Parameters:','\n')
-    f.write('\t h:',h,'\n')
-    f.write('\t k:',k,'\n')
-    f.write('\t sw:',sw,'\n')
-    f.write('Final Output:','\n')
-    f.write('\t a:',np.round(final_atom.cell[0][1]*2,decimals=5),'Ang','\n')    
-    f.write('\t pot_e:',np.round(final_atom.get_potential_energy(),decimals=5),'eV','\n')
+    f.write('Final Parameters:'+'\n')
+    f.write('\t h: '+str(h)+'\n')
+    f.write('\t k: '+str(k)+'\n')
+    f.write('\t sw: '+str(sw)+'\n')
+    f.write('Final Output: '+'\n')
+    f.write('\t a: '+str(np.round(final_atom.cell[0][1]*2,decimals=5))+'Ang'+'\n')    
+    f.write('\t pot_e: '+str(np.round(final_atom.get_potential_energy(),decimals=5))+'eV'+'\n')
     f.close()
 
 def bulk_builder(element,cif,struc,a0):
@@ -152,9 +151,9 @@ def temp_output_printer(db,iters,key,f_location):
     snd_r=db.get(iters)
     trd_r=db.get(iters+1)
     f=open(f_location,'a')
-    f.write('Optimizing parameter:',key,'\n')
-    f.write('\t','1st:', fst_r[key],'2nd:',snd_r[key],'3rd',trd_r[key],'\n')
-    f.write('\t','2nd-1st:',np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5),'eV','\n')
-    f.write('\t','3rd-1st:',np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5),'eV','\n')
-    f.write('\t','3rd-2nd:',np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5),'eV','\n')
+    f.write('Optimizing parameter: '+key+'\n')
+    f.write('\t'+'1st: '+str(fst_r[key])+' 2nd: '+str(snd_r[key])+' 3rd: '+str(trd_r[key])+'\n')
+    f.write('\t'+'2nd-1st: '+str(np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5))+'eV'+'\n')
+    f.write('\t'+'3rd-1st: '+str(np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5))+'eV'+'\n')
+    f.write('\t'+'3rd-2nd: '+str(np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5))+'eV'+'\n')
     f.close()
