@@ -18,7 +18,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     #               }
     #m_ind=re.findall(r'\d+',struc)[0]
     m_ind=tuple(map(int,struc))
-    rep_location=(element+'/'+'surf'+'/'+struc+'results_report.txt')
+    rep_location=(element+'/'+'surf'+'/'+struc+'_results_report.txt')
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     try:
