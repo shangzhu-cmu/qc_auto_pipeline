@@ -34,15 +34,15 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
         #calculate the kpts N
-        parprint('kpts hand calculated:')
-        N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
-        if round(N_raw)%2!=0:
-            if round(N_raw)>N_raw:
-                parprint('\t'+'kpts: ',round(N_raw)-1)
-            else:
-                parprint('\t'+'kpts: ',round(N_raw)+1)
-        else:
-            parprint('\t'+'kpts: ',round(N_raw))
+        # parprint('kpts hand calculated:')
+        # N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
+        # if round(N_raw)%2!=0:
+        #     if round(N_raw)>N_raw:
+        #         parprint('\t'+'kpts: ',round(N_raw)-1)
+        #     else:
+        #         parprint('\t'+'kpts: ',round(N_raw)+1)
+        # else:
+        #     parprint('\t'+'kpts: ',round(N_raw))
         db_h.write(atoms,h=h)
         if grid_iters>=2:
             fst=db_h.get_atoms(id=grid_iters-1)
@@ -75,15 +75,15 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k_density))
         #calculate the kpts N
-        parprint('kpts hand calculated:')
-        N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
-        if round(N_raw)%2!=0:
-            if round(N_raw)>N_raw:
-                parprint('\t'+'kpts: ',round(N_raw)-1)
-            else:
-                parprint('\t'+'kpts: ',round(N_raw)+1)
-        else:
-            parprint('\t'+'kpts: ',round(N_raw))
+        # parprint('kpts hand calculated:')
+        # N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
+        # if round(N_raw)%2!=0:
+        #     if round(N_raw)>N_raw:
+        #         parprint('\t'+'kpts: ',round(N_raw)-1)
+        #     else:
+        #         parprint('\t'+'kpts: ',round(N_raw)+1)
+        # else:
+        #     parprint('\t'+'kpts: ',round(N_raw))
         db_k.write(atoms,kpts=k_density)
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
@@ -115,15 +115,15 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
         #calculate the kpts N
-        parprint('kpts hand calculated:')
-        N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
-        if round(N_raw)%2!=0:
-            if round(N_raw)>N_raw:
-                parprint('\t'+'kpts: ',round(N_raw)-1)
-            else:
-                parprint('\t'+'kpts: ',round(N_raw)+1)
-        else:
-            parprint('\t'+'kpts: ',round(N_raw))
+        # parprint('kpts hand calculated:')
+        # N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
+        # if round(N_raw)%2!=0:
+        #     if round(N_raw)>N_raw:
+        #         parprint('\t'+'kpts: ',round(N_raw)-1)
+        #     else:
+        #         parprint('\t'+'kpts: ',round(N_raw)+1)
+        # else:
+        #     parprint('\t'+'kpts: ',round(N_raw))
         db_sw.write(atoms,sw=sw)
         if sw_iters>=2:
             fst=db_sw.get_atoms(id=sw_iters-1)
@@ -143,18 +143,18 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
             sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
-    N_raw=k_density*2*np.pi/(final_atom.cell.lengths()[0])
-    if round(N_raw)%2!=0:
-        if round(N_raw)>N_raw:
-            k=round(N_raw)-1
-        else:
-            k=round(N_raw)+1
-    else:
-        k=round(N_raw)
+    # N_raw=k_density*2*np.pi/(final_atom.cell.lengths()[0])
+    # if round(N_raw)%2!=0:
+    #     if round(N_raw)>N_raw:
+    #         k=round(N_raw)-1
+    #     else:
+    #         k=round(N_raw)+1
+    # else:
+    #     k=round(N_raw)
     parprint('Final Parameters:')
     parprint('\t'+'h: '+str(h))
     parprint('\t'+'k_density: '+str(k_density))
-    parprint('\t'+'kpts: '+str(k))
+    # parprint('\t'+'kpts: '+str(k))
     parprint('\t'+'sw: '+str(sw))
     parprint('Final Output: ')
     parprint('\t'+'a: '+str(np.round(final_atom.cell[0][1]*2,decimals=5))+'Ang'+'\n')    
