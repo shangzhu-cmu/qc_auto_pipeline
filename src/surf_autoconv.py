@@ -11,6 +11,7 @@ import re
 import sys
 import time
 import copy as cp
+from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**(-3),temp_print=True):
     # dispatcher = {'fcc100':build.fcc100,'fcc110':build.fcc110,'fcc111':build.fcc111,
     #               'bcc100':build.bcc100,'bcc110':build.bcc110,'bcc111':build.bcc111,
@@ -59,10 +60,11 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
+        kpts=kdens2mp(slab,kptdensity=k_density,even=True)
         calc=GPAW(xc=xc,
             h=h,
             symmetry = {'point_group': False},
-            kpts={'density': k_density, 'even': True},
+            kpts=kpts,
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
@@ -116,10 +118,11 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
+        kpts=kdens2mp(slab,kptdensity=k_density,even=True)
         calc=GPAW(xc=xc,
             h=h,
             symmetry = {'point_group': False},
-            kpts={'density': k_density, 'even': True},
+            kpts=kpts,
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
