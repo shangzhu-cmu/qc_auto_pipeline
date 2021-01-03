@@ -69,7 +69,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     k_ls=[k_density]
     db_k.write(db_h.get_atoms(len(db_h)-2),kpts=k_density)
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
-        k_density=int(k_density+1)
+        k_density=k_density+1
         atoms=bulk_builder(element,cif,struc,a0)
         calc=GPAW(xc=xc,h=h,kpts={'density': k_density, 'even': True},occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
