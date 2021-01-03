@@ -20,8 +20,8 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     # parprint('\t'+'k_density: '+str(k_density))
     # parprint('\t'+'sw: '+str(sw))
     # parprint('\t'+'rela_tol: '+str(rela_tol)+'eV')
-    f=paropen('results_report.txt','w')
-    f.write('Initial Parameters:')
+    paropen('results_report.txt','w')
+    parprint('Initial Parameters:')
     #connecting to databse
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
     db_k=connect(element+"/"+'bulk'+'/'+'kpts_converge.db')
