@@ -160,9 +160,9 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
-        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element)
+        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element,xc=xc)
     else:
-        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw)
+        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw,xc=xc)
     # N_raw=k_density*2*np.pi/(final_atom.cell.lengths()[0])
     # if round(N_raw)%2!=0:
     #     if round(N_raw)>N_raw:
@@ -177,8 +177,9 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('Final Output: ',file=f)
-        parprint('\t'+'a: '+str(np.round(final_atom.cell[0][1]*2,decimals=5))+'Ang'+'\n',file=f)    
-        parprint('\t'+'pot_e: '+str(np.round(final_atom.get_potential_energy(),decimals=5))+'eV'+'\n',file=f)
+        if cif == False:
+            parprint('\t'+'a: '+str(np.round(final_atom.cell[0][1]*2,decimals=5))+'Ang',file=f)    
+        parprint('\t'+'pot_e: '+str(np.round(final_atom.get_potential_energy(),decimals=5))+'eV',file=f)
     f.close()
 
 
