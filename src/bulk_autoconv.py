@@ -8,7 +8,7 @@ import numpy as np
 import sys
 from ase.io import read, write
 from ase.parallel import paropen, parprint, world
-
+from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
     if world.rank==0 and os.path.isfile(rep_location):
@@ -37,7 +37,8 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     h_ls=[]
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         atoms=bulk_builder(element,cif,struc,a0)
-        calc=GPAW(xc=xc,h=h,kpts={'density': k_density, 'even': True},occupations={'name':'fermi-dirac','width':sw})
+        kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
+        calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
         #calculate the kpts N
@@ -80,7 +81,8 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
         k_density=k_density+1
         atoms=bulk_builder(element,cif,struc,a0)
-        calc=GPAW(xc=xc,h=h,kpts={'density': k_density, 'even': True},occupations={'name':'fermi-dirac','width':sw})
+        kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
+        calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k_density))
         #calculate the kpts N
@@ -122,7 +124,8 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
         sw=sw/2
         atoms=bulk_builder(element,cif,struc,a0)
-        calc=GPAW(xc=xc,h=h,kpts={'density': k_density, 'even': True},occupations={'name':'fermi-dirac','width':sw})
+        kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
+        calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
         #calculate the kpts N
@@ -175,6 +178,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
         parprint('Final Parameters:',file=f)
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
+        parprint('\t'+'kpts: '+str(kdens2mp(final_atom,kptdensity=k_density,even=True)),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('Final Output: ',file=f)
         if cif == False:
