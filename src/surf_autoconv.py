@@ -38,7 +38,7 @@ def surf_auto_conv(element,struc,init_layer=3,vac=5,fix_layer=2,h=0.14,k=6,xc='P
     parprint('\t'+'Fixed layer: '+str(fix_layer))
     parprint('\t'+'a: '+str(np.round(a,decimals=5))+'Ang')
     parprint('\t'+'pot_e: '+str(np.round(opt_bulk_e,decimals=5))+'eV')
-    parprint('\t'+'rela_tol'+str(rela_tol)+'eV')
+    parprint('\t'+'rela_tol: '+str(rela_tol)+'eV')
     #first optimize the layers
     diff_primary=100
     diff_second=100
