@@ -1,13 +1,13 @@
 from gpaw import GPAW
 from ase.build import bulk
-from ase.io import write
+from ase.io import write as wr
 from ase.db import connect
 import os
 import optimizer as opt
 from ase.parallel import parprint
 import numpy as np
 import sys
-from ase.io import read
+from ase.io import read as rd
 
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
     #create a file for results output
@@ -42,7 +42,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
-        db_h.write(atoms,h=h)
+        db_h.wr(atoms,h=h)
         if grid_iters>=2:
             fst=db_h.get_atoms(id=grid_iters-1)
             snd=db_h.get_atoms(id=grid_iters)
@@ -75,7 +75,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k))
-        db_k.write(atoms,kpts=k)
+        db_k.wr(atoms,kpts=k)
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
             snd=db_k.get_atoms(id=k_iters)
@@ -108,7 +108,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
         calc=GPAW(xc=xc,h=h,kpts=(k,k,k),occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
-        db_sw.write(atoms,sw=sw)
+        db_sw.wr(atoms,sw=sw)
         if sw_iters>=2:
             fst=db_sw.get_atoms(id=sw_iters-1)
             snd=db_sw.get_atoms(id=sw_iters)
@@ -144,7 +144,7 @@ def bulk_builder(element,cif,struc,a0):
         atoms=bulk(element,struc,a=a0)
     else:
         location='orig_cif_data'+'/'+element+'.cif'
-        atoms=read(location)
+        atoms=rd(location)
     return atoms
 
 def temp_output_printer(db,iters,key,f_location):
