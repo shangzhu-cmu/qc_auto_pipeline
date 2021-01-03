@@ -10,6 +10,23 @@ import sys
 from ase.io import read
 
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
+    #create a file for results output
+    rep_location=element+'/'+'bulk'+'/'+'results_report.txt'
+    if os.path.isfile(rep_location):
+        os.remove(rep_location)
+    f=open(rep_location,'a')
+    f.write('Initial Parameters:','\n')
+    f.write('\t','Materials:',element,'\n')
+    f.write('\t','Starting cif:',cif,'\n')
+    if cif == False:
+        f.write('\t','a:',a0,'Ang','\n')
+    f.write('\t','XC:',xc,'\n')
+    f.write('\t','h:',h,'\n')
+    f.write('\t','k:',k,'\n')
+    f.write('\t','sw:',sw,'\n')
+    f.write('\t','Progress printout:',temp_print,'\n')
+    f.close()
+    #connecting to databse
     db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
     db_k=connect(element+"/"+'bulk'+'/'+'kpts_converge.db')
     db_sw=connect(element+"/"+'bulk'+'/'+'sw_converge.db')
@@ -33,14 +50,16 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
-            temp_output_printer(db_h,grid_iters,'h',temp_print)
+            if temp_print == True:
+                temp_output_printer(db_h,grid_iters,'h',rep_location)
         h_ls.append(h)
         grid_iters+=1
     if grid_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint("WARNING: Max GRID iterations reached! System may not converged.")
-            parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Grid Size.")
-            parprint("Computation Suspended!")
+            f=open(rep_location,'a')
+            f.write("WARNING: Max GRID iterations reached! System may not be converged.",'\n')
+            f.write("Computation Suspended!",'\n')
+            f.close()
             sys.exit()
     h=h_ls[-3]
     #kpts convergence
@@ -64,14 +83,16 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
-            temp_output_printer(db_k,k_iters,'kpts',temp_print)
+            if temp_print == True:
+                temp_output_printer(db_k,k_iters,'kpts',rep_location)
         k_iters+=1
         k_ls.append(k)
     if k_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint("WARNING: Max Kpts iterations reached! System may not converged.")
-            #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Kpts Size.")
-            parprint("Computation Suspended!")
+            f=open(rep_location,'a')
+            f.write("WARNING: Max KPTS iterations reached! System may not be converged.",'\n')
+            f.write("Computation Suspended!",'\n')
+            f.close()
             sys.exit()
     k=k_ls[-3]
     #smearing-width convergence test
@@ -95,22 +116,28 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k=6,xc='PBE',sw=0.1,rela_to
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
-            temp_output_printer(db_sw,sw_iters,'sw',temp_print)
+            if temp_print == True:
+                temp_output_printer(db_sw,sw_iters,'sw',rep_location)
         sw_iters+=1
         sw_ls.append(sw)
     if sw_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
-            parprint("WARNING: Max Smearing-Width iterations reached! System may not converged.")
-            #parprint("Possible Error: Incorrect Lattice Parameters, Inappropriate Starting Kpts Size.")
-            parprint("Computation Suspended!")
+            f=open(rep_location,'a')
+            f.write("WARNING: Max SMEARING-WIDTH iterations reached! System may not be converged.",'\n')
+            f.write("Computation Suspended!",'\n')
+            f.close()
             sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
-    parprint('converged h = {}'.format(h))
-    parprint('converged k = {}'.format(k))
-    parprint('converged smearing width = {}'.format(sw))
-    parprint('converged final lattice constant a = {} Ang'.format(np.round(final_atom.cell[0][1]*2,decimals=5))) ## TO-DO: NEED a comprehensive output
-    parprint('converged final potential energy e = {} eV'.format(np.round(final_atom.get_potential_energy(),decimals=5)))
+    f=open(rep_location,'a')
+    f.write('Final Parameters:','\n')
+    f.write('\t h:',h,'\n')
+    f.write('\t k:',k,'\n')
+    f.write('\t sw:',sw,'\n')
+    f.write('Final Output:','\n')
+    f.write('\t a:',np.round(final_atom.cell[0][1]*2,decimals=5),'Ang','\n')    
+    f.write('\t pot_e:',np.round(final_atom.get_potential_energy(),decimals=5),'eV','\n')
+    f.close()
 
 def bulk_builder(element,cif,struc,a0):
     if cif == False:
@@ -120,17 +147,14 @@ def bulk_builder(element,cif,struc,a0):
         atoms=read(location)
     return atoms
 
-def temp_output_printer(db,iters,key,option=False):
+def temp_output_printer(db,iters,key,f_location):
     fst_r=db.get(iters-1)
     snd_r=db.get(iters)
     trd_r=db.get(iters+1)
-    if option==True:
-        parprint('2nd{}-1st{}'.format(snd_r[key],fst_r[key]),
-                '=',
-                np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5),'eV')
-        parprint('3rd{}-1st{}'.format(trd_r[key],fst_r[key]),
-                '=',
-                np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5),'eV')
-        parprint('3rd{}-2nd{}'.format(trd_r[key],snd_r[key]),
-                '=',
-                np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5),'eV')
+    f=open(f_location,'a')
+    f.write('Optimizing parameter:',key,'\n')
+    f.write('\t','1st:', fst_r[key],'2nd:',snd_r[key],'3rd',trd_r[key],'\n')
+    f.write('\t','2nd-1st:',np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5),'eV','\n')
+    f.write('\t','3rd-1st:',np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5),'eV','\n')
+    f.write('\t','3rd-2nd:',np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5),'eV','\n')
+    f.close()
