@@ -132,14 +132,14 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
             sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
-    k_density=mp2kdens(final_atom,kpts)
+    k_density=mp2kdens(final_atom,kpts)[0]
     #writing final_atom to final_db
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
-        db_final.update(id=id,atoms=final_atom,h=h,k_density=','.join(map(str, k_density)),sw=sw,name=element,xc=xc,kpts=','.join(map(str, kpts)))
+        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element,xc=xc,kpts=','.join(map(str, kpts)))
     else:
-        db_final.write(final_atom,id=id,name=element,h=h,k_density=','.join(map(str, k_density)),sw=sw,xc=xc,kpts=','.join(map(str, kpts)))
+        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw,xc=xc,kpts=','.join(map(str, kpts)))
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'h: '+str(h),file=f)

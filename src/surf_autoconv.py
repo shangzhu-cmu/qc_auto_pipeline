@@ -32,7 +32,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     opt_bulk=db_bulk.get_atoms(name=element)
     xc=db_bulk.get(name=element).xc
     h=db_bulk.get(name=element).h
-    k_density=[float(i) for i in (db_bulk.get(name=element).k_density).split(',')]
+    k_density=db_bulk.get(name=element).k_density
     kpts=[int(i) for i in (db_bulk.get(name=element).kpts).split(',')]
     sw=db_bulk.get(name=element).sw
     db_layer=connect(element+'/'+'surf'+'/'+'layer_converge.db')
