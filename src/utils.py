@@ -53,7 +53,7 @@ def create_surf_sub_dir(element,struc,starting_layer):
         print('WARNING: '+element+'/'+'surf'+'/'+'{} directory already exists!'.format(struc))
     else:
         os.makedirs(element+'/'+'surf'+'/'+struc,exist_ok=True)
-    for layer in range(starting_layer,starting_layer+8): #3-10
+    for layer in range(starting_layer,starting_layer+6*2,2): #5
         if os.path.isdir(element+'/'+'surf'+'/'+struc+'/'+str(layer)+'x1x1'):
             print('WARNING: '+element+'/'+'surf'+'/'+struc+'/'+str(layer)+'x1x1'+' directory already exists!')
         else:
