@@ -12,7 +12,8 @@ from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
     #initialize the kpts from the k_density
-    kpts=kdens2mp(bulk_builder(element,cif,struc,a0),kptdensity=k_density,even=True)
+    orig_atom=bulk_builder(element,cif,struc,a0)
+    kpts=kdens2mp(orig_atom,kptdensity=k_density,even=True)
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
@@ -40,20 +41,9 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     h_ls=[]
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         atoms=bulk_builder(element,cif,struc,a0)
-        #kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
-        #calculate the kpts N
-        # parprint('kpts hand calculated:')
-        # N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
-        # if round(N_raw)%2!=0:
-        #     if round(N_raw)>N_raw:
-        #         parprint('\t'+'kpts: ',round(N_raw)-1)
-        #     else:
-        #         parprint('\t'+'kpts: ',round(N_raw)+1)
-        # else:
-        #     parprint('\t'+'kpts: ',round(N_raw))
         db_h.write(atoms,h=h)
         if grid_iters>=2:
             fst=db_h.get_atoms(id=grid_iters-1)
@@ -80,17 +70,16 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     diff_second=100
     k_iters=1
     k_ls=[kpts]
-    k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),kpts)
-    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=k_density,kpts=kpts)
+    k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),kpts) ##Need to improve this in the future (kpts to density)
+    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
         kpts=kpts+2
         atoms=bulk_builder(element,cif,struc,a0)
-        kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
+        k_density=mp2kdens(atoms,kpts)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(kpts[0]))
-        k_density=mp2kdens(atoms,kpts)
-        db_k.write(atoms,k_density=k_density,kpts=kpts)
+        db_k.write(atoms,k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
             snd=db_k.get_atoms(id=k_iters)
@@ -143,14 +132,14 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
             sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
-    k_density=mp2kdens(final_atom,kpts)
+    k_density=mp2kdens(orig_atom,kpts)
     #writing final_atom to final_db
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
-        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element,xc=xc,kpts=kpts)
+        db_final.update(id=id,atoms=final_atom,h=h,k_density=','.join(map(str, k_density)),sw=sw,name=element,xc=xc,kpts=','.join(map(str, kpts)))
     else:
-        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw,xc=xc,kpts=kpts)
+        db_final.write(final_atom,id=id,name=element,h=h,k_density=','.join(map(str, k_density)),sw=sw,xc=xc,kpts=','.join(map(str, kpts)))
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'h: '+str(h),file=f)
@@ -188,6 +177,6 @@ def mp2kdens(atoms,kpts):
     recipcell=atoms.get_reciprocal_cell()
     kptdensity_ls=[]
     for i in range(len(kpts)):
-        kptdensity = 2*kpts/(2 * np.pi * np.sqrt((recipcell[i]**2).sum()))
-        kptdensity_ls.append(np.round(kptdensity,decimals=2))
+        kptdensity = kpts[i]/(2 * np.pi * np.sqrt((recipcell[i]**2).sum()))
+        kptdensity_ls.append(np.round(kptdensity,decimals=4))
     return kptdensity_ls
