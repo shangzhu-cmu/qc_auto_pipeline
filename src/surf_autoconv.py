@@ -33,6 +33,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     xc=db_bulk.get(name=element).xc
     h=db_bulk.get(name=element).h
     k_density=db_bulk.get(name=element).k_density
+    kpts=db_bulk.get(name=element).kpts
     sw=db_bulk.get(name=element).sw
     db_layer=connect(element+'/'+'surf'+'/'+'layer_converge.db')
     with paropen(rep_location,'a') as f:
@@ -41,6 +42,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         parprint('\t'+'xc: '+xc,file=f)
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
+        parprint('\t'+'kpts: '+str(kpts),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('\t'+'Miller Index: '+str(m_ind),file=f)
         parprint('\t'+'Layer: '+str(init_layer),file=f)
@@ -54,9 +56,8 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     iters=0
     layer_ls=[]
     area_rela_tol=0
-    time_ls=[]
     while (diff_primary>area_rela_tol or diff_second>area_rela_tol) and iters <= 6:
-        slab = surface(opt_bulk, m_ind, layers=init_layer, vacuum=vac,periodic=True)
+        slab = surface(opt_bulk, m_ind, layers=init_layer, vacuum=vac)
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
@@ -69,11 +70,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
         location=element+'/'+'surf'+'/'+struc+'/'+str(init_layer)+'x1x1'
-        start_t=time.time()
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
-        end_t=time.time()
-        period=np.round(end_t-start_t,decimals=5)
-        time_ls.append(period)
         db_layer.write(slab,layers=init_layer)
         if iters>=2:
             area_rela_tol=cp.deepcopy(rela_tol)
@@ -99,22 +96,16 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             f.close()
             sys.exit()
     layer=layer_ls[-3]
-    time_layer=time_ls[-3]
     #second optimize the vaccum layer
     db_vac=connect(element+'/'+'surf'+'/'+'vac_converge.db')
     diff_primary=100
     diff_second=100
     iters=1
     vac_ls=[vac]
-    time_ls=[time_layer]
     db_vac.write(db_layer.get_atoms(len(db_layer)-2),vac=vac)
     area_rela_tol=0
-    #while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
-    while iters <= 5:
-        if iters>1:
-            if np.diff(time_ls)[-1]>0 and (diff_primary<rela_tol and diff_second<rela_tol):
-                break
-        slab = surface(opt_bulk, m_ind, layers=layer, vacuum=vac,periodic=True)
+    while (diff_primary>area_rela_tol or diff_second>area_rela_tol) and iters <= 5:
+        slab = surface(opt_bulk, m_ind, layers=layer, vacuum=vac)
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
@@ -127,11 +118,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
         location=element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
-        start_t=time.time()
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
-        end_t=time.time()
-        period=np.round(end_t-start_t,decimals=5)
-        time_ls.append(period)
         db_vac.write(slab,vac=vac)
         if iters>=2:
             area_rela_tol=cp.deepcopy(rela_tol)
@@ -177,7 +164,6 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         parprint(time_ls,file=f)
         parprint(vac_ls,file=f)
     f.close()
-
 
 def surf_e_calc(pre,post,bulk):
     bulk_num=len(bulk.get_tags())
