@@ -11,6 +11,8 @@ from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
+    #initialize the kpts from the k_density
+    kpts=kdens2mp(bulk_builder(element,cif,struc,a0),kptdensity=k_density,even=True)
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
@@ -22,6 +24,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
         parprint('\t'+'xc: '+xc,file=f)
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
+        parprint('\t'+'kpts: '+str(kpts),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'eV',file=f)
     f.close()
@@ -37,7 +40,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     h_ls=[]
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         atoms=bulk_builder(element,cif,struc,a0)
-        kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
+        #kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
@@ -76,26 +79,18 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     diff_primary=100
     diff_second=100
     k_iters=1
-    k_ls=[k_density]
-    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=k_density)
+    k_ls=[kpts]
+    k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),kpts)
+    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=k_density,kpts=kpts)
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
-        k_density=k_density+1
+        kpts=kpts+2
         atoms=bulk_builder(element,cif,struc,a0)
         kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
-        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(k_density))
-        #calculate the kpts N
-        # parprint('kpts hand calculated:')
-        # N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
-        # if round(N_raw)%2!=0:
-        #     if round(N_raw)>N_raw:
-        #         parprint('\t'+'kpts: ',round(N_raw)-1)
-        #     else:
-        #         parprint('\t'+'kpts: ',round(N_raw)+1)
-        # else:
-        #     parprint('\t'+'kpts: ',round(N_raw))
-        db_k.write(atoms,k_density=k_density)
+        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(kpts[0]))
+        k_density=mp2kdens(atoms,kpts)
+        db_k.write(atoms,k_density=k_density,kpts=kpts)
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
             snd=db_k.get_atoms(id=k_iters)
@@ -104,9 +99,9 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
             if temp_print == True:
-                temp_output_printer(db_k,k_iters,'k_density',rep_location)
+                temp_output_printer(db_k,k_iters,'kpts',rep_location)
         k_iters+=1
-        k_ls.append(k_density)
+        k_ls.append(kpts)
     if k_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
             with paropen(rep_location,'a') as f:
@@ -114,7 +109,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
                 parprint("Computation Suspended!",file=f)
             f.close()
             sys.exit()
-    k_density=k_ls[-3]
+    kpts=k_ls[-3]
     #smearing-width convergence test
     diff_primary=100
     diff_second=100
@@ -124,20 +119,9 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
         sw=sw/2
         atoms=bulk_builder(element,cif,struc,a0)
-        kpts=kdens2mp(atoms,kptdensity=k_density,even=True)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
-        #calculate the kpts N
-        # parprint('kpts hand calculated:')
-        # N_raw=k_density*2*np.pi/(atoms.cell.lengths()[0])
-        # if round(N_raw)%2!=0:
-        #     if round(N_raw)>N_raw:
-        #         parprint('\t'+'kpts: ',round(N_raw)-1)
-        #     else:
-        #         parprint('\t'+'kpts: ',round(N_raw)+1)
-        # else:
-        #     parprint('\t'+'kpts: ',round(N_raw))
         db_sw.write(atoms,sw=sw)
         if sw_iters>=2:
             fst=db_sw.get_atoms(id=sw_iters-1)
@@ -159,26 +143,19 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
             sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
+    k_density=mp2kdens(final_atom,kpts)
     #writing final_atom to final_db
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
-        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element,xc=xc)
+        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element,xc=xc,kpts=kpts)
     else:
-        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw,xc=xc)
-    # N_raw=k_density*2*np.pi/(final_atom.cell.lengths()[0])
-    # if round(N_raw)%2!=0:
-    #     if round(N_raw)>N_raw:
-    #         k=round(N_raw)-1
-    #     else:
-    #         k=round(N_raw)+1
-    # else:
-    #     k=round(N_raw)
+        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw,xc=xc,kpts=kpts)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
-        parprint('\t'+'kpts: '+str(kdens2mp(final_atom,kptdensity=k_density,even=True)),file=f)
+        parprint('\t'+'kpts: '+str(kpts),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('Final Output: ',file=f)
         if cif == False:
@@ -206,3 +183,11 @@ def temp_output_printer(db,iters,key,location):
         parprint('\t'+'3rd-1st: '+str(np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5))+'eV',file=f)
         parprint('\t'+'3rd-2nd: '+str(np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5))+'eV',file=f)
     f.close()
+
+def mp2kdens(atoms,kpts):
+    recipcell=atoms.get_reciprocal_cell()
+    kptdensity_ls=[]
+    for i in range(len(kpts)):
+        kptdensity = 2*kpts/(2 * np.pi * np.sqrt((recipcell[i]**2).sum()))
+        kptdensity_ls.append(np.round(kptdensity,decimals=2))
+    return kptdensity_ls
