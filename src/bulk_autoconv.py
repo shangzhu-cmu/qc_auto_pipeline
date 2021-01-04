@@ -75,10 +75,10 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
         kpts=kpts+2
         atoms=bulk_builder(element,cif,struc,a0)
-        k_density=mp2kdens(atoms,kpts)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(kpts[0]))
+        k_density=mp2kdens(atoms,kpts)
         db_k.write(atoms,k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
@@ -132,7 +132,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
             sys.exit()
     sw=sw_ls[-3]
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
-    k_density=mp2kdens(orig_atom,kpts)
+    k_density=mp2kdens(final_atom,kpts)
     #writing final_atom to final_db
     id=db_final.reserve(name=element)
     if id is None:
