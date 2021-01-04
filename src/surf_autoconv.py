@@ -56,7 +56,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     iters=0
     layer_ls=[]
     area_rela_tol=0
-    while (diff_primary>area_rela_tol or diff_second>area_rela_tol) and iters <= 6:
+    while (diff_primary>area_rela_tol or diff_second>area_rela_tol) and iters <= 5:
         slab = surface(opt_bulk, m_ind, layers=init_layer, vacuum=vac)
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
@@ -88,7 +88,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         layer_ls.append(init_layer)
         iters+=1
         init_layer+=2
-    if iters>=6:
+    if iters>=5:
         if diff_primary>area_rela_tol or diff_second>area_rela_tol:
             with paropen(rep_location,'a') as f:
                 parprint("WARNING: Max LAYER iterations reached! System may not be converged.",file=f)
@@ -161,7 +161,6 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         parprint('\t'+'Layer: '+str(init_layer),file=f)
         parprint('\t'+'Vacuume length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
-        parprint(time_ls,file=f)
         parprint(vac_ls,file=f)
     f.close()
 
