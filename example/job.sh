@@ -13,7 +13,7 @@
 
 echo "Job started on `hostname` at `date`"
 
-mpirun -np 16 gpaw python bulk_test.py
+mpirun -np 16 gpaw python convergence.py
 
 echo " "
 echo "Job Ended at `date`"
