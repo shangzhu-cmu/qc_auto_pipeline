@@ -128,7 +128,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             diff_primary=max(surf_e_calc(fst,snd,opt_bulk),surf_e_calc(fst,trd,opt_bulk))
             diff_second=surf_e_calc(snd,trd,opt_bulk)
             if temp_print==True:
-                temp_output_printer(db_layer,iters,'vac',opt_bulk,rela_tol,rep_location)
+                temp_output_printer(db_vac,iters,'vac',opt_bulk,rela_tol,rep_location)
             area_average=np.mean([2*(fst.cell[0][0]*fst.cell[1][1]),
                                 2*(snd.cell[0][0]*snd.cell[1][1]),
                                 2*(trd.cell[0][0]*trd.cell[1][1])])
