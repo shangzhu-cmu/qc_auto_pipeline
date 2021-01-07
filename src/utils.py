@@ -16,24 +16,25 @@ def create_dir(element,options=['bulk','surf','ads'],
     
     
     #create the bulk dir
-    if os.path.isdir(element+'/'+'bulk'):
-        print("WARNING: bulk directory already exists!")
-    else:
-        os.makedirs(element+'/'+'bulk',exist_ok=True)
-    for par in optimized_parameters:
-        create_bulk_sub_dir(element,par)
-    print("bulk directory complete!")
+    if 'bulk' in options:
+        if os.path.isdir(element+'/'+'bulk'):
+            print("WARNING: bulk directory already exists!")
+        else:
+            os.makedirs(element+'/'+'bulk',exist_ok=True)
+        for par in optimized_parameters:
+            create_bulk_sub_dir(element,par)
+        print("bulk directory complete!")
 
     #create the surf dir
-
-    if os.path.isdir(element+'/'+'surf'):
-        print("WARNING: surf directory already exists!")
-    else:
-        os.makedirs(element+'/'+'surf',exist_ok=True)
-    for struc in surf_struc:
-        create_surf_sub_dir(element,struc,starting_layer)
-        create_surf_vac_dir(element,struc,init_vac)
-    print('surf directory complete!')
+    if 'surf' in options:
+        if os.path.isdir(element+'/'+'surf'):
+            print("WARNING: surf directory already exists!")
+        else:
+            os.makedirs(element+'/'+'surf',exist_ok=True)
+        for struc in surf_struc:
+            create_surf_sub_dir(element,struc,starting_layer)
+            create_surf_vac_dir(element,struc,init_vac)
+        print('surf directory complete!')
 
     #TO-DO create adsorption dir
 
