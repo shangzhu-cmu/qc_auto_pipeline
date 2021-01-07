@@ -6,4 +6,4 @@ for element in element_ls:
                 surf_struc=['100','110','111'],
                 optimized_parameters=['h','k','sw'],
                 starting_layer=5,
-                init_vac=8):
+                init_vac=8)

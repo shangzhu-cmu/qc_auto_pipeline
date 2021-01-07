@@ -35,7 +35,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     k_density=db_bulk.get(name=element).k_density
     kpts=[int(i) for i in (db_bulk.get(name=element).kpts).split(',')]
     sw=db_bulk.get(name=element).sw
-    db_layer=connect(element+'/'+'surf'+'/'+'layer_converge.db')
+    db_layer=connect(element+'/'+'surf'+'/'+struc+'/'+'layer_converge.db')
     with paropen(rep_location,'a') as f:
         parprint('Initial Parameters:',file=f)
         parprint('\t'+'Materials: '+element,file=f)
@@ -97,7 +97,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             sys.exit()
     layer=layer_ls[-3]
     #second optimize the vaccum layer
-    db_vac=connect(element+'/'+'surf'+'/'+'vac_converge.db')
+    db_vac=connect(element+'/'+'surf'+'/'+struc+'/'+'vac_converge.db')
     diff_primary=100
     diff_second=100
     iters=1
