@@ -46,7 +46,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('\t'+'Miller Index: '+str(m_ind),file=f)
         parprint('\t'+'Layer: '+str(init_layer),file=f)
-        parprint('\t'+'Vacuume length: '+str(vac)+'Ang',file=f)
+        parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'eV',file=f)
     f.close()
@@ -146,22 +146,21 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     final_slab=db_vac.get_atoms(len(db_vac)-1)
     vac=vac_ls[-2]   
     db_final=connect('final_database'+'/'+'surf.db')
-    id=db_final.reserve(name=element+struc)
+    id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
-        id=db_final.get(name=element+struc).id
-        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+struc,xc=xc,layer=layer,vac=vac)
+        id=db_final.get(name=element+'('+struc+')').id
+        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,layer=layer,vac=vac)
     else:
-        db_final.write(final_slab,id=id,name=element+struc,h=h,k_density=k_density,sw=sw,xc=xc,layer=layer,vac=vac)
+        db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,layer=layer,vac=vac)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'xc: '+xc,file=f)
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
-        parprint('\t'+'Layer: '+str(init_layer),file=f)
-        parprint('\t'+'Vacuume length: '+str(vac)+'Ang',file=f)
+        parprint('\t'+'Layer: '+str(layer),file=f)
+        parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
-        parprint(vac_ls,file=f)
     f.close()
 
 def surf_e_calc(pre,post,bulk):
