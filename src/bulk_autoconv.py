@@ -9,6 +9,7 @@ import sys
 from ase.io import read, write
 from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
+
 def bulk_auto_conv(element,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),temp_print=True):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
     #initialize the kpts from the k_density
