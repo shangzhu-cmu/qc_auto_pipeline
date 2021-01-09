@@ -9,19 +9,18 @@ import sys
 from ase.io import read, write
 from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
-def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),cif=False,temp_print=True):
+def bulk_auto_conv(element,h=0.16,k_density=4,xc='PBE',sw=0.1,rela_tol=10*10**(-3),temp_print=True):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
     #initialize the kpts from the k_density
-    orig_atom=bulk_builder(element,cif,struc,a0)
+    orig_atom=bulk_builder(element)
     kpts=kdens2mp(orig_atom,kptdensity=k_density,even=True)
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
         parprint('Initial Parameters:',file=f)
         parprint('\t'+'Materials: '+element,file=f)
-        parprint('\t'+'Starting cif: '+str(cif),file=f)
-        if cif == False:
-            parprint('\t'+'a: '+str(a0)+'Ang',file=f)
+        parprint('\t'+'Lattice constants: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[:3],decimals=5))+'Ang',file=f)    
+        parprint('\t'+'Lattice angles: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[3:],decimals=5))+'Degree',file=f)
         parprint('\t'+'xc: '+xc,file=f)
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
@@ -40,7 +39,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     #start with grid spacing convergence
     h_ls=[]
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
-        atoms=bulk_builder(element,cif,struc,a0)
+        atoms=bulk_builder(element)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
@@ -74,7 +73,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
         kpts=kpts+2
-        atoms=bulk_builder(element,cif,struc,a0)
+        atoms=bulk_builder(element)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(kpts[0]))
@@ -107,7 +106,7 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
     db_sw.write(db_k.get_atoms(len(db_k)-2),sw=sw)
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
         sw=sw/2
-        atoms=bulk_builder(element,cif,struc,a0)
+        atoms=bulk_builder(element)
         calc=GPAW(xc=xc,h=h,kpts=kpts,occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
@@ -147,18 +146,15 @@ def bulk_auto_conv(element,a0=None,struc=None,h=0.16,k_density=4,xc='PBE',sw=0.1
         parprint('\t'+'kpts: '+str(kpts),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('Final Output: ',file=f)
-        if cif == False:
-            parprint('\t'+'a: '+str(np.round(final_atom.cell[0][1]*2,decimals=5))+'Ang',file=f)    
+        parprint('\t'+'Lattice constants: '+str(np.round(final_atom.get_cell_lengths_and_angles()[:3],decimals=5))+'Ang',file=f)    
+        parprint('\t'+'Lattice angles: '+str(np.round(final_atom.get_cell_lengths_and_angles()[3:],decimals=5))+'Degree',file=f)    
         parprint('\t'+'pot_e: '+str(np.round(final_atom.get_potential_energy(),decimals=5))+'eV',file=f)
     f.close()
 
 
-def bulk_builder(element,cif,struc,a0):
-    if cif == False:
-        atoms=bulk(element,struc,a=a0)
-    else:
-        location='orig_cif_data'+'/'+element+'.cif'
-        atoms=read(location)
+def bulk_builder(element):
+    location='orig_cif_data'+'/'+element+'.cif'
+    atoms=read(location)
     return atoms
 
 def temp_output_printer(db,iters,key,location):

@@ -9,14 +9,7 @@ import copy as cp
 def pause():
     input('Press <ENTER> to continue...')
 
-##TO-DO: options are not taken care of
-def create_dir(element,options=['bulk','surf','ads'],
-                surf_struc=['100','110','111'],
-                optimized_parameters=['h','k','sw'],
-                starting_layer=3,
-                init_vac=5,
-                ads_atom='Li',
-                ads_height=2.5):
+def create_big_dir():
     current_dir=os.getcwd()
     os.chdir(current_dir)
     #create the orig_cif_data and final_database dir
@@ -30,6 +23,16 @@ def create_dir(element,options=['bulk','surf','ads'],
         pause()
     else:
         os.makedirs('final_database',exist_ok=True)
+
+def create_element_dir(element,options=['bulk','surf','ads'],
+                surf_struc=['100','110','111'],
+                optimized_parameters=['h','k','sw'],
+                starting_layer=3,
+                init_vac=5,
+                ads_atom='Li',
+                ads_height=2.5):
+    current_dir=os.getcwd()
+    os.chdir(current_dir)
 
     #create the element dir
     if os.path.isdir(element):
