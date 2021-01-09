@@ -12,23 +12,29 @@ import sys
 import time
 import copy as cp
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
+from shutil import copyfile
+import glob
 def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**(-3),temp_print=True):
-    # dispatcher = {'fcc100':build.fcc100,'fcc110':build.fcc110,'fcc111':build.fcc111,
-    #               'bcc100':build.bcc100,'bcc110':build.bcc110,'bcc111':build.bcc111,
-    #               }
-    #m_ind=re.findall(r'\d+',struc)[0]
     m_ind=tuple(map(int,struc))
     rep_location=(element+'/'+'surf'+'/'+struc+'_results_report.txt')
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
-    try:
-        db_bulk=connect('final_database'+'/'+'bulk.db')
-    except:
+    if not os.path.isfile('final_database/bulk.db'):
         with paropen(rep_location,'a') as f:
-            parprint('ERROR: No Optimized Bulk Object Found!',file=f)
+            parprint('ERROR: bulk database has not been established!',file=f)
             parprint('Surface Convergence Computation Suspended!',file=f)
         f.close()
         sys.exit()
+    else:
+        db_bulk=connect('final_database'+'/'+'bulk.db')
+        try:
+            opt_bulk=db_bulk.get_atoms(name=element)
+        except:
+            with paropen(rep_location,'a') as f:
+                parprint('ERROR: No Optimized Bulk Object Found!',file=f)
+                parprint('Surface Convergence Computation Suspended!',file=f)
+            f.close()
+            sys.exit()
     opt_bulk=db_bulk.get_atoms(name=element)
     xc=db_bulk.get(name=element).xc
     h=db_bulk.get(name=element).h
@@ -38,16 +44,16 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     db_layer=connect(element+'/'+'surf'+'/'+struc+'/'+'layer_converge.db')
     with paropen(rep_location,'a') as f:
         parprint('Initial Parameters:',file=f)
+        parprint('\t'+'Miller Index: '+str(m_ind),file=f)
+        parprint('\t'+'Layer: '+str(init_layer),file=f)
+        parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
+        parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'Materials: '+element,file=f)
         parprint('\t'+'xc: '+xc,file=f)
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'kpts: '+str(kpts),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
-        parprint('\t'+'Miller Index: '+str(m_ind),file=f)
-        parprint('\t'+'Layer: '+str(init_layer),file=f)
-        parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
-        parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'eV',file=f)
     f.close()
     #first optimize the layers
@@ -96,6 +102,12 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             f.close()
             sys.exit()
     layer=layer_ls[-3]
+    glob_location=element+'/'+'surf'+'/'+struc+'/'+str(layer)+'x1x1'+'/'+'*'
+    optimized_file=glob.glob(glob_location)
+    dest_folder=element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
+    for fil in optimized_file:
+        fil_name=fil.split('/')[-1]
+        copyfile(fil,dest_folder+'/'+fil_name)
     #second optimize the vaccum layer
     db_vac=connect(element+'/'+'surf'+'/'+struc+'/'+'vac_converge.db')
     diff_primary=100
@@ -139,12 +151,12 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     if iters>=5:
         if diff_primary>area_rela_tol or diff_second>area_rela_tol:
             with paropen(rep_location,'a') as f:
-                parprint("WARNING: Max VACUUME iterations reached! System may not be converged.",file=f)
+                parprint("WARNING: Max VACUUM iterations reached! System may not be converged.",file=f)
                 parprint("Computation Suspended!",file=f)
             f.close()
             sys.exit()
-    final_slab=db_vac.get_atoms(len(db_vac)-1)
-    vac=vac_ls[-2]   
+    final_slab=db_vac.get_atoms(len(db_vac)-2)
+    vac=vac_ls[-3]   
     db_final=connect('final_database'+'/'+'surf.db')
     id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
@@ -154,13 +166,13 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,layer=layer,vac=vac)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
+        parprint('\t'+'Layer: '+str(layer),file=f)
+        parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
+        parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'xc: '+xc,file=f)
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
-        parprint('\t'+'Layer: '+str(layer),file=f)
-        parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
-        parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
     f.close()
 
 def surf_e_calc(pre,post,bulk):
