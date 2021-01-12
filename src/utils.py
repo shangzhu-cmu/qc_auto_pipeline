@@ -28,7 +28,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
                 surf_struc=['100','110','111'],
                 optimized_parameters=['h','k','sw'],
                 starting_layer=3,
-                init_vac=5,
+                # init_vac=5,
                 ads_atom='Li',
                 ads_height=2.5):
     current_dir=os.getcwd()
@@ -61,7 +61,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
             os.makedirs(element+'/'+'surf',exist_ok=True)
         for struc in surf_struc:
             create_surf_sub_dir(element,struc,starting_layer)
-            create_surf_vac_dir(element,struc,init_vac)
+            # create_surf_vac_dir(element,struc,init_vac)
         print('{} surf directories created!'.format(element))
 
     #create adsorption dir
@@ -89,30 +89,30 @@ def create_element_dir(element,options=['bulk','surf','ads'],
                 os.makedirs(element+'/'+'ads'+'/'+struc,exist_ok=True)            
             create_ads_sub_dir(element,struc,slab_clean_row,current_dir,slab_clean,ads_atom,ads_height)
             os.chdir(current_dir)
-            create_ads_vac_dir(element,struc,slab_clean_row,current_dir,slab_clean,ads_atom,ads_height)
-            os.chdir(current_dir)
+            # create_ads_vac_dir(element,struc,slab_clean_row,current_dir,slab_clean,ads_atom,ads_height)
+            # os.chdir(current_dir)
         print('{} ads directories created!'.format(element))
 
-def create_ads_vac_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_height):
-    sub_dir=element+'/'+'ads'+'/'+struc+'/'+'layer_optimized'
-    if os.path.isdir(sub_dir):
-            print('WARNING: '+'./'+sub_dir+' directory already exists!')
-            pause()
-    else:
-        os.makedirs(sub_dir,exist_ok=True)
-    init_vac=int(slab_row.vac)
-    for vac in range(init_vac,init_vac+6):
-        slab_temp=cp.deepcopy(slab)
-        os.chdir(current_dir)
-        sub_sub_dir=element+'/'+'ads'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
-        if os.path.isdir(sub_sub_dir):
-            print('WARNING: '+'./'+sub_sub_dir+' directory already exists!')
-            pause()
-        else:
-            os.makedirs(sub_sub_dir,exist_ok=True)
-        os.chdir(current_dir+'/'+sub_sub_dir)
-        add_vacuum(slab_temp,vac-init_vac)
-        adsorption.gen_rxn_int_sym(slab_temp, ads=ads_atom ,height={ads_atom:ads_height})
+# def create_ads_vac_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_height):
+#     sub_dir=element+'/'+'ads'+'/'+struc+'/'+'layer_optimized'
+#     if os.path.isdir(sub_dir):
+#             print('WARNING: '+'./'+sub_dir+' directory already exists!')
+#             pause()
+#     else:
+#         os.makedirs(sub_dir,exist_ok=True)
+#     init_vac=int(slab_row.vac)
+#     for vac in range(init_vac,init_vac+6):
+#         slab_temp=cp.deepcopy(slab)
+#         os.chdir(current_dir)
+#         sub_sub_dir=element+'/'+'ads'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
+#         if os.path.isdir(sub_sub_dir):
+#             print('WARNING: '+'./'+sub_sub_dir+' directory already exists!')
+#             pause()
+#         else:
+#             os.makedirs(sub_sub_dir,exist_ok=True)
+#         os.chdir(current_dir+'/'+sub_sub_dir)
+#         add_vacuum(slab_temp,vac-init_vac)
+#         adsorption.gen_rxn_int_sym(slab_temp, ads=ads_atom ,height={ads_atom:ads_height})
     
 def create_ads_sub_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_height):
     init_layer=int(slab_row.actual_layer)
@@ -128,20 +128,20 @@ def create_ads_sub_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_heig
         adsorption.gen_rxn_int_sym(slab, ads=ads_atom ,height={ads_atom:ads_height})
 
 
-def create_surf_vac_dir(element,struc,init_vac):
-    sub_dir=element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'
-    if os.path.isdir(sub_dir):
-        print('WARNING: '+'./'+sub_dir+' directory already exists!')
-        pause()
-    else:
-        os.makedirs(sub_dir,exist_ok=True)
-    for vac in range(init_vac,init_vac+6):
-        sub_sub_dir=element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
-        if os.path.isdir(sub_sub_dir):
-            print('WARNING: '+'./'+sub_sub_dir+' directory already exists!')
-            pause()
-        else:
-            os.makedirs(sub_sub_dir,exist_ok=True)
+# def create_surf_vac_dir(element,struc,init_vac):
+#     sub_dir=element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'
+#     if os.path.isdir(sub_dir):
+#         print('WARNING: '+'./'+sub_dir+' directory already exists!')
+#         pause()
+#     else:
+#         os.makedirs(sub_dir,exist_ok=True)
+#     for vac in range(init_vac,init_vac+6):
+#         sub_sub_dir=element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
+#         if os.path.isdir(sub_sub_dir):
+#             print('WARNING: '+'./'+sub_sub_dir+' directory already exists!')
+#             pause()
+#         else:
+#             os.makedirs(sub_sub_dir,exist_ok=True)
 
 def create_surf_sub_dir(element,struc,starting_layer):
     sub_dir=element+'/'+'surf'+'/'+struc
