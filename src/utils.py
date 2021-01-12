@@ -64,7 +64,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
             create_surf_vac_dir(element,struc,init_vac)
         print('{} surf directories created!'.format(element))
 
-    #TO-DO create adsorption dir
+    #create adsorption dir
     if 'ads' in options:
         if not os.path.isfile('final_database/surf.db'):
             sys.exit("ERROR: surf database has not been established!")
@@ -115,7 +115,7 @@ def create_ads_vac_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_heig
         adsorption.gen_rxn_int_sym(slab_temp, ads=ads_atom ,height={ads_atom:ads_height})
     
 def create_ads_sub_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_height):
-    init_layer=int(slab_row.layer)
+    init_layer=int(slab_row.actual_layer)
     for layer in range(init_layer,init_layer+6*2,2):
         os.chdir(current_dir)
         sub_dir=element+'/'+'ads'+'/'+struc+'/'+str(layer)+'x1x1'
