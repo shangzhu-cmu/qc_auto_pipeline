@@ -45,7 +45,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     with paropen(rep_location,'a') as f:
         parprint('Initial Parameters:',file=f)
         parprint('\t'+'Miller Index: '+str(m_ind),file=f)
-        parprint('\t'+'Layer: '+str(init_layer),file=f)
+        parprint('\t'+'Simulated Layer: '+str(init_layer),file=f)
         parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'Materials: '+element,file=f)
@@ -60,10 +60,12 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     diff_primary=100
     diff_second=100
     iters=0
-    layer_ls=[]
+    act_layer_ls=[]
+    sim_layer_ls=[]
     area_rela_tol=0
     while (diff_primary>area_rela_tol or diff_second>area_rela_tol) and iters <= 5:
         slab = surface(opt_bulk, m_ind, layers=init_layer, vacuum=vac)
+        actual_layer=np.unique(slab.positions[:,2])
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
@@ -75,9 +77,9 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
-        location=element+'/'+'surf'+'/'+struc+'/'+str(init_layer)+'x1x1'
+        location=element+'/'+'surf'+'/'+struc+'/'+str(actual_layer)+'x1x1'
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
-        db_layer.write(slab,layers=init_layer)
+        db_layer.write(slab,sim_layer=init_layer,actual_layer=actual_layer) #sim layer is different from the actual layers
         if iters>=2:
             area_rela_tol=cp.deepcopy(rela_tol)
             fst=db_layer.get_atoms(id=iters-1)
@@ -86,14 +88,15 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
             diff_primary=max(surf_e_calc(fst,snd,opt_bulk),surf_e_calc(fst,trd,opt_bulk))
             diff_second=surf_e_calc(snd,trd,opt_bulk)
             if temp_print==True:
-                temp_output_printer(db_layer,iters,'layers',opt_bulk,rela_tol,rep_location)
+                temp_output_printer(db_layer,iters,'actual_layer',opt_bulk,rela_tol,rep_location)
             area_average=np.mean([2*(fst.cell[0][0]*fst.cell[1][1]),
                                 2*(snd.cell[0][0]*snd.cell[1][1]),
                                 2*(trd.cell[0][0]*trd.cell[1][1])])
             area_rela_tol=area_rela_tol/area_average
-        layer_ls.append(init_layer)
+        act_layer_ls.append(actual_layer)
+        sim_layer_ls.append(init_layer)
         iters+=1
-        init_layer+=2
+        init_layer+=1 #change to one because the unit cell will generate 2 surfaces per layer
     if iters>=5:
         if diff_primary>area_rela_tol or diff_second>area_rela_tol:
             with paropen(rep_location,'a') as f:
@@ -101,8 +104,9 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
                 parprint("Computation Suspended!",file=f)
             f.close()
             sys.exit()
-    layer=layer_ls[-3]
-    glob_location=element+'/'+'surf'+'/'+struc+'/'+str(layer)+'x1x1'+'/'+'*'
+    act_layer=act_layer_ls[-3]
+    sim_layer=sim_layer_ls[-3]
+    glob_location=element+'/'+'surf'+'/'+struc+'/'+str(act_layer)+'x1x1'+'/'+'*'
     optimized_file=glob.glob(glob_location)
     dest_folder=element+'/'+'surf'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
     for fil in optimized_file:
@@ -118,7 +122,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     area_rela_tol=0
     while (diff_primary>area_rela_tol or diff_second>area_rela_tol) and iters <= 5:
         vac=int(vac+1)
-        slab = surface(opt_bulk, m_ind, layers=layer, vacuum=vac)
+        slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
@@ -161,12 +165,12 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
         id=db_final.get(name=element+'('+struc+')').id
-        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,layer=layer,vac=vac)
+        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
     else:
-        db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,layer=layer,vac=vac)
+        db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
-        parprint('\t'+'Layer: '+str(layer),file=f)
+        parprint('\t'+'Simulated Layer: '+str(layer),file=f)
         parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'xc: '+xc,file=f)
