@@ -65,7 +65,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
     area_rela_tol=0
     while (diff_primary>area_rela_tol or diff_second>area_rela_tol) and iters <= 5:
         slab = surface(opt_bulk, m_ind, layers=init_layer, vacuum=vac)
-        actual_layer=np.unique(slab.positions[:,2])
+        actual_layer=len(np.unique(slab.positions[:,2]))
         fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
@@ -170,7 +170,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=10*10**
         db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
-        parprint('\t'+'Simulated Layer: '+str(layer),file=f)
+        parprint('\t'+'Simulated Layer: '+str(sim_layer),file=f)
         parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'xc: '+xc,file=f)
