@@ -66,28 +66,22 @@ def create_element_dir(element,options=['bulk','surf','ads'],
 
     #create adsorption dir
     if 'ads' in options:
-        if not os.path.isfile('final_database/surf.db'):
-            sys.exit("ERROR: surf database has not been established!")
-        surf_db=connect('final_database/surf.db')
+        slab_db_path=element+'/'+'surf'+'/'+struc+'/'+'layer_converge.db'
+        if not os.path.isfile(slab_db_path):
+            sys.exit("ERROR: slab database has not been established!")
+        slab_db=connect(slab_db_path)
         if os.path.isdir(element+'/'+'ads'):
             print("WARNING: ./{}/ads directory already exists!".format(element))
             pause()
         else:
             os.makedirs(element+'/'+'ads',exist_ok=True)
         for struc in surf_struc:
-            try:
-                slab_clean_row=surf_db.get(name=element+'('+struc+')')
-                slab_clean=surf_db.get_atoms(name=element+'('+struc+')')
-            except:
-                print("ERROR: No such element+surface [{}]!".format(element+'('+struc+')'))
-                pause()
-                continue
             if os.path.isdir(element+'/'+'ads'+'/'+struc):
                 print('WARNING: '+'./'+element+'/'+'ads'+'/'+'{} directory already exists!'.format(struc))
                 pause()
             else:
                 os.makedirs(element+'/'+'ads'+'/'+struc,exist_ok=True)            
-            create_ads_sub_dir(element,struc,slab_clean_row,current_dir,slab_clean,ads_atom,ads_height)
+            create_ads_sub_dir(element,struc,current_dir,ads_atom,ads_height,slab_db)
             os.chdir(current_dir)
             # create_ads_vac_dir(element,struc,slab_clean_row,current_dir,slab_clean,ads_atom,ads_height)
             # os.chdir(current_dir)
@@ -114,10 +108,11 @@ def create_element_dir(element,options=['bulk','surf','ads'],
 #         add_vacuum(slab_temp,vac-init_vac)
 #         adsorption.gen_rxn_int_sym(slab_temp, ads=ads_atom ,height={ads_atom:ads_height})
     
-def create_ads_sub_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_height):
-    init_layer=int(slab_row.actual_layer)
-    for layer in range(init_layer,init_layer+6*2,2):
+def create_ads_sub_dir(element,struc,current_dir,ads_atom,ads_height,slab_db):
+    db_size=len(slab_db)
+    for i in range(db_size):
         os.chdir(current_dir)
+        layer=slab_db.get(i).actual_layer
         sub_dir=element+'/'+'ads'+'/'+struc+'/'+str(layer)+'x1x1'
         if os.path.isdir(sub_dir):
             print('WARNING: '+'./'+sub_dir+' directory already exists!')
@@ -125,7 +120,7 @@ def create_ads_sub_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_heig
         else:
             os.makedirs(sub_dir,exist_ok=True)
         os.chdir(current_dir+'/'+sub_dir)
-        adsorption.gen_rxn_int_sym(slab, ads=ads_atom ,height={ads_atom:ads_height})
+        adsorption.gen_rxn_int_sym(slab_db.get_atoms(i), ads=ads_atom ,height={ads_atom:ads_height})
 
 
 # def create_surf_vac_dir(element,struc,init_vac):
