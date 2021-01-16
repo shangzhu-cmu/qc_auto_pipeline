@@ -77,8 +77,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
     
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters < avail_slab_num:
         #glob all the .traj file in the './element/nx1x1/Li/**/' folder
-        fil=glob.glob(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/*.traj',recursive=False)
-        parprint(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/*.traj')
+        fil=glob.glob(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/**/*.traj',recursive=True)
         ads_dict={} #create dictionary for saving the adsorption energy
         for file_loc in fil: 
             ads_slab = read(file_loc)
@@ -93,9 +92,8 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
             location='{}/opt_ads.Li'.format('/'.join(file_loc.split('/')[:-2]))
             opt.surf_relax(ads_slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
             ads_dict[location]=ads_slab.get_potential_energy()-(db_slab_clean.get_atoms(iters+1).get_potential_energy()+ads_pot_e)
-        parprint(ads_dict)
         ads_dict_sorted=sorted(ads_dict,key=ads_dict.get)
-        lowest_ads_e_slab=read(ads_dict_sorted)#[0])
+        lowest_ads_e_slab=read(ads_dict_sorted[0])
         db_ads_slab.write(lowest_ads_e_slab,act_layer=act_init_layer,sim_layer=sim_init_layer)
         #enter the convergence test sequence
         if iters>=2:
@@ -147,7 +145,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
             #create the adsorption site file using autocat 
             ads_creater(clean_slab,ads,ads_height,actual_layer,ads_file_loc)
             os.chdir(code_dir+'/'+struc_dir)
-            fil=glob.glob(ads_file_loc+'/'+str(actual_layer)+'x1x1'+'/'+'Li/**/*.traj',recursive=False)
+            fil=glob.glob(ads_file_loc+'/'+str(actual_layer)+'x1x1'+'/'+'Li/**/**/*.traj',recursive=False)
             ads_dict={}
             for file_loc in fil: 
                 ads_slab = read(file_loc)
