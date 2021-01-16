@@ -123,7 +123,7 @@ def create_ads_sub_dir(element,struc,current_dir,ads_atom,ads_height,slab_db):
         os.chdir(current_dir+'/'+sub_dir)
         print(ads_atom)
         print(ads_height)
-        adsorption.gen_rxn_int_sym(slab_db.get_atoms(i+1), ads=ads_atom ,height={ads_atom:ads_height})
+        adsorption.gen_rxn_int_sym(slab_db.get_atoms(i+1), ads=[ads_atom],height={ads_atom:ads_height})
 
 
 # def create_surf_vac_dir(element,struc,init_vac):
