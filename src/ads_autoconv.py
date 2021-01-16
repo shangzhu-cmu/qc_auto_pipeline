@@ -80,6 +80,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         fil=glob.glob(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/*.traj',recursive=False)
         ads_dict={} #create dictionary for saving the adsorption energy
         for file_loc in fil: 
+            parprint(file_loc)
             ads_slab = read(file_loc)
             kpts=kdens2mp(ads_slab,kptdensity=k_density,even=True)
             calc=GPAW(xc='PBE',
