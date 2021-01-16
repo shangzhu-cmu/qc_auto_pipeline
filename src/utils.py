@@ -77,7 +77,6 @@ def create_element_dir(element,options=['bulk','surf','ads'],
                 pause()
             else:
                 os.makedirs(element+'/'+'ads',exist_ok=True) 
-        for struc in surf_struc:
             if os.path.isdir(element+'/'+'ads'+'/'+struc):
                 print('WARNING: '+'./'+element+'/'+'ads'+'/'+'{} directory already exists!'.format(struc))
                 pause()
