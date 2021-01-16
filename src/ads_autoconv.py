@@ -157,7 +157,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
                         occupations={'name': 'fermi-dirac','width': sw},
                         poissonsolver={'dipolelayer': 'xy'})
                 ads_slab.set_calculator(calc)
-                location='{}/opt_ads.Li'.format('/'.join(file_loc.split('/')[:-2]))
+                location='/'.join(file_loc.split('/')[:-1])
                 opt.surf_relax(ads_slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
                 ads_dict[location]=ads_slab.get_potential_energy()-(db_slab_clean.get_atoms(iters+1).get_potential_energy()+ads_pot_e)
             ads_dict_sorted=sorted(ads_dict,key=ads_dict.get)
