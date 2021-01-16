@@ -141,7 +141,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
                     occupations={'name': 'fermi-dirac','width': sw},
                     poissonsolver={'dipolelayer': 'xy'})
             clean_slab.set_calculator(calc)
-            location=code_dir+'/'+element+'/'+'surf'+'/'+struc+'/'+str(act_init_layer)+'x1x1'
+            location=code_dir+'/'+element+'/'+'surf'+'/'+struc+'/'+str(actual_layer)+'x1x1'
             opt.surf_relax(clean_slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
             db_slab_clean.write(clean_slab,sim_layer=sim_init_layer,act_layer=actual_layer)
             #create the adsorption site file using autocat 
@@ -164,7 +164,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
                 ads_dict[location]=ads_slab.get_potential_energy()-(db_slab_clean.get_atoms(iters+1).get_potential_energy()+ads_pot_e)
             ads_dict_sorted=sorted(ads_dict,key=ads_dict.get)
             lowest_ads_e_slab=read(ads_dict_sorted[0])
-            db_ads_slab.write(lowest_ads_e_slab,act_layer=act_init_layer,sim_layer=sim_init_layer)
+            db_ads_slab.write(lowest_ads_e_slab,act_layer=actual_layer,sim_layer=sim_init_layer)
             #enter the convergence test sequence
             fst_ads=db_ads_slab.get_atoms(id=iters-1)
             snd_ads=db_ads_slab.get_atoms(id=iters)
@@ -179,10 +179,9 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
             diff_second=ads_e_perct_diff_23
             if temp_print==True:
                 temp_output_printer(db_ads_slab,db_slab_clean,iters,'act_layer',ads_pot_e,rep_location)
-            act_layer_ls.append(act_init_layer)
+            act_layer_ls.append(actual_layer)
             sim_layer_ls.append(sim_init_layer)
             sim_init_layer+=1
-            act_init_layer+=2
             iters+=1
 
     if iters>=5:
