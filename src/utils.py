@@ -121,6 +121,8 @@ def create_ads_sub_dir(element,struc,current_dir,ads_atom,ads_height,slab_db):
         else:
             os.makedirs(sub_dir,exist_ok=True)
         os.chdir(current_dir+'/'+sub_dir)
+        print(ads_atom)
+        print(ads_height)
         adsorption.gen_rxn_int_sym(slab_db.get_atoms(i+1), ads=ads_atom ,height={ads_atom:ads_height})
 
 
