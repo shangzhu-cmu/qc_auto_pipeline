@@ -31,7 +31,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
     #connect to the surface database to get the parameters for calculation
     #connect to bulk database to get the optimized bulk for clean slab generation preparation
     db_surf=connect(code_dir+'/'+'final_database'+'/'+'surf.db')
-    opt_bulk=connect('final_database'+'/'+'bulk.db').get_atoms(name=element)
+    opt_bulk=connect(code_dir+'final_database'+'/'+'bulk.db').get_atoms(name=element)
 
     #get out the parameters for calculation from surfae database
     xc=db_surf.get(name=element+'('+struc+')').xc
@@ -195,7 +195,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
     final_slab_ads=db_ads_slab.get_atoms(len(db_ads_slab)-2)
     act_layer=act_layer_ls[-3]
     sim_layer=sim_layer_ls[-3]
-    db_final=connect('final_database'+'/'+'ads.db')
+    db_final=connect(code_dir+'final_database'+'/'+'ads.db')
     id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
         id=db_final.get(name=element+'('+struc+')').id
