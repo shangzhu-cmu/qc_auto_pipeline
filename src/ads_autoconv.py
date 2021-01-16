@@ -55,7 +55,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         parprint('\t'+'Fixed Layer: '+str(fix_layer),file=f)
         parprint('\t'+'xc: '+xc,file=f)
         parprint('\t'+'h: '+str(h),file=f)
-        parprint('\t'+'kpts: '+str(kpts),file=f)
+        parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'%',file=f)
     f.close()
