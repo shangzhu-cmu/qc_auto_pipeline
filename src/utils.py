@@ -66,15 +66,16 @@ def create_element_dir(element,options=['bulk','surf','ads'],
 
     #create adsorption dir
     if 'ads' in options:
-        slab_db_path=element+'/'+'surf'+'/'+struc+'/'+'layer_converge.db'
-        if not os.path.isfile(slab_db_path):
-            sys.exit("ERROR: slab database has not been established!")
-        slab_db=connect(slab_db_path)
-        if os.path.isdir(element+'/'+'ads'):
-            print("WARNING: ./{}/ads directory already exists!".format(element))
-            pause()
-        else:
-            os.makedirs(element+'/'+'ads',exist_ok=True)
+        for struc in surf_struc:
+            slab_db_path=element+'/'+'surf'+'/'+struc+'/'+'layer_converge.db'
+            if not os.path.isfile(slab_db_path):
+                sys.exit("ERROR: slab database has not been established!")
+            slab_db=connect(slab_db_path)
+            if os.path.isdir(element+'/'+'ads'):
+                print("WARNING: ./{}/ads directory already exists!".format(element))
+                pause()
+            else:
+                os.makedirs(element+'/'+'ads',exist_ok=True) 
         for struc in surf_struc:
             if os.path.isdir(element+'/'+'ads'+'/'+struc):
                 print('WARNING: '+'./'+element+'/'+'ads'+'/'+'{} directory already exists!'.format(struc))
