@@ -62,7 +62,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'kpts: '+str(kpts),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
-        parprint('\t'+'rela_tol: '+str(rela_tol)+'eV',file=f)
+        parprint('\t'+'rela_tol: '+str(rela_tol)+'%',file=f)
     f.close()
 
     #optimize the layers
