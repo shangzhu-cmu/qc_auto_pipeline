@@ -80,7 +80,6 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         fil=glob.glob(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/*.traj',recursive=False)
         parprint(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/*.traj')
         ads_dict={} #create dictionary for saving the adsorption energy
-        parprint(fil)
         for file_loc in fil: 
             ads_slab = read(file_loc)
             kpts=kdens2mp(ads_slab,kptdensity=k_density,even=True)
@@ -94,8 +93,9 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
             location='{}/opt_ads.Li'.format('/'.join(file_loc.split('/')[:-2]))
             opt.surf_relax(ads_slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
             ads_dict[location]=ads_slab.get_potential_energy()-(db_slab_clean.get_atoms(iters+1).get_potential_energy()+ads_pot_e)
+        parprint(ads_dict)
         ads_dict_sorted=sorted(ads_dict,key=ads_dict.get)
-        lowest_ads_e_slab=read(ads_dict_sorted[0])
+        lowest_ads_e_slab=read(ads_dict_sorted)#[0])
         db_ads_slab.write(lowest_ads_e_slab,act_layer=act_init_layer,sim_layer=sim_init_layer)
         #enter the convergence test sequence
         if iters>=2:
