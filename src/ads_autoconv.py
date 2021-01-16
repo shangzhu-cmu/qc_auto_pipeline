@@ -78,9 +78,10 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters < avail_slab_num:
         #glob all the .traj file in the './element/nx1x1/Li/**/' folder
         fil=glob.glob(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/*.traj',recursive=False)
+        parprint(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/*.traj')
         ads_dict={} #create dictionary for saving the adsorption energy
+        parprint(fil)
         for file_loc in fil: 
-            parprint(file_loc)
             ads_slab = read(file_loc)
             kpts=kdens2mp(ads_slab,kptdensity=k_density,even=True)
             calc=GPAW(xc='PBE',
