@@ -37,7 +37,6 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
     xc=db_surf.get(name=element+'('+struc+')').xc
     h=db_surf.get(name=element+'('+struc+')').h
     k_density=db_surf.get(name=element+'('+struc+')').k_density
-    kpts=[int(i) for i in (db_surf.get(name=element+'('+struc+')').kpts).split(',')]
     sw=db_surf.get(name=element+'('+struc+')').sw
     act_init_layer=db_surf.get(name=element+'('+struc+')').act_layer
     sim_init_layer=db_surf.get(name=element+'('+struc+')').sim_layer
@@ -56,7 +55,6 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         parprint('\t'+'Fixed Layer: '+str(fix_layer),file=f)
         parprint('\t'+'xc: '+xc,file=f)
         parprint('\t'+'h: '+str(h),file=f)
-        parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'kpts: '+str(kpts),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'%',file=f)
