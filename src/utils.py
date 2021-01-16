@@ -68,6 +68,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
     if 'ads' in options:
         for struc in surf_struc:
             slab_db_path=element+'/'+'surf'+'/'+struc+'/'+'layer_converge.db'
+            print(slab_db_path)
             if not os.path.isfile(slab_db_path):
                 sys.exit("ERROR: slab database has not been established!")
             slab_db=connect(slab_db_path)
