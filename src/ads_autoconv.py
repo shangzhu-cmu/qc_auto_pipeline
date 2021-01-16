@@ -48,7 +48,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         parprint('\t'+'Materials: '+element,file=f)
         parprint('\t'+'Miller Index: '+str(m_ind),file=f)
         parprint('\t'+'Adsorbate: '+ads,file=f)
-        parprint('\t'+'Initial Adsorption Height: '+ads_height,file=f)
+        parprint('\t'+'Initial Adsorption Height: '+str(ads_height),file=f)
         parprint('\t'+'Simulated Layer: '+str(sim_init_layer),file=f)
         parprint('\t'+'Actual Layer: '+str(act_init_layer),file=f)
         parprint('\t'+'Vacuum Length: '+str(vac)+'Ang',file=f)
