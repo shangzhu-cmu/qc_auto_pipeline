@@ -14,6 +14,7 @@ import copy as cp
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 from shutil import copyfile
 import glob
+from gpaw import Davidson
 def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True):
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
@@ -89,6 +90,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             h=h,
             symmetry = {'point_group': False},
             kpts=kpts,
+            eigensolver=Davidson(3)
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
