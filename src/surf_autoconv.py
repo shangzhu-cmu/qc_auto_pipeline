@@ -90,7 +90,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             h=h,
             symmetry = {'point_group': False},
             kpts=kpts,
-            eigensolver=Davidson(3)
+            eigensolver=Davidson(3),
             occupations={'name': 'fermi-dirac','width': sw},
             poissonsolver={'dipolelayer': 'xy'})
         slab.set_calculator(calc)
