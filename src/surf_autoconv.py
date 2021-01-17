@@ -54,7 +54,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         parprint('Initial Parameters:',file=f)
         parprint('\t'+'Materials: '+element,file=f)
         parprint('\t'+'Miller Index: '+str(m_ind),file=f)
-        parprint('\t'+'Simulated Layer: '+str(init_layer),file=f)
+        parprint('\t'+'Actual Layer: '+str(init_layer),file=f)
         parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'xc: '+xc,file=f)
@@ -73,10 +73,15 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     iters=0
     act_layer_ls=[]
     sim_layer_ls=[]
+    sim_layer=1
+    slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
+    actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
-        slab = surface(opt_bulk, m_ind, layers=init_layer, vacuum=vac)
-        actual_layer=len(np.unique(slab.positions[:,2]))
-        fix_mask=slab.positions[:,2] <= np.unique(slab.positions[:,2])[fix_layer-1]
+        while actual_layer != init_layer:
+            sim_layer+=1
+            slab=surface(opt_bulk, m_ind, layers=sim_layer,vacuum=vac)
+            actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
+        fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
         kpts=kdens2mp(slab,kptdensity=k_density,even=True)
@@ -89,7 +94,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         slab.set_calculator(calc)
         location=element+'/'+'surf'+'/'+struc+'/'+str(actual_layer)+'x1x1'
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
-        db_layer.write(slab,sim_layer=init_layer,act_layer=actual_layer) #sim layer is different from the actual layers
+        db_layer.write(slab,sim_layer=sim_layer,act_layer=actual_layer) #sim layer is different from the actual layers
         if iters>=2:
             fst=db_layer.get_atoms(id=iters-1)
             snd=db_layer.get_atoms(id=iters)
@@ -99,9 +104,9 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             if temp_print==True:
                 temp_output_printer(db_layer,iters,'act_layer',opt_bulk,rela_tol,rep_location)
         act_layer_ls.append(actual_layer)
-        sim_layer_ls.append(init_layer)
+        sim_layer_ls.append(sim_layer)
         iters+=1
-        init_layer+=1 #change to one because the unit cell will generate 2 surfaces per layer
+        init_layer+=2 #change to one because the unit cell will generate 2 surfaces per layer
     if iters>=5:
         if diff_primary>rela_tol or diff_second>rela_tol:
             with paropen(rep_location,'a') as f:
@@ -122,6 +127,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'Simulated Layer: '+str(sim_layer),file=f)
+        parprint('\t'+'Actual Layer: '+str(act_layer),file=f)
         parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
         parprint('\t'+'xc: '+xc,file=f)

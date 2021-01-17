@@ -48,7 +48,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         parprint('\t'+'Materials: '+element,file=f)
         parprint('\t'+'Miller Index: '+str(m_ind),file=f)
         parprint('\t'+'Adsorbate: '+ads,file=f)
-        parprint('\t'+'Initial Adsorption Height: '+str(ads_height),file=f)
+        parprint('\t'+'Initial Adsorption Height: '+str(ads_height)+'Ang',file=f)
         parprint('\t'+'Simulated Layer: '+str(sim_init_layer),file=f)
         parprint('\t'+'Actual Layer: '+str(act_init_layer),file=f)
         parprint('\t'+'Vacuum Length: '+str(vac)+'Ang',file=f)
@@ -77,6 +77,8 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
     
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters < avail_slab_num:
         #glob all the .traj file in the './element/nx1x1/Li/**/' folder
+        act_init_layer=db_slab_clean.get(iters+1).act_layer
+        sim_init_layer=db_slab_clean.get(iters+1).sim_layer
         fil=glob.glob(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/**/*.traj',recursive=True)
         ads_dict={} #create dictionary for saving the adsorption energy
         for file_loc in fil: 
@@ -89,7 +91,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
                     occupations={'name': 'fermi-dirac','width': sw},
                     poissonsolver={'dipolelayer': 'xy'})
             ads_slab.set_calculator(calc)
-            location='{}/opt_ads.Li'.format('/'.join(file_loc.split('/')[:-2]))
+            location='/'.join(file_loc.split('/')[:-1])
             opt.surf_relax(ads_slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
             ads_dict[location]=ads_slab.get_potential_energy()-(db_slab_clean.get_atoms(iters+1).get_potential_energy()+ads_pot_e)
         ads_dict_sorted=sorted(ads_dict,key=ads_dict.get)
@@ -112,8 +114,6 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
                 temp_output_printer(db_ads_slab,db_slab_clean,iters,'act_layer',ads_pot_e,rep_location)
         act_layer_ls.append(act_init_layer)
         sim_layer_ls.append(sim_init_layer)
-        sim_init_layer+=1
-        act_init_layer+=2
         iters+=1
     
     #entering the backup running sequence
@@ -124,11 +124,17 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
             parprint('WARNING: New computation from clean slab can take a long time.',file=f)
             parprint('Consider terminate the computation if the relative percentage differences are around the desire range', file=f)
         #entering while loop the iterations will stop when it hits 6
+        sim_init_layer+=1
+        act_init_layer+=2
+        clean_slab = surface(opt_bulk, m_ind, layers=sim_init_layer, vacuum=vac)
+        actual_layer=len(np.unique(np.round(clean_slab.positions[:,2],decimals=4)))
         while (diff_primary>rela_tol or diff_second>rela_tol) and iters < 6:
             #clean slab optimization
-            clean_slab = surface(opt_bulk, m_ind, layers=sim_init_layer, vacuum=vac)
-            actual_layer=len(np.unique(clean_slab.positions[:,2]))
-            fix_mask=clean_slab.positions[:,2] <= np.unique(clean_slab.positions[:,2])[fix_layer-1]
+            while actual_layer != act_init_layer:
+                sim_init_layer+=1
+                clean_slab=surface(opt_bulk, m_ind, layers=sim_init_layer,vacuum=vac)
+                actual_layer=len(np.unique(np.round(clean_slab.positions[:,2],decimals=4)))
+            fix_mask=np.round(clean_slab.positions[:,2],decimals=4) <= np.unique(np.round(clean_slab.positions[:,2],decimals=4))[fix_layer-1]
             clean_slab.set_constraint(FixAtoms(mask=fix_mask))
             clean_slab.set_pbc([1,1,0])
             kpts=kdens2mp(clean_slab,kptdensity=k_density,even=True)
@@ -179,7 +185,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
                 temp_output_printer(db_ads_slab,db_slab_clean,iters,'act_layer',ads_pot_e,rep_location)
             act_layer_ls.append(actual_layer)
             sim_layer_ls.append(sim_init_layer)
-            sim_init_layer+=1
+            act_init_layer+=2
             iters+=1
 
     if iters>=5:
@@ -191,15 +197,23 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
             sys.exit()
 
     final_slab_ads=db_ads_slab.get_atoms(len(db_ads_slab)-2)
+    final_slab=db_slab_clean.get_atoms(len(db_slab_clean)-2)
     act_layer=act_layer_ls[-3]
     sim_layer=sim_layer_ls[-3]
-    db_final=connect(code_dir+'/'+'final_database'+'/'+'ads.db')
-    id=db_final.reserve(name=element+'('+struc+')')
+    db_final_full=connect(code_dir+'/'+'final_database'+'/'+'full_ads.db')
+    db_final_clean=connect(code_dir+'/'+'final_database'+'/'+'clean_ads.db')
+    id=db_final_full.reserve(name=element+'('+struc+')')
     if id is None:
-        id=db_final.get(name=element+'('+struc+')').id
-        db_final.update(id=id,atoms=final_slab_ads,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
+        id=db_final_full.get(name=element+'('+struc+')').id
+        db_final_full.update(id=id,atoms=final_slab_ads,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
     else:
-        db_final.write(final_slab_ads,id=id,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
+        db_final_full.write(final_slab_ads,id=id,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
+    id=db_final_clean.reserve(name=element+'('+struc+')')
+    if id is None:
+        id=db_final_clean.get(name=element+'('+struc+')').id
+        db_final_clean.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
+    else:
+        db_final_clean.write(final_slab,id=id,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'Simulated Layer: '+str(sim_layer),file=f)
