@@ -112,7 +112,7 @@ def create_ads_sub_dir(element,struc,current_dir,ads_atom,ads_height,slab_db):
     db_size=len(slab_db)
     for i in range(db_size):
         os.chdir(current_dir)
-        layer=slab_db.get(i+1).actual_layer
+        layer=slab_db.get(i+1).act_layer
         sub_dir=element+'/'+'ads'+'/'+struc+'/'+str(layer)+'x1x1'
         if os.path.isdir(sub_dir):
             print('WARNING: '+'./'+sub_dir+' directory already exists!')
