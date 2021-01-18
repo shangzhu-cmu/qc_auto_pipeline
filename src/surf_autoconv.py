@@ -139,6 +139,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     act_layer=act_layer_ls[-3]
     sim_layer=sim_layer_ls[-3]
     final_slab=db_layer.get_atoms(len(db_layer)-2) 
+    vac=final_slab.cell.lengths()[-1]-final_slab.positions[-1,2]
     db_final=connect('final_database'+'/'+'surf.db')
     id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
