@@ -133,6 +133,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
             slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
             current_vac=slab.cell.lengths()[-1]-slab.positions[-1,2]
+        parprint(slab.get_cell_lengths_and_angles())
         fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
