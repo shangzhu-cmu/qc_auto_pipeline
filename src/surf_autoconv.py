@@ -15,6 +15,9 @@ from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 from shutil import copyfile
 import glob
 from gpaw import Davidson
+from pymatgen.core.surface import SlabGenerator
+from pymatgen.io.ase import AseAtomsAdaptor
+from ase.build import add_vacuum
 def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True):
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
@@ -43,7 +46,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             sys.exit()
     
     #get the optimized bulk object and converged parameters
-    opt_bulk=db_bulk.get_atoms(name=element)
+    pymatgen_bulk=AseAtomsAdaptor.get_structure(opt_bulk)
     xc=db_bulk.get(name=element).xc
     h=db_bulk.get(name=element).h
     k_density=db_bulk.get(name=element).k_density
@@ -75,13 +78,27 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     act_layer_ls=[]
     sim_layer_ls=[]
     sim_layer=1
-    slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
+    vac_init_layer=5
+    slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, vac_init_layer, center_slab=True, lll_reduce=True, in_unit_planes=True)
+    #slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
+    slab=slabgen.get_slabs()[0] #this only take the first structure
+    slab=AseAtomsAdaptor.get_atoms(slab) #convert to ase structure
     actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
         while actual_layer != init_layer:
             sim_layer+=1
-            slab=surface(opt_bulk, m_ind, layers=sim_layer,vacuum=vac)
+            #slab=surface(opt_bulk, m_ind, layers=sim_layer,vacuum=vac)
+            slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, vac_init_layer, center_slab=True, lll_reduce=True, in_unit_planes=True)
+            slab=slabgen.get_slabs()[0]
+            slab=AseAtomsAdaptor.get_atoms(slab)
             actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
+        current_vac=slab.cell.lengths()[-1]-slab.positions[-1,2]
+        while current_vac < vac:
+            vac_init_layer+=1
+            slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, vac_init_layer, center_slab=True, lll_reduce=True, in_unit_planes=True)
+            slab=slabgen.get_slabs()[0]
+            slab=AseAtomsAdaptor.get_atoms(slab)
+            current_vac=slab.cell.lengths()[-1]-slab.positions[-1,2]
         fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
