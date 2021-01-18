@@ -17,7 +17,7 @@ import glob
 from gpaw import Davidson
 from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
-from ase.build import add_vacuum
+
 def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True):
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
@@ -84,6 +84,15 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     slabs=slabgen.get_slabs() #this only take the first structure
     slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
     slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
+    orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90
+    if not np.all(orthogonality):
+        slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
+        orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
+        if not np.all(orthogonality):
+            with paropen(rep_location,'a') as f:
+                parprint('ERROR: Cannot create surface with orthogonality.',file=f)
+                parprint('Computation Suspended!',file=f)
+                sys.exit()
     actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
         while actual_layer != init_layer:
@@ -93,7 +102,23 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             slabs=slabgen.get_slabs() #this only take the first structure
             slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
             slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
+            orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90
+            if not np.all(orthogonality):
+                slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
+                orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
+                if not np.all(orthogonality):
+                    with paropen(rep_location,'a') as f:
+                        parprint('ERROR: Cannot create surface with orthogonality.',file=f)
+                        parprint('Computation Suspended!',file=f)
+                        sys.exit()
             actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
+            if actual_layer > init_layer:
+                with paropen(rep_location,'a') as f:
+                    parprint('ERROR: Actual number of layers is greater than the desired number of layers.',file=f)
+                    parprint('\t'+'Actual Layer: '+str(actual_layer),file=f)
+                    parprint('\t'+'Desired Layer: '+str(init_layer),file=f)
+                    parprint('Computation Suspended!',file=f)
+                    sys.exit()    
         current_vac=slab.cell.lengths()[-1]-slab.positions[-1,2]
         while current_vac < vac:
             vac_init_layer+=1
@@ -121,21 +146,44 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             fst=db_layer.get_atoms(id=iters-1)
             snd=db_layer.get_atoms(id=iters)
             trd=db_layer.get_atoms(id=iters+1)
-            diff_primary=max(surf_e_calc(fst,snd,opt_bulk),surf_e_calc(fst,trd,opt_bulk))
-            diff_second=surf_e_calc(snd,trd,opt_bulk)
+            diff_primary=max(surf_e_calc(fst,snd,opt_bulk.get_potential_energy(),len(opt_bulk.get_tags())),surf_e_calc(fst,trd,opt_bulk.get_potential_energy(),len(opt_bulk.get_tags())))
+            diff_second=surf_e_calc(snd,trd,opt_bulk.get_potential_energy(),len(opt_bulk.get_tags()))
             if temp_print==True:
-                temp_output_printer(db_layer,iters,'act_layer',opt_bulk,rela_tol,rep_location)
+                temp_output_printer(db_layer,iters,'act_layer',opt_bulk.get_potential_energy(),len(opt_bulk.get_tags()),rep_location)
         act_layer_ls.append(actual_layer)
         sim_layer_ls.append(sim_layer)
         iters+=1
         init_layer+=2 #change to one because the unit cell will generate 2 surfaces per layer
+    
+    
     if iters>=5:
         if diff_primary>rela_tol or diff_second>rela_tol:
+            # Fiorentini and Methfessel relation (linear fit)
             with paropen(rep_location,'a') as f:
-                parprint("WARNING: Max Surface iterations reached! System may not be converged.",file=f)
-                parprint("Computation Suspended!",file=f)
-            f.close()
-            sys.exit()
+                parprint('Regular surface convergence failed.',file=f)
+                parprint('Entering Fiorentini and Methfessel relation (linear fit) convergence test.',file=f)
+            energy_slabs=[db_layer.get_atoms(i+1).get_potential_energy() for i in len(db_layer)]
+            num_atoms=[db_layer.get(i+1).natoms for i in len(db_layer)]
+            energy_bulk_fit=np.round(np.polyfit(num_atoms,energy_slabs,1)[0],decimals=5)
+            fit_iters=2
+            while (diff_primary>rela_tol or diff_second>rela_tol) and fit_iters <= 5:
+                fst=db_layer.get_atoms(id=fit_iters-1)
+                snd=db_layer.get_atoms(id=fit_iters)
+                trd=db_layer.get_atoms(id=fit_iters+1)
+                diff_primary=max(surf_e_calc(fst,snd,energy_bulk_fit,1),surf_e_calc(fst,trd,energy_bulk_fit,2))
+                diff_second=surf_e_calc(snd,trd,energy_bulk_fit,1)
+                if temp_print==True:
+                    temp_output_printer(db_layer,iters,'act_layer',energy_bulk_fit,1,rep_location)
+                fit_iters+=1
+            if diff_primary>rela_tol or diff_second>rela_tol:
+                with paropen(rep_location,'a') as f:
+                    parprint("WARNING: Max Surface iterations reached! System may not be converged.",file=f)
+                    parprint("Computation Suspended!",file=f)
+                f.close()
+                sys.exit()
+            act_layer=act_layer_ls[fit_iters-3]
+            sim_layer=sim_layer_ls[fit_iters-3]
+            final_slab=db_layer.get_atoms(fit_iters-2) 
     act_layer=act_layer_ls[-3]
     sim_layer=sim_layer_ls[-3]
     final_slab=db_layer.get_atoms(len(db_layer)-2) 
@@ -159,10 +207,10 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         parprint('\t'+'sw: '+str(sw),file=f)
     f.close()
 
-def surf_e_calc(pre,post,bulk):
-    bulk_num=len(bulk.get_tags())
-    bulk_pot_e=bulk.get_potential_energy()
-    opt_bulk_e=bulk_pot_e/bulk_num
+def surf_e_calc(pre,post,bulk_e,bulk_num):
+    #bulk_num=len(bulk.get_tags())
+    #bulk_pot_e=bulk.get_potential_energy()
+    opt_bulk_e=bulk_e/bulk_num
     pre_area=2*(pre.cell[0][0]*pre.cell[1][1])
     post_area=2*(post.cell[0][0]*post.cell[1][1])
     pre_e=pre.get_potential_energy()
@@ -174,14 +222,14 @@ def surf_e_calc(pre,post,bulk):
     diff_surf_e=100*(abs((post_surf_e-pre_surf_e)/pre_surf_e))
     return diff_surf_e
 
-def temp_output_printer(db,iters,key,bulk,rela_tol,location):
+def temp_output_printer(db,iters,key,bulk_e,bulk_num,location):
     fst_r=db.get(iters-1)
     snd_r=db.get(iters)
     trd_r=db.get(iters+1)
     with paropen(location,'a') as f:
         parprint('Optimizing parameter: '+key,file=f)
         parprint('\t'+'1st: '+str(fst_r[key])+' 2nd: '+str(snd_r[key])+' 3rd: '+str(trd_r[key])+'\n',file=f)
-        parprint('\t'+'(2nd-1st)/1st: '+str(np.round(surf_e_calc(db.get_atoms(iters),db.get_atoms(iters-1),bulk),decimals=5))+'%',file=f)
-        parprint('\t'+'(3nd-1st)/1st: '+str(np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters-1),bulk),decimals=5))+'%',file=f)
-        parprint('\t'+'(3nd-2st)/2nd: '+str(np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters),bulk),decimals=5))+'%',file=f)
+        parprint('\t'+'(2nd-1st)/1st: '+str(np.round(surf_e_calc(db.get_atoms(iters),db.get_atoms(iters-1),bulk_e,bulk_num),decimals=5))+'%',file=f)
+        parprint('\t'+'(3nd-1st)/1st: '+str(np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters-1),bulk_e,bulk_num),decimals=5))+'%',file=f)
+        parprint('\t'+'(3nd-2st)/2nd: '+str(np.round(surf_e_calc(db.get_atoms(iters+1),db.get_atoms(iters),bulk_e,bulk_num),decimals=5))+'%',file=f)
     f.close()
