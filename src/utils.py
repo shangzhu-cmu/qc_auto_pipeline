@@ -30,7 +30,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
                 starting_layer=3,
                 # init_vac=5,
                 ads_atom='Li',
-                ads_height=2.5):
+                ads_site=['ontop','hollow','bridge']):
     current_dir=os.getcwd()
     os.chdir(current_dir)
 
@@ -81,7 +81,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
                 pause()
             else:
                 os.makedirs(element+'/'+'ads'+'/'+struc,exist_ok=True)            
-            create_ads_sub_dir(element,struc,current_dir,ads_atom,ads_height,slab_db)
+            create_ads_sub_dir(element,struc,current_dir,ads_site,ads_atom,slab_db)
             os.chdir(current_dir)
             # create_ads_vac_dir(element,struc,slab_clean_row,current_dir,slab_clean,ads_atom,ads_height)
             # os.chdir(current_dir)
@@ -108,7 +108,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
 #         add_vacuum(slab_temp,vac-init_vac)
 #         adsorption.gen_rxn_int_sym(slab_temp, ads=ads_atom ,height={ads_atom:ads_height})
     
-def create_ads_sub_dir(element,struc,current_dir,ads_atom,ads_height,slab_db):
+def create_ads_sub_dir(element,struc,current_dir,site,ads_atom,slab_db):
     db_size=len(slab_db)
     for i in range(db_size):
         os.chdir(current_dir)
@@ -120,7 +120,8 @@ def create_ads_sub_dir(element,struc,current_dir,ads_atom,ads_height,slab_db):
         else:
             os.makedirs(sub_dir,exist_ok=True)
         os.chdir(current_dir+'/'+sub_dir)
-        adsorption.gen_rxn_int_sym(slab_db.get_atoms(i+1), ads=[ads_atom],height={ads_atom:ads_height})
+        #adsorption.gen_rxn_int_sym(slab_db.get_atoms(i+1), ads=[ads_atom],height={ads_atom:ads_height})
+        adsorption.generate_rxn_structures(slab_db.get_atoms(i+1),ads=[ads_atom],site_type=site,write_to_disk=True)
 
 
 # def create_surf_vac_dir(element,struc,init_vac):
