@@ -97,7 +97,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_site=['ontop','hollow','bridge
             opt.surf_relax(ads_slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
             ads_dict[location]=ads_slab.get_potential_energy()-(db_slab_clean.get_atoms(iters+1).get_potential_energy()+ads_pot_e)
         ads_dict_sorted=sorted(ads_dict,key=ads_dict.get)
-        lowest_ads_e_slab=read(ads_dict_sorted[0])
+        lowest_ads_e_slab=read(ads_dict_sorted[0]+'/slab.traj')
         db_ads_slab.write(lowest_ads_e_slab,act_layer=act_init_layer,sim_layer=sim_init_layer)
         #enter the convergence test sequence
         if iters>=2:
@@ -211,7 +211,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_site=['ontop','hollow','bridge
                 opt.surf_relax(ads_slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
                 ads_dict[location]=ads_slab.get_potential_energy()-(db_slab_clean.get_atoms(iters+1).get_potential_energy()+ads_pot_e)
             ads_dict_sorted=sorted(ads_dict,key=ads_dict.get)
-            lowest_ads_e_slab=read(ads_dict_sorted[0])
+            lowest_ads_e_slab=read(ads_dict_sorted[0]+'/slab.traj')
             db_ads_slab.write(lowest_ads_e_slab,act_layer=actual_layer,sim_layer=sim_init_layer)
             #enter the convergence test sequence
             fst_ads=db_ads_slab.get_atoms(id=iters-1)
