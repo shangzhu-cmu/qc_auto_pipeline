@@ -86,6 +86,8 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
     orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90
     parprint(orthogonality)
+    parprint(slab.get_cell_lengths_and_angles())
+    parprint(slab.get_cell_lengths_and_angles()[3:5])
     if not np.all(orthogonality):
         slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
         orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
@@ -105,6 +107,8 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
             orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90
             parprint(orthogonality)
+            parprint(slab.get_cell_lengths_and_angles())
+            parprint(slab.get_cell_lengths_and_angles()[3:5])
             if not np.all(orthogonality):
                 slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
                 orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
