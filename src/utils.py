@@ -29,7 +29,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
                 optimized_parameters=['h','k','sw'],
                 starting_layer=3,
                 # init_vac=5,
-                ads_atom='Li',
+                ads_atom=['Li'],
                 ads_site=['ontop','hollow','bridge']):
     current_dir=os.getcwd()
     os.chdir(current_dir)
@@ -121,7 +121,7 @@ def create_ads_sub_dir(element,struc,current_dir,site,ads_atom,slab_db):
             os.makedirs(sub_dir,exist_ok=True)
         os.chdir(current_dir+'/'+sub_dir)
         #adsorption.gen_rxn_int_sym(slab_db.get_atoms(i+1), ads=[ads_atom],height={ads_atom:ads_height})
-        adsorption.generate_rxn_structures(slab_db.get_atoms(i+1),ads=[ads_atom],site_type=site,write_to_disk=True)
+        adsorption.generate_rxn_structures(slab_db.get_atoms(i+1),ads=ads_atom,site_type=site,write_to_disk=True)
 
 
 # def create_surf_vac_dir(element,struc,init_vac):
