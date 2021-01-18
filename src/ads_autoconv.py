@@ -16,7 +16,7 @@ import glob
 from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
 
-def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,temp_print=True): #changed the rela_tol to percentage 
+def ads_auto_conv(element,struc,ads,ads_pot_e,ads_site=['ontop','hollow','bridge'],fix_layer=2,rela_tol=5,temp_print=True): #changed the rela_tol to percentage 
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
 
@@ -51,7 +51,6 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         parprint('\t'+'Materials: '+element,file=f)
         parprint('\t'+'Miller Index: '+str(m_ind),file=f)
         parprint('\t'+'Adsorbate: '+ads,file=f)
-        parprint('\t'+'Initial Adsorption Height: '+str(ads_height)+'Ang',file=f)
         parprint('\t'+'Simulated Layer: '+str(sim_init_layer),file=f)
         parprint('\t'+'Actual Layer: '+str(act_init_layer),file=f)
         parprint('\t'+'Vacuum Length: '+str(vac)+'Ang',file=f)
@@ -82,7 +81,7 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         #glob all the .traj file in the './element/nx1x1/Li/**/' folder
         act_init_layer=db_slab_clean.get(iters+1).act_layer
         sim_init_layer=db_slab_clean.get(iters+1).sim_layer
-        fil=glob.glob(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'Li/**/**/*.traj',recursive=True)
+        fil=glob.glob(ads_file_loc+'/'+str(act_init_layer)+'x1x1'+'/'+'adsorbates/Li/**/**/*.traj',recursive=False)
         ads_dict={} #create dictionary for saving the adsorption energy
         for file_loc in fil: 
             ads_slab = read(file_loc)
@@ -192,9 +191,9 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
             opt.surf_relax(clean_slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
             db_slab_clean.write(clean_slab,sim_layer=sim_init_layer,act_layer=actual_layer)
             #create the adsorption site file using autocat 
-            ads_creater(clean_slab,ads,ads_height,actual_layer,ads_file_loc)
+            ads_creater(clean_slab,ads,actual_layer,ads_site,ads_file_loc)
             os.chdir(code_dir+'/'+struc_dir)
-            fil=glob.glob(ads_file_loc+'/'+str(actual_layer)+'x1x1'+'/'+'Li/**/**/*.traj',recursive=False)
+            fil=glob.glob(ads_file_loc+'/'+str(actual_layer)+'x1x1'+'/'+'adsorbates/Li/**/**/*.traj',recursive=False)
             ads_dict={}
             for file_loc in fil: 
                 ads_slab = read(file_loc)
@@ -269,11 +268,12 @@ def ads_auto_conv(element,struc,ads,ads_pot_e,ads_height,fix_layer=2,rela_tol=5,
         parprint('\t'+'sw: '+str(sw),file=f)
     f.close()
 
-def ads_creater(slab,atom,height,act_init_layer,file_loc):
+def ads_creater(slab,atom,act_init_layer,site,file_loc):
     dir_loc=file_loc+'/'+str(act_init_layer)+'x1x1'
-    os.makedirs(dir_loc,exist_ok=True)
+    if world.rank==0:
+        os.makedirs(dir_loc,exist_ok=True)
     os.chdir(dir_loc)
-    adsorption.gen_rxn_int_sym(slab, ads=atom ,height={atom:height})
+    adsorption.generate_rxn_structures(slab,ads=atom,site_type=site,write_to_disk=True)
 
     
 
