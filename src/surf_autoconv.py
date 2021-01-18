@@ -78,26 +78,29 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     act_layer_ls=[]
     sim_layer_ls=[]
     sim_layer=1
-    vac_init_layer=5
+    vac_init_layer=4
     slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, vac_init_layer, center_slab=True, lll_reduce=True, in_unit_planes=True)
     #slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
-    slab=slabgen.get_slabs()[0] #this only take the first structure
-    slab=AseAtomsAdaptor.get_atoms(slab) #convert to ase structure
+    slabs=slabgen.get_slabs() #this only take the first structure
+    slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+    slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
     actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
         while actual_layer != init_layer:
             sim_layer+=1
             #slab=surface(opt_bulk, m_ind, layers=sim_layer,vacuum=vac)
             slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, vac_init_layer, center_slab=True, lll_reduce=True, in_unit_planes=True)
-            slab=slabgen.get_slabs()[0]
-            slab=AseAtomsAdaptor.get_atoms(slab)
+            slabs=slabgen.get_slabs() #this only take the first structure
+            slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+            slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
             actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
         current_vac=slab.cell.lengths()[-1]-slab.positions[-1,2]
         while current_vac < vac:
             vac_init_layer+=1
             slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, vac_init_layer, center_slab=True, lll_reduce=True, in_unit_planes=True)
-            slab=slabgen.get_slabs()[0]
-            slab=AseAtomsAdaptor.get_atoms(slab)
+            slabs=slabgen.get_slabs() #this only take the first structure
+            slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+            slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
             current_vac=slab.cell.lengths()[-1]-slab.positions[-1,2]
         fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
