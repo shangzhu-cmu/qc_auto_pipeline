@@ -158,7 +158,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
                 symmetry = {'point_group': False},
                 kpts=kpts,
                 eigensolver=Davidson(3),
-                mixer=Mixer(0.02, 5, 100),
+                mixer=Mixer(0.01, 5, 100),
                 occupations={'name': 'fermi-dirac','width': sw},
                 poissonsolver={'dipolelayer': 'xy'})
         else:
