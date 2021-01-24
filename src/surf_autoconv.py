@@ -79,31 +79,38 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     act_layer_ls=[]
     sim_layer_ls=[]
     sim_layer=1
-    slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
-    #slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
-    slabs=slabgen.get_slabs() #this only take the first structure
-    slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
-    slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
-    # orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90
-    # if not np.all(orthogonality):
-    #     slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
-    #     orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
-    #     if not np.all(orthogonality):
-    #         with paropen(rep_location,'a') as f:
-    #             parprint('ERROR: Cannot create surface with orthogonality.',file=f)
-    #             parprint('Computation Suspended!',file=f)
-    #             sys.exit()
-    #     surface_creation='ase'
+    if generator='pymatgen':
+        slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
+        #slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
+        slabs=slabgen.get_slabs() #this only take the first structure
+        slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+        slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
+        # orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90
+        # if not np.all(orthogonality):
+        #     slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
+        #     orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
+        #     if not np.all(orthogonality):
+        #         with paropen(rep_location,'a') as f:
+        #             parprint('ERROR: Cannot create surface with orthogonality.',file=f)
+        #             parprint('Computation Suspended!',file=f)
+        #             sys.exit()
+        #     surface_creation='ase'
+    elif  generator='ase':
+        slab=surface(opt_bulk,m_ind,layers=sim_layer,vacuum=vac)
+
     actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
         while actual_layer != init_layer:
             sim_layer+=1
             #if surface_creation=='pymatgen':
             #slab=surface(opt_bulk, m_ind, layers=sim_layer,vacuum=vac)
-            slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
-            slabs=slabgen.get_slabs() #this only take the first structure
-            slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
-            slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
+            if generator='pymatgen':
+                slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
+                slabs=slabgen.get_slabs() #this only take the first structure
+                slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+                slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
+            else generator='ase':
+                slab=surface(opt_bulk,m_ind,layers=sim_layer,vacuum=vac)
             # else:
             #     slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
             #     orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
