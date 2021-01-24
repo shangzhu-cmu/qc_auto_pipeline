@@ -79,7 +79,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     act_layer_ls=[]
     sim_layer_ls=[]
     sim_layer=1
-    if generator='pymatgen':
+    if generator=='pymatgen':
         slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
         #slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
         slabs=slabgen.get_slabs() #this only take the first structure
@@ -95,7 +95,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         #             parprint('Computation Suspended!',file=f)
         #             sys.exit()
         #     surface_creation='ase'
-    elif  generator='ase':
+    elif  generator=='ase':
         slab=surface(opt_bulk,m_ind,layers=sim_layer,vacuum=vac)
 
     actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
