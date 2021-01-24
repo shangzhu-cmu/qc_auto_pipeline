@@ -17,6 +17,7 @@ import glob
 from gpaw import Davidson
 from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
+from gpaw import Mixer
 
 def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True):
     #convert str ind to tuple
