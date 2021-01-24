@@ -142,13 +142,25 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
         kpts=kdens2mp(slab,kptdensity=k_density,even=True)
-        calc=GPAW(xc=xc,
-            h=h,
-            symmetry = {'point_group': False},
-            kpts=kpts,
-            eigensolver=Davidson(3),
-            occupations={'name': 'fermi-dirac','width': sw},
-            poissonsolver={'dipolelayer': 'xy'})
+        slab_length=slab.cell.lengths()
+        slab_long_short_ratio=max(slab_length)/min(slab_length)
+        if slab_long_short_ratio > 15:  
+            calc=GPAW(xc=xc,
+                h=h,
+                symmetry = {'point_group': False},
+                kpts=kpts,
+                eigensolver=Davidson(3),
+                mixer=Mixer(0.02, 5, 100),
+                occupations={'name': 'fermi-dirac','width': sw},
+                poissonsolver={'dipolelayer': 'xy'})
+        else:
+            calc=GPAW(xc=xc,
+                h=h,
+                symmetry = {'point_group': False},
+                kpts=kpts,
+                eigensolver=Davidson(3),
+                occupations={'name': 'fermi-dirac','width': sw},
+                poissonsolver={'dipolelayer': 'xy'})            
         slab.set_calculator(calc)
         location=element+'/'+'surf'+'/'+struc+'/'+str(actual_layer)+'x1x1'
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
