@@ -104,12 +104,12 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             sim_layer+=1
             #if surface_creation=='pymatgen':
             #slab=surface(opt_bulk, m_ind, layers=sim_layer,vacuum=vac)
-            if generator='pymatgen':
+            if generator=='pymatgen':
                 slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
                 slabs=slabgen.get_slabs() #this only take the first structure
                 slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
                 slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
-            else generator='ase':
+            elif generator=='ase':
                 slab=surface(opt_bulk,m_ind,layers=sim_layer,vacuum=vac)
             # else:
             #     slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
