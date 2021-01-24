@@ -19,7 +19,7 @@ from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
 from gpaw import Mixer
 
-def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True):
+def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True,generator='pymatgen'):
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
 
