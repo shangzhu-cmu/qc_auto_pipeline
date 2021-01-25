@@ -12,10 +12,10 @@ def sym_all_slab(element,max_ind,layers,vacuum_layer):
     slabgenall=generate_all_slabs(bulk_pym,max_ind,layers,vacuum_layer,
                                 lll_reduce=True,center_slab=True,
                                 symmetrize=True,in_unit_planes=True)
-    #print('Miller Index'+'\t'+'Num of Different Shift(s)')
+    print('Miller Index'+'\t'+'Num of Different Shift(s)')
     slab_M=[]
     for slab in slabgenall:
         slab_M.append([slab.miller_index])
     slab_M_unique = Counter(chain(*slab_M))
-    #for key in list(slab_M_unique.keys()):
-        #print(str(key)+'\t'+str(slab_M_unique[key]))
+    for key in list(slab_M_unique.keys()):
+        print(str(key)+'\t'+str(slab_M_unique[key]))
