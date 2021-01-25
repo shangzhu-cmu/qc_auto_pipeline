@@ -61,7 +61,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
         else:
             os.makedirs(element+'/'+'surf',exist_ok=True)
         for struc in surf_struc:
-            create_surf_sub_dir(element,struc,starting_layer)
+            create_surf_sub_dir(element,struc,starting_layer,interval)
             # create_surf_vac_dir(element,struc,init_vac)
         print('{} surf directories created!'.format(element))
 
@@ -140,7 +140,7 @@ def create_ads_sub_dir(element,struc,current_dir,site,ads_atom,slab_db):
 #         else:
 #             os.makedirs(sub_sub_dir,exist_ok=True)
 
-def create_surf_sub_dir(element,struc,starting_layer):
+def create_surf_sub_dir(element,struc,starting_layer,interval):
     sub_dir=element+'/'+'surf'+'/'+struc
     if os.path.isdir(element+'/'+'surf'+'/'+struc):
         print('WARNING: '+'./'+sub_dir+' directory already exists!')
