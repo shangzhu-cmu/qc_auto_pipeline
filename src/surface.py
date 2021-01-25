@@ -59,7 +59,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
         angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
         cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
-        print(str(n)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(angles)+'\t'+str(cell_length))
+        print(str(0)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(angles)+'\t'+str(cell_length))
         ax=fig.add_subplot(111,figsize=(10,10))
         plot_atoms(slab_ase.reepeat((3,3,1)),ax=ax)
 
