@@ -62,7 +62,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         print(str(0)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(angles)+'\t'+str(cell_length))
         fig=plt.figure(figsize=(8,8))
         ax=fig.add_subplot(111)
-        plot_atoms(slab_ase.repeat((2,2,1)),ax=ax)
+        plot_atoms(slab_ase,ax=ax)
         ax.set_title('ASE created: {}'.format(str(ind)),{'fontsize':20})
         ax.set_xticks([])
         ax.set_yticks([])
