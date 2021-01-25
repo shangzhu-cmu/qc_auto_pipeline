@@ -8,11 +8,12 @@ from itertools import chain
 
 def sym_all_slab(element,max_ind,layers,vacuum_layer):
     bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
+    print(bulk_ase)
     bulk_pym=AseAtomsAdaptor.get_structure(bulk_ase)
     slabgenall=generate_all_slabs(bulk_pym,max_ind,layers,vacuum_layer,
                                 lll_reduce=True,center_slab=True,
                                 symmetrize=True,in_unit_planes=True)
-    print('Miller Index'+'\t'+'Num of Different Shift')
+    print('Miller Index','Num of Different Shift')
     slab_M=[]
     #slab_layer=[]
     for slab in slabgenall:
