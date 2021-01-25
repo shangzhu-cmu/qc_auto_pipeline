@@ -39,7 +39,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
     if len(slabs_symmetric) == 0:
         print('No symmetric slab found!')
     else:
-        print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\tCell Length')
+        print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
         fig=plt.figure(figsize=(20,10))
         for n,slab in enumerate(slabs_symmetric):
             slab_ase=AseAtomsAdaptor.get_atoms(slab)
