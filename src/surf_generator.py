@@ -17,7 +17,8 @@ def sym_all_slab(element,max_ind,layers,vacuum_layer):
     slab_M=[]
     #slab_layer=[]
     for slab in slabgenall:
-        slab_M.append(slab.miller_index)
+        print(miller_index)
+        #slab_M.append(slab.miller_index)
         #slab_ase=AseAtomsAdaptor.get_atoms(slab)
         #slab_layer.append(len(np.unique(slab_ase.positions[:,2])))
     #slab_M_unique = Counter(chain(*slab_M))
