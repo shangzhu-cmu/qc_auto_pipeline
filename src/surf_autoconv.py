@@ -20,7 +20,7 @@ from pymatgen.io.ase import AseAtomsAdaptor
 from gpaw import Mixer
 
 
-def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True,generator='pymatgen'):
+def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True,generator='pymatgen',interval=2):
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
 
@@ -157,7 +157,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         act_layer_ls.append(actual_layer)
         sim_layer_ls.append(sim_layer)
         iters+=1
-        init_layer+=2 #change to one because the unit cell will generate 2 surfaces per layer
+        init_layer+=interval #change to one because the unit cell will generate 2 surfaces per layer
     
     
     if iters>=5:
