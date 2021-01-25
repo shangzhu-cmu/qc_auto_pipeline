@@ -143,9 +143,9 @@ def bulk_auto_conv(element,h=0.16,k_density=4,xc='PBE',sw=0.1,init_magmom=0,maxi
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
-        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element,xc=xc,kpts=','.join(map(str, kpts)),magmom=init_magmom,spin=spinpol)
+        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element,xc=xc,kpts=','.join(map(str, kpts)),spin=spinpol)
     else:
-        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw,xc=xc,kpts=','.join(map(str, kpts)),magmom=init_magmom,spin=spinpol)
+        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw,xc=xc,kpts=','.join(map(str, kpts)),spin=spinpol)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'h: '+str(h),file=f)
