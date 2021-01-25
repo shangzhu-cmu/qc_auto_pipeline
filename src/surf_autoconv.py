@@ -1,7 +1,7 @@
 from gpaw import GPAW
 from ase.constraints import FixAtoms
 from ase.build import surface
-from ase.io import write
+from ase.io import write,read
 from ase.db import connect
 import os
 import optimizer as opt
@@ -18,6 +18,7 @@ from gpaw import Davidson
 from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
 from gpaw import Mixer
+
 
 def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True,generator='pymatgen'):
     #convert str ind to tuple
@@ -81,29 +82,17 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     sim_layer=1
     if generator=='pymatgen':
         slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
-        #slab = surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
         slabs=slabgen.get_slabs() #this only take the first structure
         slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
         slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
-        # orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90
-        # if not np.all(orthogonality):
-        #     slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
-        #     orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
-        #     if not np.all(orthogonality):
-        #         with paropen(rep_location,'a') as f:
-        #             parprint('ERROR: Cannot create surface with orthogonality.',file=f)
-        #             parprint('Computation Suspended!',file=f)
-        #             sys.exit()
-        #     surface_creation='ase'
-    elif  generator=='ase':
+    elif generator=='ase':
         slab=surface(opt_bulk,m_ind,layers=sim_layer,vacuum=vac)
-
+    elif generator=='import':
+        slab=read('raw_surf/'+str(m_ind)+'_'+str(init_layer)+'.cif')
     actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
         while actual_layer != init_layer:
             sim_layer+=1
-            #if surface_creation=='pymatgen':
-            #slab=surface(opt_bulk, m_ind, layers=sim_layer,vacuum=vac)
             if generator=='pymatgen':
                 slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
                 slabs=slabgen.get_slabs() #this only take the first structure
@@ -111,14 +100,13 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
                 slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
             elif generator=='ase':
                 slab=surface(opt_bulk,m_ind,layers=sim_layer,vacuum=vac)
-            # else:
-            #     slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
-            #     orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
-            #     if not np.all(orthogonality):
-            #         with paropen(rep_location,'a') as f:
-            #             parprint('ERROR: Cannot create surface with orthogonality.',file=f)
-            #             parprint('Computation Suspended!',file=f)
-            #             sys.exit()
+            else:
+                with paropen(rep_location,'a') as f:
+                    parprint('ERROR: The number of layers of the imported surface is not correct!',file=f)
+                    parprint('\t'+'Actual Layer: '+str(actual_layer),file=f)
+                    parprint('\t'+'Desired Layer: '+str(init_layer),file=f)
+                    parprint('Computation Suspended!',file=f)
+                    sys.exit()    
             actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
             if actual_layer > init_layer:
                 with paropen(rep_location,'a') as f:
@@ -127,25 +115,9 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
                     parprint('\t'+'Desired Layer: '+str(init_layer),file=f)
                     parprint('Computation Suspended!',file=f)
                     sys.exit()    
-        current_vac=slab.cell.lengths()[-1]-slab.positions[-1,2]
-        while current_vac < vac:
+        current_vac=slab.cell.lengths()[-1]-max(slab.positions[:,2])
+        if current_vac != vac:
             slab.center(vacuum=vac,axis=2)
-            # if surface_creation=='pymatgen':
-            #     vac_init_layer+=1
-            #     slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, vac_init_layer, center_slab=True, lll_reduce=True, in_unit_planes=True)
-            #     slabs=slabgen.get_slabs() #this only take the first structure
-            #     slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
-            #     slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
-            # else:
-            #     vac+=1
-            #     slab=surface(opt_bulk, m_ind, layers=sim_layer, vacuum=vac)
-            #     orthogonality=slab.get_cell_lengths_and_angles()[3:5]==90    
-            #     if not np.all(orthogonality):
-            #         with paropen(rep_location,'a') as f:
-            #             parprint('ERROR: Cannot create surface with orthogonality.',file=f)
-            #             parprint('Computation Suspended!',file=f)
-            #             sys.exit()
-            current_vac=slab.cell.lengths()[-1]-slab.positions[-1,2]
         fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
@@ -158,7 +130,8 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
                 symmetry = {'point_group': False},
                 kpts=kpts,
                 eigensolver=Davidson(3),
-                mixer=Mixer(0.01, 5, 100),
+                mixer=Mixer(0.02, 5, 100),
+                maxiter=500,
                 occupations={'name': 'fermi-dirac','width': sw},
                 poissonsolver={'dipolelayer': 'xy'})
         else:
