@@ -34,10 +34,8 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1):
         slabgenall=generate_all_slabs(bulk_pym,max_ind,layers,vacuum_layer,
                             lll_reduce=True,center_slab=True,
                             symmetrize=True,in_unit_planes=True)
-        slabgen_ind=[[slab.miller_index] for slab in slabgenall]
-        print(slabgen_ind)
-        print(slabgen_ind==[ind])
-        slabs=slabgenall[slabgen_ind==ind]
+        slabs=[slab for slab in slabgenall if slab.miller_index==ind]
+        print([slab.miller_index for slab in slabs])
     slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
     if len(slabs_symmetric) == 0:
         print('No symmetric slab found!')
