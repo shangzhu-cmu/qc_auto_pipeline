@@ -8,7 +8,6 @@ from itertools import chain
 
 def sym_all_slab(element,max_ind,layers,vacuum_layer):
     bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
-    print(bulk_ase)
     bulk_pym=AseAtomsAdaptor.get_structure(bulk_ase)
     slabgenall=generate_all_slabs(bulk_pym,max_ind,layers,vacuum_layer,
                                 lll_reduce=True,center_slab=True,
@@ -20,6 +19,3 @@ def sym_all_slab(element,max_ind,layers,vacuum_layer):
     slab_M_unique = Counter(chain(*slab_M))
     for key in list(slab_M_unique.keys()):
         print(str(key)+'\t'+str(slab_M_unique[key]))
-
-
-
