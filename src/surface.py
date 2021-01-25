@@ -43,7 +43,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
             print('No symmetric slab found!')
         else:
             print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
-            fig=plt.figure(figsize=(10,10))
+            fig=plt.figure(figsize=(8,8))
             for n,slab in enumerate(slabs_symmetric):
                 slab_ase=AseAtomsAdaptor.get_atoms(slab)
                 angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
@@ -60,9 +60,12 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
         cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
         print(str(0)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(angles)+'\t'+str(cell_length))
-        fig=plt.figure(figsize=(10,10))
+        fig=plt.figure(figsize=(8,8))
         ax=fig.add_subplot(111)
-        plot_atoms(slab_ase.repeat((3,3,1)),ax=ax)
+        plot_atoms(slab_ase.repeat((2,2,1)),ax=ax)
+        ax.set_title('ASE created: {}'.format(str(ind)),{'fontsize':10})
+        ax.set_xticks([])
+        ax.set_yticks([])
 
 def surf_saver(element,ind,layers,vacuum_layer,option):
     bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
