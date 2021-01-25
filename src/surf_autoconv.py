@@ -88,7 +88,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     elif generator=='ase':
         slab=surface(opt_bulk,m_ind,layers=sim_layer,vacuum=vac)
     elif generator=='import':
-        slab=read('raw_surf/'+str(m_ind)+'_'+str(init_layer)+'.cif')
+        slab=read(element+'/raw_surf/'+str(m_ind)+'_'+str(init_layer)+'.cif')
     actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
         while actual_layer != init_layer:
