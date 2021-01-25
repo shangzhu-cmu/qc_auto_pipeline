@@ -30,7 +30,8 @@ def create_element_dir(element,options=['bulk','surf','ads'],
                 starting_layer=3,
                 # init_vac=5,
                 ads_atom=['Li'],
-                ads_site=['ontop','hollow','bridge']):
+                ads_site=['ontop','hollow','bridge'],
+                interval=2):
     current_dir=os.getcwd()
     os.chdir(current_dir)
 
@@ -146,7 +147,7 @@ def create_surf_sub_dir(element,struc,starting_layer):
         pause()
     else:
         os.makedirs(sub_dir,exist_ok=True)
-    for layer in range(starting_layer,starting_layer+6*2,2):
+    for layer in range(starting_layer,starting_layer+6*interval,interval):
         sub_sub_dir=element+'/'+'surf'+'/'+struc+'/'+str(layer)+'x1x1'
         if os.path.isdir(sub_sub_dir):
             print('WARNING: '+'./'+sub_sub_dir+' directory already exists!')

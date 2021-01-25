@@ -7,6 +7,7 @@ from collections import Counter
 from itertools import chain 
 from pymatgen.analysis.adsorption import plot_slab
 from matplotlib import pyplot as plt
+import os
 
 def sym_all_slab(element,max_ind,layers,vacuum_layer):
     bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
@@ -39,7 +40,28 @@ def surf_creator(element,ind,layers,vacuum_layer):
             print(str(n)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(slab_ase.get_cell_lengths_and_angles()[3:]))
             ax=fig.add_subplot(np.ceil(len(slabs_symmetric))/2,2,n+1)
             plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
-            ax.set_title('{}: No. {}'.format(slab.miller_index,n))
+            ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':10})
             ax.set_xticks([])
             ax.set_yticks([])
+
+def surf_saver(element,ind,layers,vacuum_layer,option):
+    bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
+    bulk_pym=AseAtomsAdaptor.get_structure(bulk_ase)
+    slabgen = SlabGenerator(bulk_pym, ind, layers, vacuum_layer,
+                            center_slab=True,lll_reduce=True,in_unit_planes=True)
+    slabs=slabgen.get_slabs()
+    slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+    slab_to_save=slabs_symmetric[option]
+    rep_location=element+'/raw_surf'
+    if os.path.isdir(rep_location):
+        print('WARNING: '+rep_location+' already exists!')
+    os.makedirs(rep_location,exist_ok=True)
+    surf_location=element+'/raw_surf/'+str(slab_to_save.miller_index)+'.cif'
+    if os.path.isdir(surf_location):
+        print('WARNING: '+surf_location+' already exists!')
+        print('Raw surface saving fail!')
+    else:
+        CifWriter(slab_to_save).write_file(surf_location)
+        print('Raw surface saving complete!')
+
 
