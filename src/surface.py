@@ -23,17 +23,17 @@ def sym_all_slab(element,max_ind,layers,vacuum_layer):
     for key in list(slab_M_unique.keys()):
         print(str(key)+'\t'+str(slab_M_unique[key]))
 
-def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1):
+def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit=True):
     bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
     bulk_pym=AseAtomsAdaptor.get_structure(bulk_ase)
     if option=='slabgen':
         slabgen = SlabGenerator(bulk_pym, ind, layers, vacuum_layer,
-                            center_slab=True,lll_reduce=True,in_unit_planes=True)
+                            center_slab=True,lll_reduce=True,in_unit_planes=unit)
         slabs=slabgen.get_slabs()
     elif option=='gen_all':
         slabgenall=generate_all_slabs(bulk_pym,max_ind,layers,vacuum_layer,
                             lll_reduce=True,center_slab=True,
-                            symmetrize=True,in_unit_planes=True)
+                            symmetrize=True,in_unit_planes=unit)
         slabs=[slab for slab in slabgenall if slab.miller_index==ind]
     slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
     if len(slabs_symmetric) == 0:
