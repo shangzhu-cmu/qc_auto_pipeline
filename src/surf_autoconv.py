@@ -91,6 +91,9 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         slab=read(element+'/raw_surf/'+str(m_ind)+'_'+str(init_layer)+'.cif')
     actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
+        if generator=='import':
+            slab=read(element+'/raw_surf/'+str(m_ind)+'_'+str(init_layer)+'.cif')
+            actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
         while actual_layer != init_layer:
             sim_layer+=1
             if generator=='pymatgen':
