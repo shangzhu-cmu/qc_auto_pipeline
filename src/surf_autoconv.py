@@ -85,11 +85,10 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         slabs=slabgen.get_slabs() #this only take the first structure
         slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
         slab=AseAtomsAdaptor.get_atoms(slabs_symmetric[0]) #convert to ase structure
+        actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     elif generator=='ase':
         slab=surface(opt_bulk,m_ind,layers=sim_layer,vacuum=vac)
-    # elif generator=='import':
-    #     slab=read(element+'/raw_surf/'+str(m_ind)+'_'+str(init_layer)+'.cif')
-    actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
+        actual_layer=len(np.unique(np.round(slab.positions[:,2],decimals=4)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and iters <= 5:
         if generator=='import':
             slab=read(element+'/raw_surf/'+str(m_ind)+'_'+str(init_layer)+'.cif')
