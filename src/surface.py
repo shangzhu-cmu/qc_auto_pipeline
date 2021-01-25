@@ -36,7 +36,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1):
                             symmetrize=True,in_unit_planes=True)
         slabgen_ind=[[slab.miller_index] for slab in slabgenall]
         print(slabgen_ind)
-        print(slabgen_ind==ind)
+        print(slabgen_ind==[ind])
         slabs=slabgenall[slabgen_ind==ind]
     slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
     if len(slabs_symmetric) == 0:
