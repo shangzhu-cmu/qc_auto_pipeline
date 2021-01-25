@@ -21,6 +21,8 @@ def sym_all_slab(element,max_ind,layers,vacuum_layer):
         slab_layer.append(len(np.unique(slab_ase.positions[:,2])))
     slab_M_unique = Counter(chain(*slab_M))
     for key in list(slab_M_unique.keys()):
+        print(key)
+        print(slab_M_unique[key])
         print(str(key)+'\t'+str(slab_M_unique[key]))
 
 
