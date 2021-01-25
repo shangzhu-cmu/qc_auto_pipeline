@@ -49,7 +49,10 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
                 ax.set_xticks([])
                 ax.set_yticks([])
         if save:
-            surf_saver(element,slabs_symmetric[order],ind)
+            slab_to_save=slabs_symmetric[order]
+            slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
+            layers=len(np.unique(slab_ase.positions[:,2]))
+            surf_saver(element,slabs_symmetric[order],ind,layers)
     elif option=='ase':
         slab_ase=surface(bulk_ase,ind,layers=layers,vacuum=vacuum_layer)
         print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
@@ -64,14 +67,14 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         ax.set_yticks([])
         if save:
             slab_struc=AseAtomsAdaptor.get_structure(slab_ase)
-            surf_saver(element,slab_struc,ind)
+            surf_saver(element,slab_struc,ind,layers)
 
-def surf_saver(element,slab_to_save,ind):
+def surf_saver(element,slab_to_save,ind,layers):
     rep_location=element+'/raw_surf'
     if os.path.isdir(rep_location):
         print('WARNING: '+rep_location+' already exists!')
     os.makedirs(rep_location,exist_ok=True)
-    surf_location=element+'/raw_surf/'+str(ind)+'.cif'
+    surf_location=element+'/raw_surf/'+str(ind)+'_'+str(layers)+'.cif'
     if os.path.isdir(surf_location):
         print('WARNING: '+surf_location+' already exists!')
         print('Raw surface saving fail!')
