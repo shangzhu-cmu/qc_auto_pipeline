@@ -41,6 +41,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
     elif option=='ase':
         slabs=surface(bulk_ase,ind,layers=layers,vacuum=vacuum_layer)
         slabs_symmetric=AseAtomsAdaptor.get_structure(slabs)
+        print(slabs_symmetric)
     if len(slabs_symmetric) == 0:
         print('No symmetric slab found!')
     else:
