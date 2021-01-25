@@ -51,7 +51,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         if save:
             slab_to_save=slabs_symmetric[order]
             slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
-            layers=len(np.unique(slab_ase.positions[:,2]))
+            layers=len(np.unique(slab_to_save_ase.positions[:,2]))
             surf_saver(element,slabs_symmetric[order],ind,layers)
     elif option=='ase':
         slab_ase=surface(bulk_ase,ind,layers=layers,vacuum=vacuum_layer)
@@ -67,6 +67,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         ax.set_yticks([])
         if save:
             slab_struc=AseAtomsAdaptor.get_structure(slab_ase)
+            layers=len(np.unique(slab_ase.positions[:,2]))
             surf_saver(element,slab_struc,ind,layers)
 
 def surf_saver(element,slab_to_save,ind,layers):
