@@ -49,6 +49,8 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     
     #get the optimized bulk object and converged parameters
     pymatgen_bulk=AseAtomsAdaptor.get_structure(opt_bulk)
+    magmom=np.mean(opt_bulk.get_magnetic_moments())
+    spin=db.bulk.get(name=element).spin
     xc=db_bulk.get(name=element).xc
     h=db_bulk.get(name=element).h
     k_density=db_bulk.get(name=element).k_density
@@ -68,6 +70,8 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'kpts: '+str(kpts),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
+        parprint('\t'+'magmom: '+str(magmom),file=f)
+        parprint('\t'+'spin polarized: '+str(spin),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'%',file=f)
     f.close()
 
@@ -120,6 +124,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         current_vac=slab.cell.lengths()[-1]-max(slab.positions[:,2])
         if current_vac != vac:
             slab.center(vacuum=vac,axis=2)
+        slab.set_initial_magnetic_moments(magmom*np.ones(len(slab)))
         fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
         slab.set_pbc([1,1,0])
@@ -133,6 +138,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
                 kpts=kpts,
                 eigensolver=Davidson(3),
                 mixer=Mixer(0.02, 5, 100),
+                spinpol=spin,
                 maxiter=500,
                 occupations={'name': 'fermi-dirac','width': sw},
                 poissonsolver={'dipolelayer': 'xy'})
@@ -194,6 +200,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     sim_layer=sim_layer_ls[-3]
     final_slab=db_layer.get_atoms(len(db_layer)-2) 
     vac=final_slab.cell.lengths()[-1]-final_slab.positions[-1,2]
+    final_mag=final_slab.get_magnetic_moments()
     db_final=connect('final_database'+'/'+'surf.db')
     id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
@@ -211,6 +218,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
         parprint('\t'+'h: '+str(h),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'sw: '+str(sw),file=f)
+        parprint('\t'+'magmom: '+str(final_mag),file=f)
     f.close()
 
 def surf_e_calc(pre,post,bulk_e,bulk_num):
