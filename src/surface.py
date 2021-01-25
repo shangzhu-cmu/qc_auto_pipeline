@@ -51,7 +51,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
                 print(str(n)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(angles)+'\t'+str(cell_length))
                 ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
                 plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
-                ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':10})
+                ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
                 ax.set_xticks([])
                 ax.set_yticks([])
     elif option=='ase':
@@ -63,7 +63,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         fig=plt.figure(figsize=(8,8))
         ax=fig.add_subplot(111)
         plot_atoms(slab_ase.repeat((2,2,1)),ax=ax)
-        ax.set_title('ASE created: {}'.format(str(ind)),{'fontsize':10})
+        ax.set_title('ASE created: {}'.format(str(ind)),{'fontsize':20})
         ax.set_xticks([])
         ax.set_yticks([])
 
