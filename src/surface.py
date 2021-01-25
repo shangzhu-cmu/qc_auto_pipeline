@@ -39,11 +39,11 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1):
     if len(slabs_symmetric) == 0:
         print('No symmetric slab found!')
     else:
-        print('No.'+'\t'+'Layers'+'\t\t'+'Angles')
+        print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\tCell Length')
         fig=plt.figure(figsize=(20,10))
         for n,slab in enumerate(slabs_symmetric):
             slab_ase=AseAtomsAdaptor.get_atoms(slab)
-            print(str(n)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(slab_ase.get_cell_lengths_and_angles()[3:]))
+            print(str(n)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(slab_ase.get_cell_lengths_and_angles()[3:])+'\t'+str(slab_ase.get_cell_lengths_and_angles()[:3]))
             ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
             plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
             ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':10})
