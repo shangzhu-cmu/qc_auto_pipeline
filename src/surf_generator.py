@@ -14,11 +14,11 @@ def sym_all_slab(element,max_ind,layers,vacuum_layer):
                                 symmetrize=True,in_unit_planes=True)
     print('Miller Index'+'\t'+'Num of Different Shift')
     slab_M=[]
-    slab_layer=[]
+    #slab_layer=[]
     for slab in slabgenall:
         slab_M.append(slab.miller_index)
-        slab_ase=AseAtomsAdaptor.get_atoms(slab)
-        slab_layer.append(len(np.unique(slab_ase.positions[:,2])))
+        #slab_ase=AseAtomsAdaptor.get_atoms(slab)
+        #slab_layer.append(len(np.unique(slab_ase.positions[:,2])))
     #slab_M_unique = Counter(chain(*slab_M))
     #print(slab_M_unique)
     #print(list(slab_M_unique.keys()))
