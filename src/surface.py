@@ -63,7 +63,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         ax.set_xticks([])
         ax.set_yticks([])
         if save:
-            slab_struc=AseAtomsAdaptor.get_atoms(slab_ase)
+            slab_struc=AseAtomsAdaptor.get_structure(slab_ase)
             surf_saver(element,slab_struc)
 
 def surf_saver(element,slab_to_save):
