@@ -1,6 +1,7 @@
 from pymatgen.core.surface import SlabGenerator, generate_all_slabs
 from pymatgen.io.ase import AseAtomsAdaptor
 from ase.db import connect
+from ase.build import surface
 from pymatgen.io.cif import CifWriter
 import numpy as np
 from collections import Counter 
@@ -30,12 +31,16 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         slabgen = SlabGenerator(bulk_pym, ind, layers, vacuum_layer,
                             center_slab=True,lll_reduce=True,in_unit_planes=unit)
         slabs=slabgen.get_slabs()
+        slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
     elif option=='gen_all':
         slabgenall=generate_all_slabs(bulk_pym,max_ind,layers,vacuum_layer,
                             lll_reduce=True,center_slab=True,
                             symmetrize=True,in_unit_planes=unit)
         slabs=[slab for slab in slabgenall if slab.miller_index==ind]
-    slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+        slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+    elif option=='ase':
+        slabs=surface(bulk_ase,ind,layers=layers,vacuum=vacuum_layer)
+        slabs_symmetric=AseAtomsAdaptor.get_structure(slabs)
     if len(slabs_symmetric) == 0:
         print('No symmetric slab found!')
     else:
