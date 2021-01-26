@@ -80,7 +80,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     db_layer=connect(element+'/'+'surf'+'/'+struc+'/'+'layer_converge.db')
     diff_primary=100
     diff_second=100
-    iters=len(db_layer)-1
+    iters=len(db_layer)
     act_layer_ls=[]
     sim_layer_ls=[]
     sim_layer=1
