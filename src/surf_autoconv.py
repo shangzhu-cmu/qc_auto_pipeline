@@ -50,7 +50,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     #get the optimized bulk object and converged parameters
     pymatgen_bulk=AseAtomsAdaptor.get_structure(opt_bulk)
     magmom=np.mean(opt_bulk.get_magnetic_moments())
-    spin=db.bulk.get(name=element).spin
+    spin=db_bulk.get(name=element).spin
     xc=db_bulk.get(name=element).xc
     h=db_bulk.get(name=element).h
     k_density=db_bulk.get(name=element).k_density
