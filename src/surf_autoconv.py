@@ -81,6 +81,9 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     diff_primary=100
     diff_second=100
     iters=len(db_layer)
+    act_layer_ls=[]
+    sim_layer_ls=[]
+    sim_layer=1
     if iters>=2:
         for i in range(2,iters):
             fst=db_layer.get_atoms(id=i-1)
@@ -90,9 +93,10 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
             diff_second=surf_e_calc(snd,trd,opt_bulk.get_potential_energy(),len(opt_bulk.get_tags()))
             if temp_print==True:
                 temp_output_printer(db_layer,i,'act_layer',opt_bulk.get_potential_energy(),len(opt_bulk.get_tags()),rep_location)
-    act_layer_ls=[]
-    sim_layer_ls=[]
-    sim_layer=1
+        for j in range(len(db_layer)):
+            act_layer_ls.append(db_layer.get(j).act_layer)
+            sim_layer_ls.append(db_layer.get(j).sim_layer)
+        sim_layer=sim_layer_ls[-1]
     if generator=='pymatgen':
         slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
         slabs=slabgen.get_slabs() #this only take the first structure
