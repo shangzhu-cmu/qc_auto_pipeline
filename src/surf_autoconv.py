@@ -81,6 +81,15 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     diff_primary=100
     diff_second=100
     iters=len(db_layer)
+    if iters>=2:
+        for i in range(2,iters):
+            fst=db_layer.get_atoms(id=i-1)
+            snd=db_layer.get_atoms(id=i)
+            trd=db_layer.get_atoms(id=i+1)
+            diff_primary=max(surf_e_calc(fst,snd,opt_bulk.get_potential_energy(),len(opt_bulk.get_tags())),surf_e_calc(fst,trd,opt_bulk.get_potential_energy(),len(opt_bulk.get_tags())))
+            diff_second=surf_e_calc(snd,trd,opt_bulk.get_potential_energy(),len(opt_bulk.get_tags()))
+            if temp_print==True:
+                temp_output_printer(db_layer,i,'act_layer',opt_bulk.get_potential_energy(),len(opt_bulk.get_tags()),rep_location)
     act_layer_ls=[]
     sim_layer_ls=[]
     sim_layer=1
