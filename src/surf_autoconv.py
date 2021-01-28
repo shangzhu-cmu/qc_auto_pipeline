@@ -20,7 +20,19 @@ from pymatgen.io.ase import AseAtomsAdaptor
 from gpaw import Mixer
 
 
-def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_print=True,generator='pymatgen',interval=2,maxiter=333):
+def surf_auto_conv(element,
+                    struc,
+                    init_layer=5,
+                    vac=5,
+                    fix_layer=2,
+                    rela_tol=5,
+                    temp_print=True,
+                    generator='pymatgen',
+                    interval=2,
+                    maxiter=333,
+                    beta=0.05,
+                    nmaxold=5,
+                    weight=50.0):
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
 
@@ -161,6 +173,7 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
                 symmetry = {'point_group': False},
                 kpts=kpts,
                 spinpol=spin,
+                mixer=Mixer(beta,nmaxold,weight)
                 maxiter=maxiter,
                 eigensolver=Davidson(3),
                 occupations={'name': 'fermi-dirac','width': sw},
