@@ -215,14 +215,17 @@ def surf_auto_conv(element,struc,init_layer=5,vac=5,fix_layer=2,rela_tol=5,temp_
     sim_layer=sim_layer_ls[-3]
     final_slab=db_layer.get_atoms(len(db_layer)-2) 
     vac=np.round(final_slab.cell.lengths()[-1]-max(final_slab.positions[:,2]),decimals=4)
-    final_mag=final_slab.get_magnetic_moments()
+    if magmom!=0:
+        final_mag=final_slab.get_magnetic_moments()
+    else:
+        final_mag=0
     db_final=connect('final_database'+'/'+'surf.db')
     id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
         id=db_final.get(name=element+'('+struc+')').id
-        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
+        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac,magmom=final_mag)
     else:
-        db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
+        db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac,magmom=final_mag)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'Simulated Layer: '+str(sim_layer),file=f)
