@@ -173,7 +173,7 @@ def surf_auto_conv(element,
                 symmetry = {'point_group': False},
                 kpts=kpts,
                 spinpol=spin,
-                mixer=Mixer(beta,nmaxold,weight)
+                mixer=Mixer(beta,nmaxold,weight),
                 maxiter=maxiter,
                 eigensolver=Davidson(3),
                 occupations={'name': 'fermi-dirac','width': sw},
