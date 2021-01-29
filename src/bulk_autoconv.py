@@ -10,7 +10,19 @@ from ase.io import read, write
 from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
-def bulk_auto_conv(element,h=0.16,k_density=4,xc='PBE',sw=0.1,init_magmom=0,maxiter=333,spinpol=False,rela_tol=10*10**(-3),temp_print=True):
+def bulk_auto_conv(element,
+                    h=0.16,
+                    k_density=4,
+                    xc='PBE',
+                    sw=0.1,
+                    init_magmom=0,
+                    maxiter=333,
+                    spinpol=False,
+                    rela_tol=10*10**(-3),
+                    temp_print=True,
+                    beta=0.05,
+                    nmaxold=5,
+                    weight=50.0):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
     #initialize the kpts from the k_density
     orig_atom=bulk_builder(element)
@@ -44,7 +56,14 @@ def bulk_auto_conv(element,h=0.16,k_density=4,xc='PBE',sw=0.1,init_magmom=0,maxi
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         atoms=bulk_builder(element)
         atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
-        calc=GPAW(xc=xc,h=h,kpts=kpts,spinpol=spinpol,maxiter=maxiter,occupations={'name':'fermi-dirac','width':sw})
+        calc=GPAW(xc=xc,
+                    h=h,
+                    kpts=kpts,
+                    spinpol=spinpol,
+                    maxiter=maxiter,
+                    mixer=Mixer(beta,nmaxold,weight),
+                    eigensolver=Davidson(3),
+                    occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
         db_h.write(atoms,h=h)
@@ -79,7 +98,14 @@ def bulk_auto_conv(element,h=0.16,k_density=4,xc='PBE',sw=0.1,init_magmom=0,maxi
         kpts=kpts+2
         atoms=bulk_builder(element)
         atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
-        calc=GPAW(xc=xc,h=h,kpts=kpts,spinpol=spinpol,maxiter=maxiter,occupations={'name':'fermi-dirac','width':sw})
+        calc=GPAW(xc=xc,
+                    h=h,
+                    kpts=kpts,
+                    spinpol=spinpol,
+                    maxiter=maxiter,
+                    mixer=Mixer(beta,nmaxold,weight),
+                    eigensolver=Davidson(3),
+                    occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(kpts[0]))
         k_density=mp2kdens(atoms,kpts)
@@ -113,7 +139,14 @@ def bulk_auto_conv(element,h=0.16,k_density=4,xc='PBE',sw=0.1,init_magmom=0,maxi
         sw=sw/2
         atoms=bulk_builder(element)
         atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
-        calc=GPAW(xc=xc,h=h,kpts=kpts,spinpol=spinpol,maxiter=maxiter,occupations={'name':'fermi-dirac','width':sw})
+        calc=GPAW(xc=xc,
+                    h=h,
+                    kpts=kpts,
+                    spinpol=spinpol,
+                    maxiter=maxiter,
+                    mixer=Mixer(beta,nmaxold,weight),
+                    eigensolver=Davidson(3),
+                    occupations={'name':'fermi-dirac','width':sw})
         atoms.set_calculator(calc)
         opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
         db_sw.write(atoms,sw=sw)
