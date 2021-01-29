@@ -9,11 +9,7 @@ from ase.parallel import parprint,paropen,world
 import numpy as np
 import re
 import sys
-import time
-import copy as cp
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
-from shutil import copyfile
-import glob
 from gpaw import Davidson
 from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
