@@ -25,7 +25,7 @@ def sym_all_slab(element,max_ind,layers,vacuum_layer):
     for key in list(slab_M_unique.keys()):
         print(str(key)+'\t'+str(slab_M_unique[key]))
 
-def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit=True,order=0,save=False):
+def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit=True,order=0,save=False,):
     bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
     bulk_pym=AseAtomsAdaptor.get_structure(bulk_ase)
     if option=='slabgen':
@@ -53,6 +53,32 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
             slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
             layers=len(np.unique(np.round(slab_to_save_ase.positions[:,2],decimals=4)))
             surf_saver(element,slabs_symmetric[order],ind,layers)
+    elif option=='allslab':
+        max_ind=max(ind)
+        slabgenall=generate_all_slabs(bulk_pym,max_ind,layers,vacuum_layer,
+                                lll_reduce=True,center_slab=True,
+                                symmetrize=True,in_unit_planes=True)
+        slab_RM=[]
+        for slab in slabgenall:
+            if slab.miller_index == ind:
+                slab_RM.append(slab)
+        print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
+        fig=plt.figure(figsize=(8,8))
+        for n,slab in enumerate(slab_RM):
+            slab_ase=AseAtomsAdaptor.get_atoms(slab)
+            angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
+            cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
+            print(str(n)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
+            ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
+            plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
+            ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
+            ax.set_xticks([])
+            ax.set_yticks([])
+        if save:
+            slab_to_save=slab_RM[order]
+            slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
+            layers=len(np.unique(np.round(slab_to_save_ase.positions[:,2],decimals=4)))
+            surf_saver(element,slab_RM[order],ind,layers)
     elif option=='ase':
         slab_ase=surface(bulk_ase,ind,layers=layers,vacuum=vacuum_layer)
         print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
