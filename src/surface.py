@@ -43,6 +43,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
                 slab_ase=AseAtomsAdaptor.get_atoms(slab)
                 angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
                 cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
+                print(slab_ase.positions[:,2])
                 print(str(n)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
                 if plot:
                     ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
