@@ -199,8 +199,11 @@ def surf_auto_conv(element,
                 parprint('Regular surface convergence failed.',file=f)
                 parprint('Entering Fiorentini and Methfessel relation (linear fit) convergence test.',file=f)
             energy_slabs=[db_layer.get_atoms(i+1).get_potential_energy() for i in range(len(db_layer))]
+            print(energy_slabs)
             num_atoms=[db_layer.get(i+1).natoms for i in range(len(db_layer))]
+            print(num_atoms)
             energy_bulk_fit=np.round(np.polyfit(num_atoms,energy_slabs,1)[0],decimals=5)
+            print(energy_bulk_fit)
             fit_iters=2
             while (diff_primary>rela_tol or diff_second>rela_tol) and fit_iters <= 5:
                 fst=db_layer.get_atoms(id=fit_iters-1)
@@ -209,7 +212,7 @@ def surf_auto_conv(element,
                 diff_primary=max(surf_e_calc(fst,snd,energy_bulk_fit,1),surf_e_calc(fst,trd,energy_bulk_fit,2))
                 diff_second=surf_e_calc(snd,trd,energy_bulk_fit,1)
                 if temp_print==True:
-                    temp_output_printer(db_layer,iters,'act_layer',energy_bulk_fit,1,rep_location)
+                    temp_output_printer(db_layer,fit_iters,'act_layer',energy_bulk_fit,1,rep_location)
                 fit_iters+=1
             if diff_primary>rela_tol or diff_second>rela_tol:
                 with paropen(rep_location,'a') as f:
