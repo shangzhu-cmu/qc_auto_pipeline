@@ -69,7 +69,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
             angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
             cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
             print(str(n)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
-            ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
+            ax=fig.add_subplot(np.ceil(len(slab_RM)/2),2,n+1)
             plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
             ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
             ax.set_xticks([])
