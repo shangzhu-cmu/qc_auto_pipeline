@@ -42,7 +42,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
                 slab_ase=AseAtomsAdaptor.get_atoms(slab)
                 angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
                 cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
-                print(str(n)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(angles)+'\t'+str(cell_length))
+                print(str(n)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
                 ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
                 plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
                 ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
@@ -51,14 +51,14 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         if save:
             slab_to_save=slabs_symmetric[order]
             slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
-            layers=len(np.unique(slab_to_save_ase.positions[:,2]))
+            layers=len(np.unique(np.round(slab_to_save_ase.positions[:,2],decimals=4)))
             surf_saver(element,slabs_symmetric[order],ind,layers)
     elif option=='ase':
         slab_ase=surface(bulk_ase,ind,layers=layers,vacuum=vacuum_layer)
         print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
         angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
         cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
-        print(str(0)+'\t'+str(len(np.unique(slab_ase.positions[:,2])))+'\t'+str(angles)+'\t'+str(cell_length))
+        print(str(0)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
         fig=plt.figure(figsize=(8,8))
         ax=fig.add_subplot(111)
         plot_atoms(slab_ase,ax=ax)
@@ -67,7 +67,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         ax.set_yticks([])
         if save:
             slab_struc=AseAtomsAdaptor.get_structure(slab_ase)
-            layers=len(np.unique(slab_ase.positions[:,2]))
+            layers=len(np.unique(np.round(slab_ase.positions[:,2],decimals=4)))
             surf_saver(element,slab_struc,ind,layers)
 
 def surf_saver(element,slab_to_save,ind,layers):
