@@ -76,7 +76,7 @@ def surf_saver(element,slab_to_save,ind,layers):
         print('WARNING: '+rep_location+' already exists!')
     os.makedirs(rep_location,exist_ok=True)
     surf_location=element+'/raw_surf/'+str(ind)+'_'+str(layers)+'.cif'
-    if os.path.isdir(surf_location):
+    if os.path.isfile(surf_location):
         print('WARNING: '+surf_location+' already exists!')
         print('Raw surface saving fail!')
     else:
