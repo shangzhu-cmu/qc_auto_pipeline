@@ -154,7 +154,7 @@ def surf_auto_conv(element,
             slab.set_pbc([1,1,0])
         else:
             slab.set_pbc([1,1,1])
-        parrpint(slab.pbc)
+        parprint(slab.pbc)
         kpts=kdens2mp(slab,kptdensity=k_density,even=True)
         slab_length=slab.cell.lengths()
         slab_long_short_ratio=max(slab_length)/min(slab_length)
