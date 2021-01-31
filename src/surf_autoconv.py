@@ -14,7 +14,7 @@ from gpaw import Davidson
 from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
 from gpaw import Mixer
-
+###Warning: Only stocimetric surface!
 
 def surf_auto_conv(element,
                     struc,
@@ -199,11 +199,8 @@ def surf_auto_conv(element,
                 parprint('Regular surface convergence failed.',file=f)
                 parprint('Entering Fiorentini and Methfessel relation (linear fit) convergence test.',file=f)
             energy_slabs=[db_layer.get_atoms(i+1).get_potential_energy() for i in range(len(db_layer))]
-            print(energy_slabs)
             num_atoms=[db_layer.get(i+1).natoms for i in range(len(db_layer))]
-            print(num_atoms)
             energy_bulk_fit=np.round(np.polyfit(num_atoms,energy_slabs,1)[0],decimals=5)
-            print(energy_bulk_fit)
             fit_iters=2
             while (diff_primary>rela_tol or diff_second>rela_tol) and fit_iters <= 5:
                 fst=db_layer.get_atoms(id=fit_iters-1)
@@ -259,8 +256,8 @@ def surf_e_calc(pre,post,bulk_e,bulk_num):
     post_area=2*(post.cell[0][0]*post.cell[1][1])
     pre_e=pre.get_potential_energy()
     post_e=post.get_potential_energy()
-    pre_num=float(re.findall(r'\d+',str(pre.symbols))[0])
-    post_num=float(re.findall(r'\d+',str(post.symbols))[0])
+    pre_num=len(pre.get_tags())
+    post_num=len(post.get_tags())
     pre_surf_e=(1/pre_area)*(pre_e-pre_num*opt_bulk_e)
     post_surf_e=(1/post_area)*(post_e-post_num*opt_bulk_e)
     diff_surf_e=100*(abs((post_surf_e-pre_surf_e)/pre_surf_e))
