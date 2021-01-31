@@ -13,7 +13,7 @@ from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 from gpaw import Davidson
 from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
-from gpaw import Mixer
+from gpaw import Mixer,MixerDif
 ###Warning: Only stocimetric surface!
 
 def surf_auto_conv(element,
@@ -83,6 +83,7 @@ def surf_auto_conv(element,
         parprint('\t'+'rela_tol: '+str(rela_tol)+'%',file=f)
     f.close()
 
+    
     #optimize the layers
     ##connect to the layer convergence database
     db_layer=connect(element+'/'+'surf'+'/'+struc+'/'+'layer_converge.db')
@@ -153,27 +154,51 @@ def surf_auto_conv(element,
         slab_length=slab.cell.lengths()
         slab_long_short_ratio=max(slab_length)/min(slab_length)
         if slab_long_short_ratio > 15:  
-            calc=GPAW(xc=xc,
-                h=h,
-                symmetry = {'point_group': False},
-                kpts=kpts,
-                eigensolver=Davidson(3),
-                mixer=Mixer(0.02, 5, 100),
-                spinpol=spin,
-                maxiter=maxiter,
-                occupations={'name': 'fermi-dirac','width': sw},
-                poissonsolver={'dipolelayer': 'xy'})
+            if spin:
+                calc=GPAW(xc=xc,
+                    h=h,
+                    symmetry = {'point_group': False},
+                    kpts=kpts,
+                    eigensolver=Davidson(3),
+                    mixer=MixerDif(np.round(beta/2,decimals=2), nmaxold, weight*2),
+                    spinpol=spin,
+                    maxiter=maxiter,
+                    occupations={'name': 'fermi-dirac','width': sw},
+                    poissonsolver={'dipolelayer': 'xy'})
+            else:
+                calc=GPAW(xc=xc,
+                    h=h,
+                    symmetry = {'point_group': False},
+                    kpts=kpts,
+                    eigensolver=Davidson(3),
+                    mixer=Mixer(np.round(beta/2,decimals=2), nmaxold, weight*2),
+                    maxiter=maxiter,
+                    occupations={'name': 'fermi-dirac','width': sw},
+                    poissonsolver={'dipolelayer': 'xy'})
+
         else:
-            calc=GPAW(xc=xc,
-                h=h,
-                symmetry = {'point_group': False},
-                kpts=kpts,
-                spinpol=spin,
-                mixer=Mixer(beta,nmaxold,weight),
-                maxiter=maxiter,
-                eigensolver=Davidson(3),
-                occupations={'name': 'fermi-dirac','width': sw},
-                poissonsolver={'dipolelayer': 'xy'})            
+            if spin:
+                calc=GPAW(xc=xc,
+                    h=h,
+                    symmetry = {'point_group': False},
+                    kpts=kpts,
+                    spinpol=spin,
+                    mixer=MixerDif(beta,nmaxold,weight),
+                    maxiter=maxiter,
+                    eigensolver=Davidson(3),
+                    occupations={'name': 'fermi-dirac','width': sw},
+                    poissonsolver={'dipolelayer': 'xy'})   
+            else:
+                calc=GPAW(xc=xc,
+                    h=h,
+                    symmetry = {'point_group': False},
+                    kpts=kpts,
+                    spinpol=spin,
+                    mixer=Mixer(beta,nmaxold,weight),
+                    maxiter=maxiter,
+                    eigensolver=Davidson(3),
+                    occupations={'name': 'fermi-dirac','width': sw},
+                    poissonsolver={'dipolelayer': 'xy'})                            
         slab.set_calculator(calc)
         location=element+'/'+'surf'+'/'+struc+'/'+str(actual_layer)+'x1x1'
         opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
