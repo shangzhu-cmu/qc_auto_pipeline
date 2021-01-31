@@ -10,6 +10,7 @@ from pymatgen.analysis.adsorption import plot_slab
 from matplotlib import pyplot as plt
 from ase.visualize.plot import plot_atoms
 import os
+from ase.io import read
 
 def sym_all_slab(element,max_ind,layers,vacuum_layer):
     bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
@@ -31,32 +32,37 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
     if option=='slabgen':
         slabgen = SlabGenerator(bulk_pym, ind, layers, vacuum_layer,
                             center_slab=True,lll_reduce=True,in_unit_planes=unit)
-        slabs=slabgen.get_slabs()
-        slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+        #slabs=slabgen.get_slabs()
+        #slabs_symmetric=[slab for slab in slabs if slab.is_symmetric()]
+        slabs_symmetric=slabgen.get_slabs(symmetrize=True)
         if len(slabs_symmetric) == 0:
             print('No symmetric slab found!')
         else:
             print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
             if plot:
                 fig=plt.figure(figsize=(8,8))
+            layers_ls=[]
             for n,slab in enumerate(slabs_symmetric):
-                slab_ase=AseAtomsAdaptor.get_atoms(slab)
+                #temp save for analysis
+                surf_location=element+'/raw_surf/'+str(ind)+'_temp'+'.cif'
+                CifWriter(slab).write_file(surf_location)
+                slab_ase=read(surf_location)
+                #slab_ase=AseAtomsAdaptor.get_atoms(slab)
                 angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
                 cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
-                print(slab)
-                print(slab_ase.positions[:,2])
-                print(str(n)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
+                layers=len(np.unique(np.round(slab_ase.positions[:,2],decimals=4)))
+                print(str(n)+'\t'+str(layers)+'\t'+str(angles)+'\t'+str(cell_length))
+                layers_ls.append(layers)
                 if plot:
                     ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
                     plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
                     ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
                     ax.set_xticks([])
                     ax.set_yticks([])
+            os.remove(surf_location)
         if save:
             slab_to_save=slabs_symmetric[order]
-            slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
-            layers=len(np.unique(np.round(slab_to_save_ase.positions[:,2],decimals=4)))
-            surf_saver(element,slabs_symmetric[order],ind,layers)
+            surf_saver(element,slabs_symmetric[order],ind,layers_ls[order])
     elif option=='allslab':
         max_ind=max(ind)
         slabgenall=generate_all_slabs(bulk_pym,max_ind,layers,vacuum_layer,
@@ -69,22 +75,28 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
         if plot:
             fig=plt.figure(figsize=(8,8))
+        layers_ls=[]
         for n,slab in enumerate(slab_RM):
-            slab_ase=AseAtomsAdaptor.get_atoms(slab)
+            #temp save for analysis
+            surf_location=element+'/raw_surf/'+str(ind)+'_temp'+'.cif'
+            CifWriter(slab).write_file(surf_location)
+            slab_ase=read(surf_location)
+            #slab_ase=AseAtomsAdaptor.get_atoms(slab)
             angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
             cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
-            print(str(n)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
+            layers=len(np.unique(np.round(slab_ase.positions[:,2],decimals=4)))
+            print(str(n)+'\t'+str(layers)+'\t'+str(angles)+'\t'+str(cell_length))
+            layers_ls.append(layers)
             if plot:
                 ax=fig.add_subplot(np.ceil(len(slab_RM)/2),2,n+1)
                 plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
                 ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
                 ax.set_xticks([])
                 ax.set_yticks([])
+        os.remove(surf_location)
         if save:
             slab_to_save=slab_RM[order]
-            slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
-            layers=len(np.unique(np.round(slab_to_save_ase.positions[:,2],decimals=4)))
-            surf_saver(element,slab_RM[order],ind,layers)
+            surf_saver(element,slab_RM[order],ind,layers_ls[order])
     elif option=='ase':
         slab_ase=surface(bulk_ase,ind,layers=layers,vacuum=vacuum_layer)
         print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
