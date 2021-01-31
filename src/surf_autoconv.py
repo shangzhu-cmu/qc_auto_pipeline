@@ -149,7 +149,11 @@ def surf_auto_conv(element,
         slab.set_initial_magnetic_moments(magmom*np.ones(len(slab)))
         fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
-        slab.set_pbc([1,1,0])
+        ortho=slab.get_cell_lengths_and_angles()[3:5]
+        if np.all(90==ortho):
+            slab.set_pbc([1,1,0])
+        else:
+            slab.set_pbc([1,1,1])
         kpts=kdens2mp(slab,kptdensity=k_density,even=True)
         slab_length=slab.cell.lengths()
         slab_long_short_ratio=max(slab_length)/min(slab_length)
