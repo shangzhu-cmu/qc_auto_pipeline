@@ -25,7 +25,7 @@ def sym_all_slab(element,max_ind,layers,vacuum_layer):
     for key in list(slab_M_unique.keys()):
         print(str(key)+'\t'+str(slab_M_unique[key]))
 
-def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit=True,order=0,save=False,):
+def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit=True,order=0,save=False,plot=True):
     bulk_ase=connect('final_database/bulk.db').get_atoms(name=element)
     bulk_pym=AseAtomsAdaptor.get_structure(bulk_ase)
     if option=='slabgen':
@@ -37,17 +37,19 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
             print('No symmetric slab found!')
         else:
             print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
-            fig=plt.figure(figsize=(8,8))
+            if plot:
+                fig=plt.figure(figsize=(8,8))
             for n,slab in enumerate(slabs_symmetric):
                 slab_ase=AseAtomsAdaptor.get_atoms(slab)
                 angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
                 cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
                 print(str(n)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
-                ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
-                plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
-                ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
-                ax.set_xticks([])
-                ax.set_yticks([])
+                if plot:
+                    ax=fig.add_subplot(np.ceil(len(slabs_symmetric)/2),2,n+1)
+                    plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
+                    ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
+                    ax.set_xticks([])
+                    ax.set_yticks([])
         if save:
             slab_to_save=slabs_symmetric[order]
             slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
@@ -63,17 +65,19 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
             if slab.miller_index == ind:
                 slab_RM.append(slab)
         print('No.'+'\t'+'Layers'+'\t'+'Angles'+'\t\t\t\tCell Length')
-        fig=plt.figure(figsize=(8,8))
+        if plot:
+            fig=plt.figure(figsize=(8,8))
         for n,slab in enumerate(slab_RM):
             slab_ase=AseAtomsAdaptor.get_atoms(slab)
             angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
             cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
             print(str(n)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
-            ax=fig.add_subplot(np.ceil(len(slab_RM)/2),2,n+1)
-            plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
-            ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
-            ax.set_xticks([])
-            ax.set_yticks([])
+            if plot:
+                ax=fig.add_subplot(np.ceil(len(slab_RM)/2),2,n+1)
+                plot_slab(slab,ax,adsorption_sites=False,decay=0.25,window=1)
+                ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
+                ax.set_xticks([])
+                ax.set_yticks([])
         if save:
             slab_to_save=slab_RM[order]
             slab_to_save_ase=AseAtomsAdaptor.get_atoms(slab_to_save)
@@ -85,12 +89,13 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
         angles=np.round(slab_ase.get_cell_lengths_and_angles()[3:],decimals=4)
         cell_length=np.round(slab_ase.get_cell_lengths_and_angles()[:3],decimals=4)
         print(str(0)+'\t'+str(len(np.unique(np.round(slab_ase.positions[:,2],decimals=4))))+'\t'+str(angles)+'\t'+str(cell_length))
-        fig=plt.figure(figsize=(8,8))
-        ax=fig.add_subplot(111)
-        plot_atoms(slab_ase,ax=ax)
-        ax.set_title('ASE created: {}'.format(str(ind)),{'fontsize':20})
-        ax.set_xticks([])
-        ax.set_yticks([])
+        if plot:
+            fig=plt.figure(figsize=(8,8))
+            ax=fig.add_subplot(111)
+            plot_atoms(slab_ase,ax=ax)
+            ax.set_title('ASE created: {}'.format(str(ind)),{'fontsize':20})
+            ax.set_xticks([])
+            ax.set_yticks([])
         if save:
             slab_struc=AseAtomsAdaptor.get_structure(slab_ase)
             layers=len(np.unique(np.round(slab_ase.positions[:,2],decimals=4)))
