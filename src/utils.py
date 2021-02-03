@@ -92,8 +92,9 @@ def create_ads_and_dir(element,
                         surf_struc,
                         ads_atom=['Li'],
                         ads_site=['ontop','hollow','bridge'],):
-    surf_db_path='final_database/surf.db'
     current_dir=os.getcwd()
+    surf_db_path='final_database/surf.db'
+    os.chdir(current_dir)
     if not os.path.isfile(surf_db_path):
         sys.exit("ERROR: surf database has not been established!")
     else:
@@ -110,6 +111,7 @@ def create_ads_and_dir(element,
         else:
             os.makedirs(element+'/'+'ads'+'/'+struc,exist_ok=True)
         surf = surf_db.get_atoms(name=element+'('+struc+')')
+        print(surf)
         sub_dir=element+'/'+'ads'+'/'+struc
         os.chdir(current_dir+'/'+sub_dir)
         adsorption.generate_rxn_structures(surf,ads=ads_atom,site_type=ads_site,write_to_disk=True)
