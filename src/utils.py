@@ -88,9 +88,31 @@ def create_element_dir(element,options=['bulk','surf','ads'],
             # os.chdir(current_dir)
         print('{} ads directories created!'.format(element))
 
-def create_ads_and_dir(element, surf_struc,)
+def create_ads_and_dir(element, 
+                        surf_struc,
+                        ads_atom=['Li'],
+                        ads_site=['ontop','hollow','bridge'],):
+    surf_db_path='final_database/surf.db'
+    current_dir=os.getcwd()
+    if not os.path.isfile(surf_db_path):
+        sys.exit("ERROR: surf database has not been established!")
+    else:
+        surf_db=connect(surf_db_path)
     for struc in surf_struc:
-        
+        if os.path.isdir(element+'/'+'ads'):
+            print("WARNING: ./{}/ads directory already exists!".format(element))
+            pause()
+        else:
+            os.makedirs(element+'/'+'ads',exist_ok=True) 
+        if os.path.isdir(element+'/'+'ads'+'/'+struc):
+            print('WARNING: '+'./'+element+'/'+'ads'+'/'+'{} directory already exists!'.format(struc))
+            pause()
+        else:
+            os.makedirs(element+'/'+'ads'+'/'+struc,exist_ok=True)
+        surf = surf_db.get_atoms(name=element+'('+struc+')')
+        sub_dir=element+'/'+'ads'+'/'+struc
+        os.chdir(curren_dir+'/'+sub_dir)
+        adsorption.generate_rxn_structures(surf,ads=ads_atom,site_type=ads_site,write_to_disk=True)
     
 def create_ads_sub_dir(element,struc,current_dir,site,ads_atom,slab_db):
     db_size=len(slab_db)
