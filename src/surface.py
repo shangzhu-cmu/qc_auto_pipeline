@@ -59,7 +59,8 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
                     ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
                     ax.set_xticks([])
                     ax.set_yticks([])
-            os.remove(surf_location)
+            if os.path.isfile(surf_location):
+                os.remove(surf_location)
         if save:
             slab_to_save=slabs_symmetric[order]
             surf_saver(element,slabs_symmetric[order],ind,layers_ls[order])
@@ -93,7 +94,8 @@ def surf_creator(element,ind,layers,vacuum_layer,option='slabgen',max_ind=1,unit
                 ax.set_title('{}: No. {}'.format(slab.miller_index,n),{'fontsize':20})
                 ax.set_xticks([])
                 ax.set_yticks([])
-        os.remove(surf_location)
+        if os.path.isfile(surf_location):
+            os.remove(surf_location)
         if save:
             slab_to_save=slab_RM[order]
             surf_saver(element,slab_RM[order],ind,layers_ls[order])
