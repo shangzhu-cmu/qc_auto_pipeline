@@ -88,26 +88,9 @@ def create_element_dir(element,options=['bulk','surf','ads'],
             # os.chdir(current_dir)
         print('{} ads directories created!'.format(element))
 
-# def create_ads_vac_dir(element,struc,slab_row,current_dir,slab,ads_atom,ads_height):
-#     sub_dir=element+'/'+'ads'+'/'+struc+'/'+'layer_optimized'
-#     if os.path.isdir(sub_dir):
-#             print('WARNING: '+'./'+sub_dir+' directory already exists!')
-#             pause()
-#     else:
-#         os.makedirs(sub_dir,exist_ok=True)
-#     init_vac=int(slab_row.vac)
-#     for vac in range(init_vac,init_vac+6):
-#         slab_temp=cp.deepcopy(slab)
-#         os.chdir(current_dir)
-#         sub_sub_dir=element+'/'+'ads'+'/'+struc+'/'+'layer_optimized'+'/'+'vacuum_'+str(vac)
-#         if os.path.isdir(sub_sub_dir):
-#             print('WARNING: '+'./'+sub_sub_dir+' directory already exists!')
-#             pause()
-#         else:
-#             os.makedirs(sub_sub_dir,exist_ok=True)
-#         os.chdir(current_dir+'/'+sub_sub_dir)
-#         add_vacuum(slab_temp,vac-init_vac)
-#         adsorption.gen_rxn_int_sym(slab_temp, ads=ads_atom ,height={ads_atom:ads_height})
+def create_ads_and_dir(element, surf_struc,)
+    for struc in surf_struc:
+        
     
 def create_ads_sub_dir(element,struc,current_dir,site,ads_atom,slab_db):
     db_size=len(slab_db)
