@@ -111,7 +111,6 @@ def create_ads_and_dir(element,
         else:
             os.makedirs(element+'/'+'ads'+'/'+struc,exist_ok=True)
         surf = surf_db.get_atoms(name=element+'('+struc+')')
-        print(surf)
         sub_dir=element+'/'+'ads'+'/'+struc
         os.chdir(current_dir+'/'+sub_dir)
         adsorption.generate_rxn_structures(surf,ads=ads_atom,site_type=ads_site,write_to_disk=True)
