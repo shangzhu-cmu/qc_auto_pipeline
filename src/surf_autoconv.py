@@ -154,7 +154,6 @@ def surf_auto_conv(element,
             slab.set_pbc([1,1,0])
         else:
             slab.set_pbc([1,1,1])
-        parprint(slab.pbc)
         kpts=kdens2mp(slab,kptdensity=k_density,even=True)
         slab_length=slab.cell.lengths()
         slab_long_short_ratio=max(slab_length)/min(slab_length)
@@ -262,9 +261,9 @@ def surf_auto_conv(element,
     id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
         id=db_final.get(name=element+'('+struc+')').id
-        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
+        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac,spin=spin)
     else:
-        db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac)
+        db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac,spin=spin)
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'Simulated Layer: '+str(sim_layer),file=f)
