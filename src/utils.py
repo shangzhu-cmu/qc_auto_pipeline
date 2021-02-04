@@ -91,7 +91,7 @@ def create_element_dir(element,options=['bulk','surf','ads'],
 def create_ads_and_dir(element, 
                         surf_struc,
                         ads_atom=['Li'],
-                        ads_site=['ontop','hollow','bridge'],):
+                        ads_site=['ontop','hollow','bridge']):
     current_dir=os.getcwd()
     surf_db_path='final_database/surf.db'
     os.chdir(current_dir)
@@ -115,6 +115,7 @@ def create_ads_and_dir(element,
         os.chdir(current_dir+'/'+sub_dir)
         adsorption.generate_rxn_structures(surf,ads=ads_atom,site_type=ads_site,write_to_disk=True)
         os.chdir(current_dir)
+
 def create_ads_sub_dir(element,struc,current_dir,site,ads_atom,slab_db):
     db_size=len(slab_db)
     for i in range(db_size):
