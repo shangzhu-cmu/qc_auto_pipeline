@@ -41,6 +41,7 @@ def ads_auto_select(element,
         sys.exit()
     else:
         db_surf=connect('final_database'+'/'+'surf.db')
+        db_bulk=connect('final_database'+'/'+'bulk.db')
         try:
             opt_slab=db_surf.get_atoms(name=element+'('+struc+')')
         except:
@@ -55,7 +56,7 @@ def ads_auto_select(element,
     h=db_surf.get(name=element+'('+struc+')').h
     k_density=db_surf.get(name=element+'('+struc+')').k_density
     sw=db_surf.get(name=element+'('+struc+')').sw
-    spin=db_surf.get(name=element).spin
+    spin=db_bulk.get(name=element).spin
     if spin:
         magmom=db_surf.get(name=element+'('+struc+')').magmom
 
