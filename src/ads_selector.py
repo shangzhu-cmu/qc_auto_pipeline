@@ -72,7 +72,6 @@ def ads_auto_select(element,
         parprint('\t'+'spin polarized: '+str(spin),file=f)
         if spin:
             parprint('\t'+'magmom: '+str(magmom),file=f)
-        parprint('\t'+'rela_tol: '+str(rela_tol)+'%',file=f)
     f.close()
 
     ads_db=connect('final_database/ads'+str(size)+'.db')
