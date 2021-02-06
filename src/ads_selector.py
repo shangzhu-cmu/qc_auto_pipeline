@@ -88,6 +88,8 @@ def ads_auto_select(element,
             slab_formula=ads_slab.get_chemical_symbols()
             magmom_ls=np.mean(magmom)*np.ones(len(slab_formula))
             magmom_ls[slab_formula.index(ads)]=0
+            parprint(slab_formula)
+            parprint(magmom_ls)
             ads_slab.set_initial_magnetic_moments(magmom_ls)
         if slab_long_short_ratio > 15:  
             if spin:
