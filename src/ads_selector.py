@@ -147,5 +147,4 @@ def ads_auto_select(element,
     lowest_ads_e_slab=read(ads_dict_sorted[0]+'/slab.traj')
     ads_db.write(lowest_ads_e_slab)
     with paropen(rep_location,'a') as f:
-        parprint('Computation Complete. Selected ads site is: '+ads_dict_sorted[0].split('/')[-2],file=f)
-    
+        parprint('Computation Complete. Selected ads site is: '+ads_dict_sorted[0].split('/')[-1],file=f)
