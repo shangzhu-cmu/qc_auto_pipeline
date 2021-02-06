@@ -145,6 +145,6 @@ def ads_auto_select(element,
                 parprint(str(file_loc.split('/')[-2])+'\t\t\t'+str(np.round(ads_dict[location],decimals=5)),file=f)
     ads_dict_sorted=sorted(ads_dict,key=ads_dict.get)
     lowest_ads_e_slab=read(ads_dict_sorted[0]+'/slab.traj')
-    ads_db.write(lowest_ads_e_slab)
+    ads_db.write(lowest_ads_e_slab,clean_slab_pot_e=opt_slab.get_potential_energy(),ads_pot_e=ads_dict[ads_dict_sorted[0]])
     with paropen(rep_location,'a') as f:
         parprint('Computation Complete. Selected ads site is: '+ads_dict_sorted[0].split('/')[-1],file=f)
