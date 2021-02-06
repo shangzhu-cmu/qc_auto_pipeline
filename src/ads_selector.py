@@ -58,7 +58,7 @@ def ads_auto_select(element,
     sw=db_surf.get(name=element+'('+struc+')').sw
     spin=db_bulk.get(name=element).spin
     if spin:
-        magmom=db_surf.get(name=element+'('+struc+')').magmom
+        magmom=opt_slab.get_magnetic_moments()
 
     with paropen(rep_location,'a') as f:
         parprint('Initial Parameters:',file=f)
