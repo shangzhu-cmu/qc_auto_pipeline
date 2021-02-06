@@ -71,7 +71,7 @@ def ads_auto_select(element,
         parprint('\t'+'sw: '+str(sw),file=f)
         parprint('\t'+'spin polarized: '+str(spin),file=f)
         if spin:
-            parprint('\t'+'magmom: '+str(magmom),file=f)
+            parprint('\t'+'init_magmom: '+str(np.mean(magmom)*np.ones(len(opt_slab))),file=f)
     f.close()
     
     ads_file_loc=code_dir+'/'+element+'/'+'ads'+'/'+struc
@@ -88,8 +88,6 @@ def ads_auto_select(element,
             slab_formula=ads_slab.get_chemical_symbols()
             magmom_ls=np.mean(magmom)*np.ones(len(slab_formula))
             magmom_ls[slab_formula.index(ads)]=0
-            parprint(slab_formula)
-            parprint(magmom_ls)
             ads_slab.set_initial_magnetic_moments(magmom_ls)
         if slab_long_short_ratio > 15:  
             if spin:
