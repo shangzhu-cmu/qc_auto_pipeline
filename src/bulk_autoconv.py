@@ -65,7 +65,7 @@ def bulk_auto_conv(element,
             if temp_print == True:
                 temp_output_printer(db_h,i,'h',rep_location)
     if grid_iters>0:
-        for j in range(1,grid_iters):
+        for j in range(1,grid_iters+1):
             h_ls.append(db_h.get(j).h)
     #start with grid spacing convergence
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
