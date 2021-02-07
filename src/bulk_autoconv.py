@@ -56,14 +56,14 @@ def bulk_auto_conv(element,
     h_ls=[]
     if grid_iters>=2:
         for i in range(2,grid_iters):
-            fst=db_h.get_atoms(id=grid_iters-1)
-            snd=db_h.get_atoms(id=grid_iters)
-            trd=db_h.get_atoms(id=grid_iters+1)
+            fst=db_h.get_atoms(id=i-1)
+            snd=db_h.get_atoms(id=i)
+            trd=db_h.get_atoms(id=i+1)
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
             if temp_print == True:
-                temp_output_printer(db_h,grid_iters,'h',rep_location)
+                temp_output_printer(db_h,i,'h',rep_location)
     if grid_iters>0:
         for j in range(1,grid_iters):
             h_ls.append(db_h.get(j).h)
@@ -109,14 +109,14 @@ def bulk_auto_conv(element,
     k_ls=[kpts]
     if k_iters>=2:
         for i in range(2,k_iters):
-            fst=db_k.get_atoms(id=k_iters-1)
-            snd=db_k.get_atoms(id=k_iters)
-            trd=db_k.get_atoms(id=k_iters+1)
+            fst=db_k.get_atoms(id=i-1)
+            snd=db_k.get_atoms(id=i)
+            trd=db_k.get_atoms(id=i+1)
             diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
                             abs(trd.get_potential_energy()-fst.get_potential_energy()))
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
             if temp_print == True:
-                temp_output_printer(db_k,grid_iters,'h',rep_location)
+                temp_output_printer(db_k,i,'kpts',rep_location)
     if k_iters>1:
         for j in range(1,k_iters):
             k_ls.append(db_k.get(j).kpts)
