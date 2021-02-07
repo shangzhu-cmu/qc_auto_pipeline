@@ -108,22 +108,8 @@ def bulk_auto_conv(element,
     diff_second=100
     k_iters=len(db_k)+1
     k_ls=[kpts]
-    if k_iters>=2:
-        for i in range(2,k_iters):
-            fst=db_k.get_atoms(id=i-1)
-            snd=db_k.get_atoms(id=i)
-            trd=db_k.get_atoms(id=i+1)
-            diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
-                            abs(trd.get_potential_energy()-fst.get_potential_energy()))
-            diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
-            if temp_print == True:
-                temp_output_printer(db_k,i,'kpts',rep_location)
-    if k_iters>1:
-        for j in range(1,k_iters):
-            k_ls.append(db_k.get(j).kpts)
-    else:
-        k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),kpts) ##Need to improve this in the future (kpts to density)
-        db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
+    k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),kpts) ##Need to improve this in the future (kpts to density)
+    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
         kpts=kpts+2
         atoms=bulk_builder(element)
