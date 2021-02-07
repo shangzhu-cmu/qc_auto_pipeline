@@ -101,6 +101,7 @@ def bulk_auto_conv(element,
                 parprint("Computation Suspended!",file=f)
             f.close()
             sys.exit()
+    parprint(h_ls)
     h=h_ls[-3]
     #kpts convergence
     diff_primary=100
