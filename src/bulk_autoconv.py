@@ -52,9 +52,22 @@ def bulk_auto_conv(element,
     db_final=connect('final_database'+'/'+'bulk.db')
     diff_primary=100
     diff_second=100
-    grid_iters=0
-    #start with grid spacing convergence
+    grid_iters=len(db_h)
     h_ls=[]
+    if grid_iters>=2:
+        for i in range(2,grid_iters):
+            fst=db_h.get_atoms(id=grid_iters-1)
+            snd=db_h.get_atoms(id=grid_iters)
+            trd=db_h.get_atoms(id=grid_iters+1)
+            diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
+                            abs(trd.get_potential_energy()-fst.get_potential_energy()))
+            diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
+            if temp_print == True:
+                temp_output_printer(db_h,grid_iters,'h',rep_location)
+    if grid_iters>0:
+        for j in range(1,grid_iters):
+            h_ls.append(db_h.get(j).h)
+    #start with grid spacing convergence
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         atoms=bulk_builder(element)
         atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
@@ -92,10 +105,24 @@ def bulk_auto_conv(element,
     #kpts convergence
     diff_primary=100
     diff_second=100
-    k_iters=1
+    k_iters=len(db_k)+1
     k_ls=[kpts]
-    k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),kpts) ##Need to improve this in the future (kpts to density)
-    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
+    if k_iters>=2:
+        for i in range(2,k_iters):
+            fst=db_k.get_atoms(id=k_iters-1)
+            snd=db_k.get_atoms(id=k_iters)
+            trd=db_k.get_atoms(id=k_iters+1)
+            diff_primary=max(abs(snd.get_potential_energy()-fst.get_potential_energy()),
+                            abs(trd.get_potential_energy()-fst.get_potential_energy()))
+            diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
+            if temp_print == True:
+                temp_output_printer(db_k,grid_iters,'h',rep_location)
+    if k_iters>1:
+        for j in range(1,k_iters):
+            k_ls.append(db_k.get(j).kpts)
+    else:
+        k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),kpts) ##Need to improve this in the future (kpts to density)
+        db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
         kpts=kpts+2
         atoms=bulk_builder(element)
