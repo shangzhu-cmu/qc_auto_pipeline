@@ -17,9 +17,9 @@ def bulk_auto_conv(element,gpaw_calc,
                     solver_step=0.05,
                     solver_fmax=0.01):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
-    print(gpaw_calc.__dict__)
+    parprint('before',gpaw_calc.__dict__)
     calc_dict=gpaw_calc.__dict__['parameters']
-    print(gpaw_calc.__dict__)
+    parprint('after',gpaw_calc.__dict__)
     #initialize the kpts from the k_density
     orig_atom=bulk_builder(element)
     if world.rank==0 and os.path.isfile(rep_location):
