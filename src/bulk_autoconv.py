@@ -12,7 +12,10 @@ from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
 def bulk_auto_conv(element,gpaw_calc,
                     rela_tol=10*10**(-3),
-                    temp_print=True):
+                    init_magmom=0,
+                    temp_print=True,
+                    solver_step=0.05,
+                    solver_fmax=0.01):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
     calc_dict=gpaw_calc.__dict__['parameters']
     #initialize the kpts from the k_density
@@ -28,9 +31,9 @@ def bulk_auto_conv(element,gpaw_calc,
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
         parprint('\t'+'sw: '+str(calc_dict['sw']),file=f)
+        parprint('\t'+'spin polarized: '+str(calc_dict['spinpol']),file=f)
         if calc_dict['spinpol']:
-            parprint('\t'+'magmom: '+str(calc_dict[init_magmom]),file=f)
-        parprint('\t'+'spin polarized: '+str(spinpol),file=f)
+            parprint('\t'+'magmom: '+str(init_magmom),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'eV',file=f)
     f.close()
     #connecting to databse
@@ -58,18 +61,11 @@ def bulk_auto_conv(element,gpaw_calc,
     #start with grid spacing convergence
     while (diff_primary>rela_tol or diff_second>rela_tol) and grid_iters <= 6:
         atoms=bulk_builder(element)
-        atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
-        calc=GPAW(xc=xc,
-                    h=h,
-                    kpts=kpts,
-                    spinpol=spinpol,
-                    maxiter=maxiter,
-                    mixer=Mixer(beta,nmaxold,weight),
-                    eigensolver=Davidson(3),
-                    occupations={'name':'fermi-dirac','width':sw})
-        atoms.set_calculator(calc)
-        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(h))
-        db_h.write(atoms,h=h)
+        if calc_dict['spinpol']:
+            atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
+        atoms.set_calculator(gpaw_calc)
+        opt.optimize_bulk(atoms,step=solver_step,fmax=solver_fmax,location=element+"/"+'bulk'+'/'+'results_h',extname='{}'.format(calc_dict['h']))
+        db_h.write(atoms,h=calc_dict['h'])
         if grid_iters>=2:
             fst=db_h.get_atoms(id=grid_iters-1)
             snd=db_h.get_atoms(id=grid_iters)
@@ -79,8 +75,9 @@ def bulk_auto_conv(element,gpaw_calc,
             diff_second=abs(trd.get_potential_energy()-snd.get_potential_energy())
             if temp_print == True:
                 temp_output_printer(db_h,grid_iters,'h',rep_location)
-        h_ls.append(h)
-        h=np.round(h-0.02,decimals=2)
+        h_ls.append(calc_dict['h'])
+        gpaw_calc.__dict__['parameters']['h']=np.round(calc_dict['h']-0.02,decimals=2)
+        calc_dict=gpaw_calc.__dict__['parameters']
         grid_iters+=1
     if grid_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
@@ -91,29 +88,26 @@ def bulk_auto_conv(element,gpaw_calc,
             sys.exit()
     parprint(h_ls)
     h=h_ls[-3]
+    gpaw_calc.__dict__['parameters']['h']=h
+    calc_dict=gpaw_calc.__dict__['parameters']
     #kpts convergence
     diff_primary=100
     diff_second=100
     k_iters=len(db_k)+1
-    k_ls=[kpts]
-    k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),kpts) ##Need to improve this in the future (kpts to density)
-    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
+    k_ls=[calc_dict['kpts'][0]]
+    k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),calc_dict['kpts'][0])
+    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=str(calc_dict['kpts'][0]))
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
-        kpts=kpts+2
-        atoms=bulk_builder(element)
-        atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
-        calc=GPAW(xc=xc,
-                    h=h,
-                    kpts=kpts,
-                    spinpol=spinpol,
-                    maxiter=maxiter,
-                    mixer=Mixer(beta,nmaxold,weight),
-                    eigensolver=Davidson(3),
-                    occupations={'name':'fermi-dirac','width':sw})
-        atoms.set_calculator(calc)
-        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(kpts[0]))
+        kpts=tuple([int(i+2) for i in calc_dict['kpts'][0]])
         k_density=mp2kdens(atoms,kpts)
-        db_k.write(atoms,k_density=','.join(map(str, k_density)),kpts=','.join(map(str, kpts)))
+        gpaw_calc.__dict__['parameters']['kpts']=kpts
+        calc_dict=gpaw_calc.__dict__['parameters']
+        atoms=bulk_builder(element)
+        if calc_dict['spinpol']:
+            atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
+        atoms.set_calculator(gpaw_calc)
+        opt.optimize_bulk(atoms,step=solver_step,fmax=solver_fmax,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(np.round(k_density[0],decimals=3)))
+        db_k.write(atoms,k_density=','.join(map(str, k_density)),kpts=str(calc_dict['kpts'][0]))
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
             snd=db_k.get_atoms(id=k_iters)
@@ -133,27 +127,23 @@ def bulk_auto_conv(element,gpaw_calc,
             f.close()
             sys.exit()
     kpts=k_ls[-3]
+    gpaw_calc.__dict__['parameters']['kpts']=kpts
+    calc_dict=gpaw_calc.__dict__['parameters']
     #smearing-width convergence test
     diff_primary=100
     diff_second=100
     sw_iters=1
-    sw_ls=[sw]
-    db_sw.write(db_k.get_atoms(len(db_k)-2),sw=sw)
+    sw_ls=[calc_dict['sw']]
+    db_sw.write(db_k.get_atoms(len(db_k)-2),sw=calc_dict['sw'])
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
-        sw=sw/2
+        gpaw_calc.__dict__['parameters']['sw']=calc_dict['sw']/2
+        calc_dict=gpaw_calc.__dict__['parameters']
         atoms=bulk_builder(element)
-        atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
-        calc=GPAW(xc=xc,
-                    h=h,
-                    kpts=kpts,
-                    spinpol=spinpol,
-                    maxiter=maxiter,
-                    mixer=Mixer(beta,nmaxold,weight),
-                    eigensolver=Davidson(3),
-                    occupations={'name':'fermi-dirac','width':sw})
-        atoms.set_calculator(calc)
-        opt.optimize_bulk(atoms,step=0.05,fmax=0.01,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(sw))
-        db_sw.write(atoms,sw=sw)
+        if calc_dict['spinpol']:
+            atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
+        atoms.set_calculator(gpaw_calc)
+        opt.optimize_bulk(atoms,step=solver_step,fmax=solver_fmax,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(calc_dict['sw']))
+        db_sw.write(atoms,sw=calc_dict['sw'])
         if sw_iters>=2:
             fst=db_sw.get_atoms(id=sw_iters-1)
             snd=db_sw.get_atoms(id=sw_iters)
@@ -164,7 +154,7 @@ def bulk_auto_conv(element,gpaw_calc,
             if temp_print == True:
                 temp_output_printer(db_sw,sw_iters,'sw',rep_location)
         sw_iters+=1
-        sw_ls.append(sw)
+        sw_ls.append(calc_dict['sw'])
     if sw_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
             with paropen(rep_location,'a') as f:
@@ -173,23 +163,31 @@ def bulk_auto_conv(element,gpaw_calc,
             f.close()
             sys.exit()
     sw=sw_ls[-3]
+    gpaw_calc.__dict__['parameters']['sw']=sw
+    calc_dict=gpaw_calc.__dict__['parameters']
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
-    k_density=mp2kdens(final_atom,kpts)[0]
-    init_magmom=final_atom.get_magnetic_moments()
+    k_density=mp2kdens(final_atom,calc_dict['kpts'])[0]
+    if calc_dict['spinpol']:
+        final_magmom=final_atom.get_magnetic_moments()
     #writing final_atom to final_db
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
-        db_final.update(id=id,atoms=final_atom,h=h,k_density=k_density,sw=sw,name=element,xc=xc,kpts=','.join(map(str, kpts)),spin=spinpol)
+        db_final.update(id=id,atoms=final_atom,name=element,
+                        h=calc_dict['h'],k_density=k_density,sw=calc_dict['sw'],xc=calc_dict['xc'],
+                        kpts=str(calc_dict['kpts']),spin=calc_dict['spinpol'])
     else:
-        db_final.write(final_atom,id=id,name=element,h=h,k_density=k_density,sw=sw,xc=xc,kpts=','.join(map(str, kpts)),spin=spinpol)
+        db_final.write(final_atom,id=id,name=element,
+                        h=calc_dict['h'],k_density=k_density,sw=calc_dict['sw'],xc=calc_dict['xc'],
+                        kpts=str(calc_dict['kpts']),spin=calc_dict['spinpol'])
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
-        parprint('\t'+'h: '+str(h),file=f)
+        parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
-        parprint('\t'+'kpts: '+str(kpts),file=f)
-        parprint('\t'+'sw: '+str(sw),file=f)
-        parprint('\t'+'magmom: '+str(init_magmom),file=f)
+        parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
+        parprint('\t'+'sw: '+str(calc_dict['sw']),file=f)
+        if calc_dict['spinpol']:
+            parprint('\t'+'magmom: '+str(final_magmom),file=f)
         parprint('Final Output: ',file=f)
         parprint('\t'+'Lattice constants: '+str(np.round(final_atom.get_cell_lengths_and_angles()[:3],decimals=5))+'Ang',file=f)    
         parprint('\t'+'Lattice angles: '+str(np.round(final_atom.get_cell_lengths_and_angles()[3:],decimals=5))+'Degree',file=f)    
