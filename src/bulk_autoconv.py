@@ -1,4 +1,4 @@
-from gpaw import GPAW
+from gpaw import GPAW,Mixer,Davidson
 from ase.build import bulk
 from ase.db import connect
 import os
@@ -9,8 +9,6 @@ import sys
 from ase.io import read, write
 from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
-from gpaw import Mixer
-from gpaw import Davidson
 
 def bulk_auto_conv(element,
                     h=0.16,
