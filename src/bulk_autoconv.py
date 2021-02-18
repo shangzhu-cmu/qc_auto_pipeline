@@ -10,23 +10,13 @@ from ase.io import read, write
 from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
-def bulk_auto_conv(element,
-                    h=0.16,
-                    k_density=4,
-                    xc='PBE',
-                    sw=0.1,
-                    init_magmom=0,
-                    maxiter=333,
-                    spinpol=False,
+def bulk_auto_conv(element,gpaw_calc,
                     rela_tol=10*10**(-3),
-                    temp_print=True,
-                    beta=0.05,
-                    nmaxold=5,
-                    weight=50.0):
+                    temp_print=True):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
+    calc_dict=gpaw_calc.__dict__['parameters']
     #initialize the kpts from the k_density
     orig_atom=bulk_builder(element)
-    kpts=kdens2mp(orig_atom,kptdensity=k_density,even=True)
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
@@ -34,12 +24,12 @@ def bulk_auto_conv(element,
         parprint('\t'+'Materials: '+element,file=f)
         parprint('\t'+'Lattice constants: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[:3],decimals=5))+'Ang',file=f)    
         parprint('\t'+'Lattice angles: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[3:],decimals=5))+'Degree',file=f)
-        parprint('\t'+'xc: '+xc,file=f)
-        parprint('\t'+'h: '+str(h),file=f)
-        parprint('\t'+'k_density: '+str(k_density),file=f)
-        parprint('\t'+'kpts: '+str(kpts),file=f)
-        parprint('\t'+'sw: '+str(sw),file=f)
-        parprint('\t'+'magmom: '+str(init_magmom),file=f)
+        parprint('\t'+'xc: '+calc_dict['xc'],file=f)
+        parprint('\t'+'h: '+str(calc_dict['h']),file=f)
+        parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
+        parprint('\t'+'sw: '+str(calc_dict['sw']),file=f)
+        if calc_dict['spinpol']:
+            parprint('\t'+'magmom: '+str(calc_dict[init_magmom]),file=f)
         parprint('\t'+'spin polarized: '+str(spinpol),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'eV',file=f)
     f.close()
