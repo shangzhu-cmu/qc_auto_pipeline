@@ -173,12 +173,12 @@ def bulk_auto_conv(element,gpaw_calc,
     if id is None:
         id=db_final.get(name=element).id
         db_final.update(id=id,atoms=final_atom,name=element,
-                        h=calc_dict['h'],k_density=k_density,sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],
-                        kpts=str(calc_dict['kpts']),spin=calc_dict['spinpol'])
+                        h=calc_dict['h'],sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],spin=calc_dict['spinpol'],
+                        k_density=k_density,kpts=str(','.join(map(str, calc_dict['kpts']))))
     else:
         db_final.write(final_atom,id=id,name=element,
-                        h=calc_dict['h'],k_density=k_density,sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],
-                        kpts=str(calc_dict['kpts']),spin=calc_dict['spinpol'])
+                        h=calc_dict['h'],sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],spin=calc_dict['spinpol'],
+                        k_density=k_density,kpts=str(','.join(map(str, calc_dict['kpts']))))
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
