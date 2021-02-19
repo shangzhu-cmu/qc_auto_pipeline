@@ -95,9 +95,9 @@ def bulk_auto_conv(element,gpaw_calc,
     k_iters=len(db_k)+1
     k_ls=[calc_dict['kpts']]
     k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),calc_dict['kpts'])
-    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=str(calc_dict['kpts']))
+    db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=str(','.join(map(str, calc_dict['kpts']))))
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
-        kpts=tuple([int(i+2) for i in calc_dict['kpts'][0]])
+        kpts=[int(i+2) for i in calc_dict['kpts']]
         k_density=mp2kdens(atoms,kpts)
         gpaw_calc.__dict__['parameters']['kpts']=kpts
         calc_dict=gpaw_calc.__dict__['parameters']
@@ -105,8 +105,8 @@ def bulk_auto_conv(element,gpaw_calc,
         if calc_dict['spinpol']:
             atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
         atoms.set_calculator(gpaw_calc)
-        opt.optimize_bulk(atoms,step=solver_step,fmax=solver_fmax,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(np.round(k_density[0],decimals=3)))
-        db_k.write(atoms,k_density=','.join(map(str, k_density)),kpts=str(calc_dict['kpts'][0]))
+        opt.optimize_bulk(atoms,step=solver_step,fmax=solver_fmax,location=element+"/"+'bulk'+'/'+'results_k',extname='{}'.format(calc_dict['kpts'][0]))
+        db_k.write(atoms,k_density=','.join(map(str, k_density)),kpts=str(','.join(map(str, calc_dict['kpts']))))
         if k_iters>=2:
             fst=db_k.get_atoms(id=k_iters-1)
             snd=db_k.get_atoms(id=k_iters)
@@ -132,8 +132,8 @@ def bulk_auto_conv(element,gpaw_calc,
     diff_primary=100
     diff_second=100
     sw_iters=1
-    sw_ls=[calc_dict['sw']]
-    db_sw.write(db_k.get_atoms(len(db_k)-2),sw=calc_dict['sw'])
+    sw_ls=[calc_dict['occupations']['width']]
+    db_sw.write(db_k.get_atoms(len(db_k)-2),sw=calc_dict['occupations']['width'])
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
         gpaw_calc.__dict__['parameters']['occupations']['width']=calc_dict['occupations']['width']/2
         calc_dict=gpaw_calc.__dict__['parameters']
@@ -184,7 +184,7 @@ def bulk_auto_conv(element,gpaw_calc,
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
-        parprint('\t'+'sw: '+str(calc_dict['sw']),file=f)
+        parprint('\t'+'sw: '+str(calc_dict['occupations']['width']),file=f)
         if calc_dict['spinpol']:
             parprint('\t'+'magmom: '+str(final_magmom),file=f)
         parprint('Final Output: ',file=f)
