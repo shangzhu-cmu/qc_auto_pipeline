@@ -17,9 +17,7 @@ def bulk_auto_conv(element,gpaw_calc,
                     solver_step=0.05,
                     solver_fmax=0.01):
     rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
-    parprint('before',gpaw_calc.__dict__)
     calc_dict=gpaw_calc.__dict__['parameters']
-    parprint('after',gpaw_calc.__dict__)
     #initialize the kpts from the k_density
     orig_atom=bulk_builder(element)
     if world.rank==0 and os.path.isfile(rep_location):
@@ -32,7 +30,7 @@ def bulk_auto_conv(element,gpaw_calc,
         parprint('\t'+'xc: '+calc_dict['xc'],file=f)
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
-        parprint('\t'+'sw: '+str(calc_dict['sw']),file=f)
+        parprint('\t'+'sw: '+str(calc_dict['occupations']),file=f)
         parprint('\t'+'spin polarized: '+str(calc_dict['spinpol']),file=f)
         if calc_dict['spinpol']:
             parprint('\t'+'magmom: '+str(init_magmom),file=f)
@@ -138,14 +136,14 @@ def bulk_auto_conv(element,gpaw_calc,
     sw_ls=[calc_dict['sw']]
     db_sw.write(db_k.get_atoms(len(db_k)-2),sw=calc_dict['sw'])
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
-        gpaw_calc.__dict__['parameters']['sw']=calc_dict['sw']/2
+        gpaw_calc.__dict__['parameters']['occupations']['width']=calc_dict['occupations']['width']/2
         calc_dict=gpaw_calc.__dict__['parameters']
         atoms=bulk_builder(element)
         if calc_dict['spinpol']:
             atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
         atoms.set_calculator(gpaw_calc)
-        opt.optimize_bulk(atoms,step=solver_step,fmax=solver_fmax,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(calc_dict['sw']))
-        db_sw.write(atoms,sw=calc_dict['sw'])
+        opt.optimize_bulk(atoms,step=solver_step,fmax=solver_fmax,location=element+"/"+'bulk'+'/'+'results_sw',extname='{}'.format(calc_dict['occupations']['width']))
+        db_sw.write(atoms,sw=calc_dict['occupations']['width'])
         if sw_iters>=2:
             fst=db_sw.get_atoms(id=sw_iters-1)
             snd=db_sw.get_atoms(id=sw_iters)
@@ -156,7 +154,7 @@ def bulk_auto_conv(element,gpaw_calc,
             if temp_print == True:
                 temp_output_printer(db_sw,sw_iters,'sw',rep_location)
         sw_iters+=1
-        sw_ls.append(calc_dict['sw'])
+        sw_ls.append(calc_dict['occupations']['width'])
     if sw_iters>=6:
         if diff_primary>rela_tol or diff_second>rela_tol:
             with paropen(rep_location,'a') as f:
@@ -165,7 +163,7 @@ def bulk_auto_conv(element,gpaw_calc,
             f.close()
             sys.exit()
     sw=sw_ls[-3]
-    gpaw_calc.__dict__['parameters']['sw']=sw
+    gpaw_calc.__dict__['parameters']['occupations']['width']=sw
     calc_dict=gpaw_calc.__dict__['parameters']
     final_atom=db_sw.get_atoms(id=len(db_sw)-2)
     k_density=mp2kdens(final_atom,calc_dict['kpts'])[0]
@@ -176,11 +174,11 @@ def bulk_auto_conv(element,gpaw_calc,
     if id is None:
         id=db_final.get(name=element).id
         db_final.update(id=id,atoms=final_atom,name=element,
-                        h=calc_dict['h'],k_density=k_density,sw=calc_dict['sw'],xc=calc_dict['xc'],
+                        h=calc_dict['h'],k_density=k_density,sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],
                         kpts=str(calc_dict['kpts']),spin=calc_dict['spinpol'])
     else:
         db_final.write(final_atom,id=id,name=element,
-                        h=calc_dict['h'],k_density=k_density,sw=calc_dict['sw'],xc=calc_dict['xc'],
+                        h=calc_dict['h'],k_density=k_density,sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],
                         kpts=str(calc_dict['kpts']),spin=calc_dict['spinpol'])
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
