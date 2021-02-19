@@ -94,7 +94,7 @@ def bulk_auto_conv(element,gpaw_calc,
     diff_second=100
     k_iters=len(db_k)+1
     k_ls=[calc_dict['kpts'][0]]
-    paprint(calc_dict['kpts'][0])
+    parprint(calc_dict['kpts'][0])
     k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),calc_dict['kpts'][0])
     db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=str(calc_dict['kpts'][0]))
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
