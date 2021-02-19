@@ -5,7 +5,6 @@ from gpaw import GPAW
 from ase.io.trajectory import Trajectory
 from ase.io import read,write
 from fractions import Fraction
-from ase.parallel import parprint
 import numpy as np
 from ase.dft.bee import BEEFEnsemble
 
@@ -25,7 +24,6 @@ def optimize_bulk(atoms,step=0.05,fmax=0.01,location=' ',extname=' '):
         volumes.append(atoms.get_volume())
     eos=EquationOfState(volumes,energies,eos='birchmurnaghan')
     v0,e0,B=eos.fit()
-    parprint('B={}'.format(B))
     x0=(v0/vol)**Fraction('1/3')
     atoms.set_cell(x0*cell,scale_atoms=True)
     atoms.calc.set(txt=location+'/'+name+'_'+str(x0)+'-'+extname+'.txt')
