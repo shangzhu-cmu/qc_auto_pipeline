@@ -60,7 +60,7 @@ def ads_auto_select(element,
         slab_long_short_ratio=max(slab_length)/min(slab_length)
         if calc_dict['spinpol']:
             slab_formula=ads_slab.get_chemical_symbols()
-            magmom_ls=np.concatenate((magmom,np.mean(magmom)))
+            magmom_ls=np.append(magmom,np.mean(magmom))
             magmom_ls[slab_formula.index(ads)]=0
             ads_slab.set_initial_magnetic_moments(magmom_ls)
         if slab_long_short_ratio > 15:  
