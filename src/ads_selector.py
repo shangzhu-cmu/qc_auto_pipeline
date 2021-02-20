@@ -64,7 +64,7 @@ def ads_auto_select(element,
             magmom_ls[slab_formula.index(ads)]=0
             ads_slab.set_initial_magnetic_moments(magmom_ls)
             with paropen(rep_location,'a') as f:
-                parprint('Setting Initial Magmom:')
+                parprint('Setting Initial Magmom:',file=f)
                 parprint(slab_formula,file=f)
                 parprint(ads_slab.get_magnetic_moments(),file=f)
             f.close()
