@@ -43,7 +43,7 @@ def ads_auto_select(element,
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
         parprint('\t'+'sw: '+str(calc_dict['occupations']),file=f)
-        parprint('\t'+'spin polarized: '+str(calc_dict['occupations']),file=f)
+        parprint('\t'+'spin polarized: '+str(calc_dict['spin']),file=f)
         if calc_dict['spinpol']:
             parprint('\t'+'init_magmom: '+str(magmom),file=f)
     f.close()
@@ -53,6 +53,7 @@ def ads_auto_select(element,
     ads_dict={}
     with paropen(rep_location,'a') as f:
         parprint('Ads Site(Ang)\t\t\tAds Energy(eV)',file=f)
+    f.close()
     for file_loc in fils:
         ads_slab=read(file_loc)
         # kpts=kdens2mp(ads_slab,kptdensity=k_density,even=True)
@@ -63,11 +64,6 @@ def ads_auto_select(element,
             magmom_ls=np.append(magmom,np.mean(magmom))
             magmom_ls[slab_formula.index(ads)]=0
             ads_slab.set_initial_magnetic_moments(magmom_ls)
-            with paropen(rep_location,'a') as f:
-                parprint('Setting Initial Magmom:',file=f)
-                parprint(slab_formula,file=f)
-                parprint(ads_slab.get_initial_magnetic_moments(),file=f)
-            f.close()
         if slab_long_short_ratio > 15:  
             with paropen(rep_location,'a') as f:
                 parprint('WARNING: slab long-short side ratio is'+str(slab_long_short_ratio),file=f)
