@@ -43,7 +43,7 @@ def ads_auto_select(element,
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
         parprint('\t'+'sw: '+str(calc_dict['occupations']),file=f)
-        parprint('\t'+'spin polarized: '+str(calc_dict['spin']),file=f)
+        parprint('\t'+'spin polarized: '+str(calc_dict['spinpol']),file=f)
         if calc_dict['spinpol']:
             parprint('\t'+'init_magmom: '+str(magmom),file=f)
     f.close()
