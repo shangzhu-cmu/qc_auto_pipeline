@@ -1,4 +1,4 @@
-from gpaw import GPAW
+from gpaw import GPAW,Mixer,MixerDif,Davidson
 import glob
 import optimizer as opt
 import numpy as np 
@@ -8,8 +8,6 @@ from ase.db import connect
 import sys
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 from ase.io import read,write
-from gpaw import Davidson
-from gpaw import Mixer,MixerDif
 def ads_auto_select(element,
                 struc,
                 ads,
