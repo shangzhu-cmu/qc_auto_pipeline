@@ -1,5 +1,5 @@
 import ads_selector as ads_sl
-from gpaw import GPAW, MixerSum, Mixer, MixerDiff, Davidson
+from gpaw import GPAW, MixerSum, Mixer, MixerDif, Davidson
 from ase.db import connect
 element='Li_mp-46'
 struc='100'
