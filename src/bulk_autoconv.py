@@ -97,6 +97,7 @@ def bulk_auto_conv(element,gpaw_calc,
     k_density=mp2kdens(db_h.get_atoms(len(db_h)-2),calc_dict['kpts'])
     db_k.write(db_h.get_atoms(len(db_h)-2),k_density=','.join(map(str, k_density)),kpts=str(','.join(map(str, calc_dict['kpts']))))
     while (diff_primary>rela_tol or diff_second>rela_tol) and k_iters <= 6: 
+        atoms=bulk_builder(element)
         kpts=[int(i+2) for i in calc_dict['kpts']]
         k_density=mp2kdens(atoms,kpts)
         gpaw_calc.__dict__['parameters']['kpts']=kpts
@@ -135,6 +136,7 @@ def bulk_auto_conv(element,gpaw_calc,
     sw_ls=[calc_dict['occupations']['width']]
     db_sw.write(db_k.get_atoms(len(db_k)-2),sw=calc_dict['occupations']['width'])
     while (diff_primary>rela_tol or diff_second>rela_tol) and sw_iters <= 6: 
+        atoms=bulk_builder(element)
         gpaw_calc.__dict__['parameters']['occupations']['width']=calc_dict['occupations']['width']/2
         calc_dict=gpaw_calc.__dict__['parameters']
         atoms=bulk_builder(element)
