@@ -66,7 +66,7 @@ def ads_auto_select(element,
             with paropen(rep_location,'a') as f:
                 parprint('Setting Initial Magmom:',file=f)
                 parprint(slab_formula,file=f)
-                parprint(ads_slab.get_magnetic_moments(),file=f)
+                parprint(ads_slab.get_initial_magnetic_moments(),file=f)
             f.close()
         if slab_long_short_ratio > 15:  
             with paropen(rep_location,'a') as f:
