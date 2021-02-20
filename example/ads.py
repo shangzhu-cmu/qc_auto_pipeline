@@ -3,7 +3,7 @@ from gpaw import GPAW, MixerSum, Mixer, MixerDiff, Davidson
 from ase.db import connect
 element='Li_mp-46'
 struc='100'
-element_surf=connect('final_database/bulk.db').get(name=element+'('+struc+')')
+element_surf=connect('final_database/surf.db').get(name=element+'('+struc+')')
 h=element_surf.h
 xc=element_surf.xc
 sw=element_surf.sw
