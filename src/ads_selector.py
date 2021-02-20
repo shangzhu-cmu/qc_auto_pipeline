@@ -63,6 +63,11 @@ def ads_auto_select(element,
             magmom_ls=np.append(magmom,np.mean(magmom))
             magmom_ls[slab_formula.index(ads)]=0
             ads_slab.set_initial_magnetic_moments(magmom_ls)
+            with paropen(rep_location,'a') as f:
+                parprint('Setting Initial Magmom:')
+                parprint(slab_formula,file=f)
+                parprint(ads_slab.get_magnetic_moments(),file=f)
+            f.close()
         if slab_long_short_ratio > 15:  
             with paropen(rep_location,'a') as f:
                 parprint('WARNING: slab long-short side ratio is'+str(slab_long_short_ratio),file=f)
