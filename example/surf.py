@@ -6,6 +6,7 @@ element_bulk=connect('final_database/bulk.db').get(name=element)
 h=element_bulk.h
 xc=element_bulk.xc
 sw=element_bulk.sw
+spin=element_bulk.spin
 #all settings but kpts (due to structure dependence)
 struc='100'
 calc=GPAW(xc=xc,
@@ -13,7 +14,7 @@ calc=GPAW(xc=xc,
     symmetry = {'point_group': False},
     eigensolver=Davidson(3),
     mixer=Mixer(beta=0.05,nmaxold=5,weight=50),
-    spinpol=False,
+    spinpol=spin,
     maxiter=333,
     occupations={'name': 'fermi-dirac','width': sw},
     poissonsolver={'dipolelayer': 'xy'})
