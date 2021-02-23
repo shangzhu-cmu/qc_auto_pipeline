@@ -163,7 +163,7 @@ def surf_auto_conv(element,struc,gpaw_calc,generator='pymatgen',init_layer=4,int
         if slab_long_short_ratio > 15:  
             with paropen(rep_location,'a') as f:
                 parprint('WARNING: slab long-short side ratio is'+str(slab_long_short_ratio),file=f)
-                parprint('Consider change the mixer setting, if not converged.',fiile=f)
+                parprint('Consider change the mixer setting, if not converged.',file=f)
             f.close()                       
         slab.set_calculator(gpaw_calc)
         location=element+'/'+'surf'+'/'+struc+'/'+str(actual_layer)+'x1x1'
