@@ -181,8 +181,7 @@ def cif_grabber(API_key,pretty_formula):
     doc_ls=mpr.query({'pretty_formula':pretty_formula},['material_id','formation_energy_per_atom'])
     form_dict={}
     for doc in doc_ls:
-        print(doc)
-        form_dict[doc['material_id']]=doc['formation_energy_peratom']
+        form_dict[doc['material_id']]=doc['formation_energy_per_atom']
     id_sorted = sorted(form_dict,key=form_dict.get)
     lowest_matID=id_sorted[0]
     struc=mpr.get_structure_by_material_id(lowest_matID,final=True,conventional_unit_cell=True)
