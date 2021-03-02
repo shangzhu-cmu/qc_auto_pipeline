@@ -22,8 +22,8 @@ def ads_auto_select(element,
     #set up the workspace
     code_dir=os.getcwd() #get the current working dir
     #struc_dir=element+'/'+'ads'+'/'+struc #get the structure dir
-    # 
-
+    #
+    
     #create report
     rep_location=code_dir+'/'+element+'/'+'ads'+'/'+struc+'_results_report.txt' 
     if world.rank==0 and os.path.isfile(rep_location):
@@ -54,6 +54,7 @@ def ads_auto_select(element,
     with paropen(rep_location,'a') as f:
         parprint('Ads Site(Ang)\t\t\tAds Energy(eV)',file=f)
     f.close()
+    parprint(fils)
     for file_loc in fils:
         ads_slab=read(file_loc)
         # kpts=kdens2mp(ads_slab,kptdensity=k_density,even=True)
