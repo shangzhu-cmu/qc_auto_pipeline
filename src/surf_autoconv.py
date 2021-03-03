@@ -27,7 +27,7 @@ from pymatgen.io.ase import AseAtomsAdaptor
 #                     beta=0.05,
 #                     nmaxold=5,
 #                     weight=50.0):
-def surf_auto_conv(element,struc,gpaw_calc,generator='pymatgen',init_layer=4,interval=2,fix_layer=2,vac=10,solver_fmax=0.01,solver_step=0.05,rela_tol=5,temp_print=True):
+def surf_auto_conv(element,struc,gpaw_calc,generator='pymatgen',pbc_all=False,init_layer=4,interval=2,fix_layer=2,vac=10,solver_fmax=0.01,solver_step=0.05,rela_tol=5,temp_print=True):
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
 
@@ -149,7 +149,10 @@ def surf_auto_conv(element,struc,gpaw_calc,generator='pymatgen',init_layer=4,int
             slab.set_initial_magnetic_moments(magmom*np.ones(len(slab)))
         fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
-        slab.set_pbc([1,1,0])
+        if pbc_all:
+            slab.set_pbc([1,1,1])
+        else: 
+            slab.set_pbc([1,1,0])
         # ortho=slab.get_cell_lengths_and_angles()[3:5]
         # if np.all(90==ortho):
         #     slab.set_pbc([1,1,0])
