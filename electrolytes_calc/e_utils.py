@@ -1,7 +1,7 @@
 import os
 import sys
 import pubchempy as pcp
-from ase.data.pubchem import pubchem_atoms_search
+from ase.data.pubchem import pubchem_atoms_conformer_search
 
 def pause():
     input('Press <ENTER> to continue...')
@@ -39,8 +39,9 @@ def create_big_dir():
 
 def mol_pubchem_grabber(cid):
     try:
-        mol=pubchem_atoms_search(cid=cid)
+        mol=pubchem_atoms_conformer_search(cid=cid)[0]
         c=pcp.get_compounds(cid,'cid')
+        print(c)
         synonyms_name=(c[0].synonyms)[0]
         mol_name=synonyms_name.lower().replace(' ','-')
         mol.write('./input_xyz/'+mol_name+'_'+str(cid)+'.xyz')
