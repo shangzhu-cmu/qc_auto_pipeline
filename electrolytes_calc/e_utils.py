@@ -43,5 +43,5 @@ def mol_pubchem_grabber(mol_name):
         cid=str(c[0].cid)
         mol.write('./input_xyz/'+mol_name+'_'+cid+'.xyz')
     except:
-        print("Can't find '{}' in PubChem Database.".format(mol_name))
+        print("ERROR: Can't find '{}' in PubChem Database.".format(mol_name))
         sys.exit()
