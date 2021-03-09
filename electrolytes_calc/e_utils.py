@@ -36,11 +36,12 @@ def create_big_dir():
     else:
         os.makedirs('final_database')
 
-def mol_pubchem_grabber(mol_name):
+def mol_pubchem_grabber(cid):
     try:
-        mol=pubchem_atoms_search(name=mol_name)
-        c=pcp.get_compounds(mol_name,'name')
-        cid=str(c[0].cid)
-        mol.write('./input_xyz/'+mol_name+'_'+cid+'.xyz')
+        mol=pubchem_atoms_search(cid=cid)
+        c=pcp.get_compounds(cid,'cid')
+        synonyms_name=str(c[0].synonyms)
+        print(synonyms_name)
+        #mol.write('./input_xyz/'+mol_name+'_'+cid+'.xyz')
     except:
         print("ERROR: Can't find '{}' in PubChem Database.".format(mol_name))
