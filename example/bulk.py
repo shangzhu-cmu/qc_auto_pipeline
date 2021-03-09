@@ -3,7 +3,7 @@ import bulk_autoconv as bulk_ac
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 ## Set up the initial calculator
 element='Cu_mp-30'
-element_atom=bulk_ac.bulk_builder(element)
+element_atom=bulk_ac.bulk_builder(element) #cif --> ase atom
 kpts=kdens2mp(element_atom) #default k_dens=3.5, even=True
 calc=GPAW(xc='PBE',
             h=0.16,
