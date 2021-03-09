@@ -1,6 +1,7 @@
 import os
 import sys
 import pubchempy as pcp
+from ase.data.pubchem import pubchem_atoms_search
 
 def pause():
     input('Press <ENTER> to continue...')
@@ -34,3 +35,13 @@ def create_big_dir():
         sys.exit()
     else:
         os.makedirs('final_database')
+
+def mol_pubchem_grabber(mol_name):
+    try:
+        mol=pubchem_atoms_search(name=mol_name)
+        c=pcp.get_compounds(mol_name,'name')
+        cid=str(c[0].cid)
+        mol.write('./input_xyz/'+mol_name+'(cid='+cid+').xyz')
+    except:
+        print("Can't find '{}' in PubChem Database.".format(mol_name))
+        sys.exis()
