@@ -19,6 +19,7 @@ def create_mol_dir(mol_name,sub_dir=['PBE','BEEF']):
         os.makedirs(cid)
         for i in sub_dir:
             os.makedirs(cid+'/'+i)
+        return int(cid) 
 
 
 def create_big_dir():
@@ -40,8 +41,7 @@ def mol_pubchem_grabber(cid):
     try:
         mol=pubchem_atoms_search(cid=cid)
         c=pcp.get_compounds(cid,'cid')
-        synonyms_name=str(c[0].synonyms)
-        print(synonyms_name)
-        #mol.write('./input_xyz/'+mol_name+'_'+cid+'.xyz')
+        synonyms_name=c[0].synonyms
+        mol.write('./input_xyz/'+synonyms_name[0].lower()+'_'+str(cid)+'.xyz')
     except:
-        print("ERROR: Can't find '{}' in PubChem Database.".format(mol_name))
+        print("ERROR: Can't find '{}' in PubChem Database.".format(str(cid)))
