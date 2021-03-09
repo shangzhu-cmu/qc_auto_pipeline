@@ -41,7 +41,7 @@ def mol_pubchem_grabber(mol_name):
         mol=pubchem_atoms_search(name=mol_name)
         c=pcp.get_compounds(mol_name,'name')
         cid=str(c[0].cid)
-        mol.write('./input_xyz/'+mol_name+'(cid='+cid+').xyz')
+        mol.write('./input_xyz/'+mol_name+'_'+cid+'.xyz')
     except:
         print("Can't find '{}' in PubChem Database.".format(mol_name))
         sys.exis()
