@@ -42,6 +42,7 @@ def mol_pubchem_grabber(cid):
         mol=pubchem_atoms_search(cid=cid)
         c=pcp.get_compounds(cid,'cid')
         synonyms_name=c[0].synonyms
-        mol.write('./input_xyz/'+synonyms_name[0].lower()+'_'+str(cid)+'.xyz')
+        mol_name=synonyms_name.lower.replace(' ','-')
+        mol.write('./input_xyz/'+mol_name+'_'+str(cid)+'.xyz')
     except:
         print("ERROR: Can't find '{}' in PubChem Database.".format(str(cid)))
