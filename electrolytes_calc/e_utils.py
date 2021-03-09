@@ -39,7 +39,7 @@ def create_big_dir():
 
 def mol_pubchem_grabber(cid):
     try:
-        mol=pubchem_atoms_conformer_search(cid=cid)
+        mol=pubchem_atoms_search(cid=cid,silent=True)
         c=pcp.get_compounds(cid,'cid')
         synonyms_name=(c[0].synonyms)[0]
         mol_name=synonyms_name.lower().replace(' ','-')
