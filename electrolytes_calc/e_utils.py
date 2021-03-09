@@ -42,6 +42,7 @@ def mol_pubchem_grabber(cid):
         mol=pubchem_atoms_search(cid=cid)
         c=pcp.get_compounds(cid,'cid')
         synonyms_name=c[0].synonyms
+        print(synonyms_name)
         mol_name=synonyms_name.lower.replace(' ','-')
         mol.write('./input_xyz/'+mol_name+'_'+str(cid)+'.xyz')
     except:
