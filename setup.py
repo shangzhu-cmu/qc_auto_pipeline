@@ -17,7 +17,7 @@ setup(
     version='0.1.0',
     description='A python library to automate convergence test in GPAW',
     url='https://github.com/kianpu34593/AutoConverge',
-    liscence='MIT',
+    license='MIT',
     install_requires=[
         "numpy==1.19.5",
         "ase==3.20.1",
