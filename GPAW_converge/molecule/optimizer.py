@@ -34,7 +34,7 @@ def optimize_bulk(atoms,step=0.05,fmax=0.01,location=' ',extname=' '):
     atoms.calc.write(location+'/'+name+'_'+str(x0)+'-'+extname+'.gpw')
     ## TO-DO: add ensemble energies to file
 
-def relax(atoms,name,sub_name,xc,parameters,fmax=0.01, maxstep=0.04, replay_traj=None):
+def relax(atoms,name,sub_name,parameters,xc,fmax=0.01, maxstep=0.04, replay_traj=None):
     gpwname=name+'/'+xc+'/results_'+sub_name+'/'+'mol_'+str(parameters)
     atoms.calc.set(txt=gpwname+'.txt')
     #atoms.calc.attach(atoms.calc.write, 5, gpwname+'.gpw')
