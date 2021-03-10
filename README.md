@@ -1,2 +1,2 @@
-# auto_converg_GPAW
+# AutoConverge
 Auto convergence test for GPAW
