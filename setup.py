@@ -1,5 +1,5 @@
 from setuptools import setup
-from setuptools import find_namespace_packages
+from setuptools import find_packages
 
 # Load the README file.
 with open(file="README.md", mode="r") as readme_handle:
@@ -27,7 +27,7 @@ setup(
         "pubchempy==1.0.4",
     ],
     keywords='DFT,GPAW,convergence test,ase',
-    packages=find_namespace_packages(where='GPAW_converge'),
+    packages=find_packages(where='GPAW_converge'),
     python_requies='>=3.7',
     classifiers=[
         "Development Status :: 3 - Alpha",
