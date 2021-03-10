@@ -41,7 +41,7 @@ def bulk_auto_conv(element,gpaw_calc,
     #connecting to databse
     db_final=connect('final_database'+'/'+'bulk_'+calc_dict['xc']+'.db')
     if 'h' in parameters:
-        db_h=connect(element+"/"+'bulk'+'/'+'grid_converge.db')
+        db_h=connect(cid+'/'+calc_dict['xc'].split('-')[0]+'/'+'grid_converge.db')
         diff_primary=100
         diff_second=100
         grid_iters=len(db_h)
@@ -134,7 +134,7 @@ def bulk_auto_conv(element,gpaw_calc,
     # calc_dict=gpaw_calc.__dict__['parameters']
     #smearing-width convergence test
     elif 'sw' in parameters:
-        db_sw=connect(element+"/"+'bulk'+'/'+'sw_converge.db')
+        db_sw=connect(cid+'/'+calc_dict['xc'].split('-')[0]+'/'+'sw_converge.db')
         diff_primary=100
         diff_second=100
         sw_iters=1
