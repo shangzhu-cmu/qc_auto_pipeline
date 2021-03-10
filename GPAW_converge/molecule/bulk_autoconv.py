@@ -18,9 +18,9 @@ def bulk_auto_conv(element,gpaw_calc,
                     solver_fmax=0.01,
                     solver_maxstep=0.04):
     calc_dict=gpaw_calc.__dict__['parameters']
-    rep_location=(element+'/'+calc_dict['xc'].split('-')[0]+'/'+'results_report.txt')
-    orig_atom=bulk_builder(element)
     cid=element.split('_')[-1]
+    orig_atom=bulk_builder(element)
+    rep_location=(cid+'/'+calc_dict['xc'].split('-')[0]+'/'+'results_report.txt')
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
