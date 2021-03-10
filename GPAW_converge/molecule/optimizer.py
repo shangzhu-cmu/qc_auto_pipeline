@@ -37,7 +37,7 @@ def optimize_bulk(atoms,step=0.05,fmax=0.01,location=' ',extname=' '):
 def relax(atoms,name,sub_name,parameters,fmax=0.01, maxstep=0.04, replay_traj=None):
     #calc = surf.calc
     #name = surf.get_chemical_formula(mode='hill')
-    gpwname=name+'/'+'results_'+sub_name+'mol_'+str(parameters)
+    gpwname=name+'/'+'results_'+sub_name+'/+'mol_'+str(parameters)
     atoms.calc.set(txt=gpwname+'.txt')
     #atoms.calc.attach(atoms.calc.write, 5, gpwname+'.gpw')
     dyn=BFGS(atoms=atoms,trajectory=gpwname+'.traj',logfile = gpwname+'.log',restart=gpwname+'qn.pckl',maxstep=maxstep)
