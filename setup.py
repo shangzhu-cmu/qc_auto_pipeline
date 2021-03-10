@@ -21,7 +21,7 @@ setup(
     install_requires=[
         "numpy==1.19.5",
         "ase==3.20.1",
-        "gpaw==20.10.1",
+        "gpaw==20.10.0",
         "autocat==0.0.1",
         "pymatgen==2020.12.31",
         "pubchempy==1.0.4",
