@@ -1,4 +1,4 @@
-from gpaw import GPAW
+from gpaw import GPAW,Mixer,MixerDif,MixerSum,Davidson
 from ase.constraints import FixAtoms
 from ase.build import surface
 from ase.io import write,read
@@ -10,25 +10,24 @@ import numpy as np
 import re
 import sys
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
-from gpaw import Davidson
 from pymatgen.core.surface import SlabGenerator
 from pymatgen.io.ase import AseAtomsAdaptor
-from gpaw import Mixer,MixerDif
 ###Warning: Only stocimetric surface!
 
-def surf_auto_conv(element,
-                    struc,
-                    init_layer=5,
-                    vac=5,
-                    fix_layer=2,
-                    rela_tol=5,
-                    temp_print=True,
-                    generator='pymatgen',
-                    interval=2,
-                    maxiter=333,
-                    beta=0.05,
-                    nmaxold=5,
-                    weight=50.0):
+# def surf_auto_conv(element,
+#                     struc,
+#                     init_layer=5,
+#                     vac=5,
+#                     fix_layer=2,
+#                     rela_tol=5,
+#                     temp_print=True,
+#                     generator='pymatgen',
+#                     interval=2,
+#                     maxiter=333,
+#                     beta=0.05,
+#                     nmaxold=5,
+#                     weight=50.0):
+def surf_auto_conv(element,struc,gpaw_calc,generator='pymatgen',pbc_all=False,init_layer=4,interval=2,fix_layer=2,vac=10,solver_fmax=0.01,solver_step=0.05,rela_tol=5,temp_print=True):
     #convert str ind to tuple
     m_ind=tuple(map(int,struc))
 
@@ -37,34 +36,32 @@ def surf_auto_conv(element,
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     
-    #check the optimized bulk object
-    if not os.path.isfile('final_database/bulk.db'):
-        with paropen(rep_location,'a') as f:
-            parprint('ERROR: bulk database has not been established!',file=f)
-            parprint('Surface Convergence Computation Suspended!',file=f)
-        f.close()
-        sys.exit()
-    else:
-        db_bulk=connect('final_database'+'/'+'bulk.db')
-        try:
-            opt_bulk=db_bulk.get_atoms(name=element)
-        except:
-            with paropen(rep_location,'a') as f:
-                parprint('ERROR: No Optimized Bulk Object Found!',file=f)
-                parprint('Surface Convergence Computation Suspended!',file=f)
-            f.close()
-            sys.exit()
-    
+    # #check the optimized bulk object
+    # if not os.path.isfile('final_database/bulk.db'):
+    #     with paropen(rep_location,'a') as f:
+    #         parprint('ERROR: bulk database has not been established!',file=f)
+    #         parprint('Surface Convergence Computation Suspended!',file=f)
+    #     f.close()
+    #     sys.exit()
+    # else:
+    #     db_bulk=connect('final_database'+'/'+'bulk.db')
+    #     try:
+    #         opt_bulk=db_bulk.get_atoms(name=element)
+    #     except:
+    #         with paropen(rep_location,'a') as f:
+    #             parprint('ERROR: No Optimized Bulk Object Found!',file=f)
+    #             parprint('Surface Convergence Computation Suspended!',file=f)
+    #         f.close()
+    #         sys.exit()
+    db_bulk=connect('final_database'+'/'+'bulk.db')
+    opt_bulk=db_bulk.get_atoms(name=element)
+    calc_dict=gpaw_calc.__dict__['parameters']
     #get the optimized bulk object and converged parameters
     pymatgen_bulk=AseAtomsAdaptor.get_structure(opt_bulk)
-    magmom=np.mean(opt_bulk.get_magnetic_moments())
-    spin=db_bulk.get(name=element).spin
-    xc=db_bulk.get(name=element).xc
-    h=db_bulk.get(name=element).h
+    if calc_dict['spinpol']:
+        magmom=np.mean(opt_bulk.get_magnetic_moments()) ## do i need to make this exposed as well?
     k_density=db_bulk.get(name=element).k_density
     kpts=[int(i) for i in (db_bulk.get(name=element).kpts).split(',')]
-    sw=db_bulk.get(name=element).sw
-    
     #print out parameters
     with paropen(rep_location,'a') as f:
         parprint('Initial Parameters:',file=f)
@@ -73,13 +70,14 @@ def surf_auto_conv(element,
         parprint('\t'+'Actual Layer: '+str(init_layer),file=f)
         parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
-        parprint('\t'+'xc: '+xc,file=f)
-        parprint('\t'+'h: '+str(h),file=f)
+        parprint('\t'+'xc: '+calc_dict['xc'],file=f)
+        parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'k_density: '+str(k_density),file=f)
         parprint('\t'+'kpts: '+str(kpts),file=f)
-        parprint('\t'+'sw: '+str(sw),file=f)
-        parprint('\t'+'magmom: '+str(magmom),file=f)
-        parprint('\t'+'spin polarized: '+str(spin),file=f)
+        parprint('\t'+'sw: '+str(calc_dict['occupations']),file=f)
+        parprint('\t'+'spin polarized: '+str(calc_dict['spinpol']),file=f)
+        if calc_dict['spinpol']:
+            parprint('\t'+'Init magmom: '+str(magmom),file=f)
         parprint('\t'+'rela_tol: '+str(rela_tol)+'%',file=f)
     f.close()
 
@@ -105,7 +103,8 @@ def surf_auto_conv(element,
         for j in range(len(db_layer)):
             act_layer_ls.append(db_layer.get(j+1).act_layer)
             sim_layer_ls.append(db_layer.get(j+1).sim_layer)
-        sim_layer=sim_layer_ls[-1]
+        sim_layer=sim_layer_ls[-1]+np.diff(sim_layer_ls)[0]
+        init_layer=act_layer_ls[-1]+np.diff(act_layer_ls)[0]
     if generator=='pymatgen':
         slabgen = SlabGenerator(pymatgen_bulk, m_ind, sim_layer, sim_layer*2, center_slab=True, lll_reduce=True, in_unit_planes=True)
         slabs=slabgen.get_slabs() #this only take the first structure
@@ -146,66 +145,32 @@ def surf_auto_conv(element,
         current_vac=slab.cell.lengths()[-1]-max(slab.positions[:,2])
         if current_vac != vac:
             slab.center(vacuum=vac,axis=2)
-        slab.set_initial_magnetic_moments(magmom*np.ones(len(slab)))
+        if calc_dict['spinpol']:
+            slab.set_initial_magnetic_moments(magmom*np.ones(len(slab)))
         fix_mask=np.round(slab.positions[:,2],decimals=4) <= np.unique(np.round(slab.positions[:,2],decimals=4))[fix_layer-1]
         slab.set_constraint(FixAtoms(mask=fix_mask))
-        ortho=slab.get_cell_lengths_and_angles()[3:5]
-        if np.all(90==ortho):
-            slab.set_pbc([1,1,0])
-        else:
+        if pbc_all:
             slab.set_pbc([1,1,1])
+        else: 
+            slab.set_pbc([1,1,0])
+        # ortho=slab.get_cell_lengths_and_angles()[3:5]
+        # if np.all(90==ortho):
+        #     slab.set_pbc([1,1,0])
+        # else:
+        #     slab.set_pbc([1,1,1])
         kpts=kdens2mp(slab,kptdensity=k_density,even=True)
+        gpaw_calc.__dict__['parameters']['kpts']=kpts
+        calc_dict=gpaw_calc.__dict__['parameters']
         slab_length=slab.cell.lengths()
         slab_long_short_ratio=max(slab_length)/min(slab_length)
         if slab_long_short_ratio > 15:  
-            if spin:
-                calc=GPAW(xc=xc,
-                    h=h,
-                    symmetry = {'point_group': False},
-                    kpts=kpts,
-                    eigensolver=Davidson(3),
-                    mixer=MixerDif(np.round(beta/2,decimals=2), nmaxold, weight*2),
-                    spinpol=spin,
-                    maxiter=maxiter,
-                    occupations={'name': 'fermi-dirac','width': sw},
-                    poissonsolver={'dipolelayer': 'xy'})
-            else:
-                calc=GPAW(xc=xc,
-                    h=h,
-                    symmetry = {'point_group': False},
-                    kpts=kpts,
-                    eigensolver=Davidson(3),
-                    mixer=Mixer(np.round(beta/2,decimals=2), nmaxold, weight*2),
-                    maxiter=maxiter,
-                    occupations={'name': 'fermi-dirac','width': sw},
-                    poissonsolver={'dipolelayer': 'xy'})
-
-        else:
-            if spin:
-                calc=GPAW(xc=xc,
-                    h=h,
-                    symmetry = {'point_group': False},
-                    kpts=kpts,
-                    spinpol=spin,
-                    mixer=MixerDif(beta,nmaxold,weight),
-                    maxiter=maxiter,
-                    eigensolver=Davidson(3),
-                    occupations={'name': 'fermi-dirac','width': sw},
-                    poissonsolver={'dipolelayer': 'xy'})   
-            else:
-                calc=GPAW(xc=xc,
-                    h=h,
-                    symmetry = {'point_group': False},
-                    kpts=kpts,
-                    spinpol=spin,
-                    mixer=Mixer(beta,nmaxold,weight),
-                    maxiter=maxiter,
-                    eigensolver=Davidson(3),
-                    occupations={'name': 'fermi-dirac','width': sw},
-                    poissonsolver={'dipolelayer': 'xy'})                            
-        slab.set_calculator(calc)
+            with paropen(rep_location,'a') as f:
+                parprint('WARNING: slab long-short side ratio is'+str(slab_long_short_ratio),file=f)
+                parprint('Consider change the mixer setting, if not converged.',file=f)
+            f.close()                       
+        slab.set_calculator(gpaw_calc)
         location=element+'/'+'surf'+'/'+struc+'/'+str(actual_layer)+'x1x1'
-        opt.surf_relax(slab, location, fmax=0.01, maxstep=0.04, replay_traj=None)
+        opt.surf_relax(slab, location, fmax=solver_fmax, maxstep=solver_step, replay_traj=None)
         db_layer.write(slab,sim_layer=sim_layer,act_layer=actual_layer) #sim layer is different from the actual layers
         if iters>=2:
             fst=db_layer.get_atoms(id=iters-1)
@@ -253,28 +218,31 @@ def surf_auto_conv(element,
     sim_layer=sim_layer_ls[-3]
     final_slab=db_layer.get_atoms(len(db_layer)-2) 
     vac=np.round(final_slab.cell.lengths()[-1]-max(final_slab.positions[:,2]),decimals=4)
-    if magmom!=0:
+    if calc_dict['spinpol']:
         final_mag=final_slab.get_magnetic_moments()
-    else:
-        final_mag=0
     db_final=connect('final_database'+'/'+'surf.db')
     id=db_final.reserve(name=element+'('+struc+')')
     if id is None:
         id=db_final.get(name=element+'('+struc+')').id
-        db_final.update(id=id,atoms=final_slab,h=h,k_density=k_density,sw=sw,name=element+'('+struc+')',xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac,spin=spin)
+        db_final.update(id=id,atoms=final_slab,name=element+'('+struc+')',
+                        act_layer=act_layer,sim_layer=sim_layer,vac=vac,
+                        h=calc_dict['h'],sw=calc_dict['occupations']['width'],
+                        xc=calc_dict['xc'],spin=calc_dict['spinpol'],
+                        k_density=k_density,kpts=str(','.join(map(str, calc_dict['kpts']))))
     else:
-        db_final.write(final_slab,id=id,name=element+'('+struc+')',h=h,k_density=k_density,sw=sw,xc=xc,act_layer=act_layer,sim_layer=sim_layer,vac=vac,spin=spin)
+        db_final.write(final_slab,id=id,name=element+'('+struc+')',
+                        act_layer=act_layer,sim_layer=sim_layer,vac=vac,
+                        h=calc_dict['h'],sw=calc_dict['occupations']['width'],
+                        xc=calc_dict['xc'],spin=calc_dict['spinpol'],
+                        k_density=k_density,kpts=str(','.join(map(str, calc_dict['kpts']))))
     with paropen(rep_location,'a') as f:
         parprint('Final Parameters:',file=f)
         parprint('\t'+'Simulated Layer: '+str(sim_layer),file=f)
         parprint('\t'+'Actual Layer: '+str(act_layer),file=f)
         parprint('\t'+'Vacuum length: '+str(vac)+'Ang',file=f)
         parprint('\t'+'Fixed layer: '+str(fix_layer),file=f)
-        parprint('\t'+'xc: '+xc,file=f)
-        parprint('\t'+'h: '+str(h),file=f)
-        parprint('\t'+'k_density: '+str(k_density),file=f)
-        parprint('\t'+'sw: '+str(sw),file=f)
-        parprint('\t'+'magmom: '+str(final_mag),file=f)
+        if calc_dict['spinpol']:
+            parprint('\t'+'Final magmom: '+str(final_mag),file=f)
     f.close()
 
 def surf_e_calc(pre,post,bulk_e,bulk_num):
