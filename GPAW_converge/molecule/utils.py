@@ -6,7 +6,7 @@ from ase.data.pubchem import pubchem_atoms_search
 def pause():
     input('Press <ENTER> to continue...')
 
-def create_mol_dir(mol_name,sub_dir=['PBE','BEEF']):
+def create_mol_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
     current_dir=os.getcwd()
     os.chdir(current_dir)
     c=pcp.get_compounds(mol_name,'name')
@@ -19,6 +19,9 @@ def create_mol_dir(mol_name,sub_dir=['PBE','BEEF']):
         os.makedirs(cid)
         for i in sub_dir:
             os.makedirs(cid+'/'+i)
+            if convergence:
+                for j in parameters:
+                    os.makedirs(cid+'/'+i+'/'+j)
         return int(cid) 
 
 
@@ -47,3 +50,4 @@ def mol_pubchem_grabber(cid):
         print("'"+mol_name+"'",'input xyz is saved successfully!')
     except:
         print("ERROR: Can't find '{}' in PubChem Database.".format(str(cid)))
+
