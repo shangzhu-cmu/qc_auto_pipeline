@@ -20,7 +20,8 @@ def bulk_auto_conv(element,gpaw_calc,
     calc_dict=gpaw_calc.__dict__['parameters']
     cid=element.split('_')[-1]
     orig_atom=bulk_builder(element)
-    rep_location=(cid+'/'+calc_dict['xc'].split('-')[0]+'/'+'results_report.txt')
+    XC=calc_dict['xc'].split('-')[0]
+    rep_location=(cid+'/'+XC+'/'+'results_report.txt')
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
@@ -28,7 +29,7 @@ def bulk_auto_conv(element,gpaw_calc,
         parprint('\t'+'Materials: '+element,file=f)
         parprint('\t'+'Lattice constants: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[:3],decimals=5))+'Ang',file=f)    
         parprint('\t'+'Lattice angles: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[3:],decimals=5))+'Degree',file=f)
-        parprint('\t'+'xc: '+calc_dict['xc'],file=f)
+        parprint('\t'+'xc: '+XC,file=f)
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
         parprint('\t'+'sw: '+str(calc_dict['occupations']),file=f)
@@ -65,7 +66,7 @@ def bulk_auto_conv(element,gpaw_calc,
             if calc_dict['spinpol']:
                 atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
             atoms.set_calculator(gpaw_calc)
-            opt.relax(atoms,cid,'h',calc_dict['h'],fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
+            opt.relax(atoms,cid,'h',calc_dict['h'],XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
             db_h.write(atoms,h=calc_dict['h'])
             if grid_iters>=2:
                 fst=db_h.get_atoms(id=grid_iters-1)
@@ -147,7 +148,7 @@ def bulk_auto_conv(element,gpaw_calc,
             if calc_dict['spinpol']:
                 atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
             atoms.set_calculator(gpaw_calc)
-            opt.relax(atoms,cid,'sw',calc_dict['occupations']['width'],fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
+            opt.relax(atoms,cid,'sw',calc_dict['occupations']['width'],XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
             db_sw.write(atoms,sw=calc_dict['occupations']['width'])
             if sw_iters>=2:
                 fst=db_sw.get_atoms(id=sw_iters-1)
