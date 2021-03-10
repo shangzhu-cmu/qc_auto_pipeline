@@ -194,6 +194,13 @@ def bulk_auto_conv(element,gpaw_calc,
 def bulk_builder(element):
     location='input_xyz'+'/'+element+'.xyz'
     atoms=read(location)
+    pos = atoms.get_positions()
+    xl = max(pos[:,0])-min(pos[:,0])+15
+    yl = max(pos[:,1])-min(pos[:,1])+15
+    zl = max(pos[:,2])-min(pos[:,2])+15
+    atoms.set_cell((xl,yl,zl))
+    atoms.center()
+    atoms.set_pbc([False,False,False])
     return atoms
 
 def temp_output_printer(db,iters,key,location):
