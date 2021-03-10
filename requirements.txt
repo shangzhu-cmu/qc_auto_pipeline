@@ -1,0 +1,7 @@
+pymatgen==2020.12.31
+PubChemPy==1.0.4
+autocat.egg==info
+numpy==1.19.5
+ase==3.20.1
+gpaw==20.10.0
+matplotlib==3.3.3
