@@ -21,7 +21,7 @@ def create_mol_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=
             os.makedirs(cid+'/'+i)
             if convergence:
                 for j in parameters:
-                    os.makedirs(cid+'/'+i+'/'+j)
+                    os.makedirs(cid+'/'+i+'/results_'+j)
         return int(cid) 
 
 
