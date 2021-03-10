@@ -199,7 +199,8 @@ def bulk_builder(element):
     xl = max(pos[:,0])-min(pos[:,0])+15
     yl = max(pos[:,1])-min(pos[:,1])+15
     zl = max(pos[:,2])-min(pos[:,2])+15
-    atoms.set_cell((xl,yl,zl))
+    maxlength=max([xl,yl,zl])
+    atoms.set_cell((maxlength,maxlength,maxlength))
     atoms.center()
     atoms.set_pbc([False,False,False])
     return atoms
