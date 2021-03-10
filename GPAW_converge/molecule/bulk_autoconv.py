@@ -65,7 +65,7 @@ def bulk_auto_conv(element,gpaw_calc,
             if calc_dict['spinpol']:
                 atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(atoms)))
             atoms.set_calculator(gpaw_calc)
-            opt.relax(atoms,cid,'h',calc_dict['h'],calcfmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
+            opt.relax(atoms,cid,'h',calc_dict['h'],fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
             db_h.write(atoms,h=calc_dict['h'])
             if grid_iters>=2:
                 fst=db_h.get_atoms(id=grid_iters-1)
