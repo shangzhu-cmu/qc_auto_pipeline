@@ -14,6 +14,24 @@ setup(
     #   - MAJOR VERSION 0
     #   - MINOR VERSION 1
     #   - MAINTENANCE VERSION 0
-    version='0.1.0'
+    version='0.1.0',
+    description='A python library to automate convergence test in GPAW',
+    url='https://github.com/kianpu34593/AutoConverge',
+    liscence='MIT',
+    install_requires=[
+        "numpy==1.19.5",
+        "ase==3.20.1",
+        "gpaw==20.10.1",
+        "autocat==0.0.1",
+        "pymatgen==2020.12.31",
+        "pubchempy==1.0.4",
+    ],
+    keywords='DFT,GPAW,convergence test,ase',
+    packages=find_namespace_packages(where=['GPAW_converge','GPAW_converge.*']),
+    python_requies='>=3.7',
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Programming Language :: Python :: 3.8",
+    ],
 
 )
