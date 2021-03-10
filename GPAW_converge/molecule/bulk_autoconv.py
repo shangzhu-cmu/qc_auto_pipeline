@@ -17,7 +17,7 @@ def bulk_auto_conv(element,gpaw_calc,
                     temp_print=True,
                     solver_fmax=0.01,
                     solver_maxstep=0.04):
-    rep_location=(element+'/'+'bulk'+'/'+'results_report.txt')
+    rep_location=(element+'/'+calc_dict['xc'].split('-')[0]+'/'+'results_report.txt')
     calc_dict=gpaw_calc.__dict__['parameters']
     orig_atom=bulk_builder(element)
     cid=element.split('_')[-1]
