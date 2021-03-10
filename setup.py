@@ -27,7 +27,7 @@ setup(
         "pubchempy==1.0.4",
     ],
     keywords='DFT,GPAW,convergence test,ase',
-    packages=find_namespace_packages(where=['GPAW_converge','GPAW_converge.*']),
+    packages=find_namespace_packages(include='GPAW_converge.*'),
     python_requies='>=3.7',
     classifiers=[
         "Development Status :: 3 - Alpha",
