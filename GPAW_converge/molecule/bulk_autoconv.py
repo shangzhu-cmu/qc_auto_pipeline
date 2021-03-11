@@ -134,7 +134,7 @@ def bulk_auto_conv(element,gpaw_calc,
     # gpaw_calc.__dict__['parameters']['kpts']=kpts
     # calc_dict=gpaw_calc.__dict__['parameters']
     #smearing-width convergence test
-    elif 'sw' in parameters:
+    if 'sw' in parameters:
         db_sw=connect(cid+'/'+calc_dict['xc'].split('-')[0]+'/'+'sw_converge.db')
         diff_primary=100
         diff_second=100
