@@ -54,7 +54,7 @@ def relax_iterate(atoms,name,xc,parameters,num,fmax=0.01, maxstep=0.04, replay_t
                 file.write(str(ens_material[i])+'\n')
 
 def relax_single(atoms,name,xc,fmax=0.01, maxstep=0.04, replay_traj=None):
-    gpwname=name+'/'+xc+'/'+'mol'
+    gpwname=name[-2]+'_'+name[-1]+'/'+xc+'/'+'mol'
     atoms.calc.set(txt=gpwname+'.txt')
     #atoms.calc.attach(atoms.calc.write, 5, gpwname+'.gpw')
     dyn=BFGS(atoms=atoms,trajectory=gpwname+'.traj',logfile = gpwname+'.log',restart=gpwname+'qn.pckl',maxstep=maxstep)
