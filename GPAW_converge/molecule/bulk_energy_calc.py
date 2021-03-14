@@ -10,8 +10,7 @@ from ase.io import read, write
 from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
-def bulk_auto_conv(element,gpaw_calc,
-                    parameters=['h','k','sw'],
+def bulk_energy(element,gpaw_calc,
                     init_magmom=0,
                     solver_fmax=0.01,
                     solver_maxstep=0.04):
