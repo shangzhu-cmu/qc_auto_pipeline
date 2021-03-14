@@ -71,7 +71,7 @@ def mol_pubchem_grabber(cid):
         sys.exit()
     c=pcp.get_compounds(pure_cid,'cid')
     synonyms_name=(c[0].synonyms)[0]
-    mol_name=synonyms_name.lower().replace(' ','-')
+    #mol_name=synonyms_name.lower().replace(' ','-')
     for i,mol_i in enumerate(mol):
         mol_i.write('input_xyz/'+str(cid[i])+'.xyz',format='xyz')
         print("'"+cid+"'",'input xyz is saved successfully!')
