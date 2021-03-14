@@ -2,7 +2,7 @@ import os
 import sys
 import pubchempy as pcp
 from ase.data.pubchem import pubchem_atoms_search,available_conformer_search,pubchem_atoms_conformer_search
-
+from ase.io import write
 def pause():
     input('Press <ENTER> to continue...')
 
