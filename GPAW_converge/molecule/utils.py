@@ -6,23 +6,65 @@ from ase.data.pubchem import pubchem_atoms_search
 def pause():
     input('Press <ENTER> to continue...')
 
-def create_mol_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
+
+def create_mol_dir(mol_name):
     current_dir=os.getcwd()
     os.chdir(current_dir)
     c=pcp.get_compounds(mol_name,'name')
-    cid=str(c[0].cid)
-    #create the orig_cif_data and final_database dir
-    if os.path.isdir(cid):
-        print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid))
-        sys.exit()
+    cid=str(c.cid[0])
+    num_of_conformer=len(available_conformer_search(mol_name,'name'))
+    cid_i_ls=[]
+    if num_of_conformer==1:
+        cid_i=cid+'_'+'0'
+        if os.path.isdir(cid_i):
+            print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
+            sys.exit()
+        else:
+            os.makedirs(cid_i)
+            print('{}(cid={}) directory created!'.format(mol_name,cid_i))
+            cid_i_ls.append(cid_i)
     else:
-        os.makedirs(cid)
-        for i in sub_dir:
-            os.makedirs(cid+'/'+i)
-            if convergence:
-                for j in parameters:
-                    os.makedirs(cid+'/'+i+'/results_'+j)
-        return int(cid) 
+        for i in range(1,num_of_conformer+1):
+            cid_i=cid+'_'+i
+            if os.path.isdir(cid_i):
+                print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
+                continue
+            else:
+                os.makedirs(cid_i)
+                print('{}(cid={}) directory created!'.format(mol_name,cid_i))
+                cid_i_ls.append(cid_i)
+    return cid_i_ls
+
+def create_xc_dir(cid,sub_dir=['PBE,BEEF']):
+    current_dir=os.getcwd()
+    for i in cid:
+        os.chdir(current_dir+'/'+i)
+        for j in sub_dir:
+            if os.path.isdir(j):
+                print('WARNING: (cid={}) {} directory already exists!'.format(i,j))
+                continue
+            else:
+                os.makedirs(j)
+                print('(cid={}) {} directory created!'.format(i,j))
+
+def create_converg_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
+    current_dir=os.getcwd()
+    os.chdir(current_dir)
+    c=pcp.get_compounds(mol_name,'name')
+    cid_ls=[str(i) for i in c.cid]
+    for i in cid_ls:
+    #create the orig_cif_data and final_database dir
+        if os.path.isdir(cid):
+            print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid))
+            sys.exit()
+        else:
+            os.makedirs(cid)
+            for i in sub_dir:
+                os.makedirs(cid+'/'+i)
+                if convergence:
+                    for j in parameters:
+                        os.makedirs(cid+'/'+i+'/results_'+j)
+            return int(cid) 
 
 
 def create_big_dir():
