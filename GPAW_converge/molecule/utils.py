@@ -64,7 +64,6 @@ def create_xc_dir(cid,sub_dir=['PBE,BEEF']):
 def mol_pubchem_grabber(cid):
     cid_i=cid[0]
     pure_cid=int(cid_i.split('_')[0])
-    print(pure_cid)
     try:
         mol=pubchem_atoms_conformer_search(cid=pure_cid)
     except:
