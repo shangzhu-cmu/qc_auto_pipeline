@@ -26,7 +26,7 @@ def create_mol_dir(mol_name):
     os.chdir(current_dir)
     c=pcp.get_compounds(mol_name,'name')
     cid=str(c[0].cid)
-    num_of_conformer=len(available_conformer_search(mol_name,'name'))
+    num_of_conformer=len(available_conformer_search(cid,'cid'))
     cid_i_ls=[]
     if num_of_conformer==1:
         cid_i=cid+'_'+'0'
@@ -76,7 +76,7 @@ def mol_pubchem_grabber(cid):
     synonyms_name=(c[0].synonyms)[0]
     mol_name=synonyms_name.lower().replace(' ','-')
     for i,mol_i in enumerate(mol):
-        mol_i.write(mol_name+str(cid[i])+'.xyz',format='xyz')
+        mol_i.write(mol_name+'_'+str(cid[i])+'.xyz',format='xyz')
         print("'"+str(cid[i])+"'",'input xyz is saved successfully!')
     os.chdir(current_dir)
 
