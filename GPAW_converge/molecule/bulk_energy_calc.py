@@ -18,7 +18,7 @@ def bulk_energy(element,gpaw_calc,
     cid=element.split('_')[-2:]
     orig_atom=bulk_builder(element)
     XC=calc_dict['xc'].split('-')[0]
-    rep_location=cid[-2]+'_'+cid[-1]+'/'+XC+'/'+'results_report.txt')
+    rep_location=cid[-2]+'_'+cid[-1]+'/'+XC+'/'+'results_report.txt'
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
