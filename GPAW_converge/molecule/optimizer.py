@@ -34,8 +34,27 @@ def optimize_bulk(atoms,step=0.05,fmax=0.01,location=' ',extname=' '):
     atoms.calc.write(location+'/'+name+'_'+str(x0)+'-'+extname+'.gpw')
     ## TO-DO: add ensemble energies to file
 
-def relax(atoms,name,sub_name,parameters,xc,fmax=0.01, maxstep=0.04, replay_traj=None):
-    gpwname=name+'/'+xc+'/results_'+sub_name+'/'+'mol_'+str(parameters)
+def relax_iterate(atoms,name,xc,parameters,num,fmax=0.01, maxstep=0.04, replay_traj=None):
+    gpwname=name+'/'+xc+'/results_'+parameters+'mol_'+str(num)
+    atoms.calc.set(txt=gpwname+'.txt')
+    #atoms.calc.attach(atoms.calc.write, 5, gpwname+'.gpw')
+    dyn=BFGS(atoms=atoms,trajectory=gpwname+'.traj',logfile = gpwname+'.log',restart=gpwname+'qn.pckl',maxstep=maxstep)
+    if(replay_traj):
+        print('Replaying trajctory file: {}\n'.format(replay_traj))
+        dyn.replay_trajectory(replay_traj)
+    dyn.run(fmax=fmax)
+    atoms.calc.write(gpwname+'.gpw')
+    #Writing ensemble energies to file 
+    if atoms.calc.get_xc_functional()=='BEEF-vdW':
+        ens = BEEFEnsemble(atoms.calc)
+        ens_material = ens.get_ensemble_energies()
+        with open(str(gpwname)+'_Ensemble_Energies.txt','w+') as file:
+            file.write(gpwname+'\n')
+            for i in range(len(ens_material)):
+                file.write(str(ens_material[i])+'\n')
+
+def relax_single(atoms,name,xc,fmax=0.01, maxstep=0.04, replay_traj=None):
+    gpwname=name+'/'+xc+'/'+'mol'
     atoms.calc.set(txt=gpwname+'.txt')
     #atoms.calc.attach(atoms.calc.write, 5, gpwname+'.gpw')
     dyn=BFGS(atoms=atoms,trajectory=gpwname+'.traj',logfile = gpwname+'.log',restart=gpwname+'qn.pckl',maxstep=maxstep)

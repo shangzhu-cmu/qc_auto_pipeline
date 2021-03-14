@@ -38,7 +38,7 @@ def bulk_energy(element,gpaw_calc,
     db_final=connect('final_database'+'/'+'bulk_'+calc_dict['xc']+'.db')
     atoms=bulk_builder(element)
     atoms.set_calculator(gpaw_calc)
-    opt.relax(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
+    opt.relax_single(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
