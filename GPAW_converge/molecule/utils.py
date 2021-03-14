@@ -77,7 +77,8 @@ def mol_pubchem_grabber(cid):
     mol_name=synonyms_name.lower().replace(' ','-')
     for i,mol_i in enumerate(mol):
         mol_i.write(mol_name+str(cid[i])+'.xyz',format='xyz')
-        print("'"+cid+"'",'input xyz is saved successfully!')
+        print("'"+str(cid[i])+"'",'input xyz is saved successfully!')
+    os.chdir(current_dir)
 
 
 def create_converg_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
