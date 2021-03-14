@@ -1,11 +1,25 @@
 import os
 import sys
 import pubchempy as pcp
-from ase.data.pubchem import pubchem_atoms_search
+from ase.data.pubchem import pubchem_atoms_search,available_conformer_search,pubchem_atoms_conformer_search
 
 def pause():
     input('Press <ENTER> to continue...')
 
+def create_big_dir():
+    current_dir=os.getcwd()
+    os.chdir(current_dir)
+    #create the orig_cif_data and final_database dir
+    if os.path.isdir('input_xyz'):
+        print("WARNING: input_xyz directory already exists!")
+        sys.exit()
+    else:
+        os.makedirs('input_xyz')
+    if os.path.isdir('final_database'):
+        print("WARNING: final_database directory already exists!")
+        sys.exit()
+    else:
+        os.makedirs('final_database')
 
 def create_mol_dir(mol_name):
     current_dir=os.getcwd()
@@ -47,6 +61,22 @@ def create_xc_dir(cid,sub_dir=['PBE,BEEF']):
                 os.makedirs(j)
                 print('(cid={}) {} directory created!'.format(i,j))
 
+def mol_pubchem_grabber(cid):
+    cid_i=cid[0]
+    pure_cid=cid_i.split('_')[0]
+    try:
+        mol=pubchem_atoms_conformer_search(cid=pure_cid)
+    except:
+        print("ERROR: Can't find '{}' in PubChem Database.".format(str(cid)))
+        sys.exit()
+    c=pcp.get_compounds(pure_cid,'cid')
+    synonyms_name=(c[0].synonyms)[0]
+    mol_name=synonyms_name.lower().replace(' ','-')
+    for i,mol_i in enumerate(mol):
+        mol_i.write('./input_xyz/'+mol_name+'_'+str(cid[i])+'.xyz')
+        print("'"+cid+"'",'input xyz is saved successfully!')
+
+
 def create_converg_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
     current_dir=os.getcwd()
     os.chdir(current_dir)
@@ -65,31 +95,3 @@ def create_converg_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,paramet
                     for j in parameters:
                         os.makedirs(cid+'/'+i+'/results_'+j)
             return int(cid) 
-
-
-def create_big_dir():
-    current_dir=os.getcwd()
-    os.chdir(current_dir)
-    #create the orig_cif_data and final_database dir
-    if os.path.isdir('input_xyz'):
-        print("WARNING: input_xyz directory already exists!")
-        sys.exit()
-    else:
-        os.makedirs('input_xyz')
-    if os.path.isdir('final_database'):
-        print("WARNING: final_database directory already exists!")
-        sys.exit()
-    else:
-        os.makedirs('final_database')
-
-def mol_pubchem_grabber(cid):
-    try:
-        mol=pubchem_atoms_search(cid=cid,silent=True)
-        c=pcp.get_compounds(cid,'cid')
-        synonyms_name=(c[0].synonyms)[0]
-        mol_name=synonyms_name.lower().replace(' ','-')
-        mol.write('./input_xyz/'+mol_name+'_'+str(cid)+'.xyz')
-        print("'"+mol_name+"'",'input xyz is saved successfully!')
-    except:
-        print("ERROR: Can't find '{}' in PubChem Database.".format(str(cid)))
-
