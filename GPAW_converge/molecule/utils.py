@@ -60,6 +60,7 @@ def create_xc_dir(cid,sub_dir=['PBE,BEEF']):
             else:
                 os.makedirs(j)
                 print('(cid={}) {} directory created!'.format(i,j))
+    os.chdir(current_dir)
 
 def mol_pubchem_grabber(cid):
     cid_i=cid[0]
