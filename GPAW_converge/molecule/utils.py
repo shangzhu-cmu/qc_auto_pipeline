@@ -25,9 +25,6 @@ def create_mol_dir(mol_name):
     current_dir=os.getcwd()
     os.chdir(current_dir)
     c=pcp.get_compounds(mol_name,'name')
-    cid=str(c[0].cid)
-    print(cid)
-    print(type(cid))
     num_of_conformer=len(available_conformer_search(mol_name,'name'))
     cid_i_ls=[]
     if num_of_conformer==1:
@@ -41,7 +38,7 @@ def create_mol_dir(mol_name):
             cid_i_ls.append(cid_i)
     else:
         for i in range(1,num_of_conformer+1):
-            cid_i=cid+'_'+i
+            cid_i=cid+'_'+str(i)
             if os.path.isdir(cid_i):
                 print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
                 continue
