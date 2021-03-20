@@ -1,0 +1,35 @@
+from gpaw import GPAW
+from ase.build import molecule
+import GPAW_converge.molecule.optimizer as opt
+from ase.db import connect
+
+def ele_calc(element,gpaw_calc,loc,uc_size=15,solver_fmax=0.01,solver_maxstep=0.04):
+    calc_dict=gpaw_calc.__dict__['parameters']
+    XC=calc_dict['xc'].split('-')[0]
+    mol=mol_builder(element,uc_size)
+    mol.set_calculator(gpaw_calc)
+    opt.relax_single(mol,element,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
+    db_element=connect('final_database'+'/'+'element_'+calc_dict['xc']+'.db')
+    id=db_element.reserve(name=element)
+    if id is None:
+        id=db_element.get(name=element).id
+        db_element.update(id=id,atoms=mol,name=element,
+                        h=calc_dict['h'],sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],spin=calc_dict['spinpol'],
+                        kpts=str(','.join(map(str, calc_dict['kpts']))))
+    else:
+        db_element.write(mol,id=id,name=element,
+                        h=calc_dict['h'],sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],spin=calc_dict['spinpol'],
+                        kpts=str(','.join(map(str, calc_dict['kpts']))))
+
+
+def mol_builder(element,uc_size):
+    mol=molecule(element)
+    pos = mol.get_positions()
+    xl = max(pos[:,0])-min(pos[:,0])+uc_size
+    yl = max(pos[:,1])-min(pos[:,1])+uc_size
+    zl = max(pos[:,2])-min(pos[:,2])+uc_size
+    maxlength=max([xl,yl,zl])
+    mol.set_cell((maxlength,maxlength,maxlength))
+    mol.center()
+    mol.set_pbc([False,False,False])
+    return mol
