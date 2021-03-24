@@ -16,9 +16,10 @@ def bulk_energy(element,gpaw_calc,
                     solver_maxstep=0.04):
     calc_dict=gpaw_calc.__dict__['parameters']
     cid=element.split('_')[-2:]
+    cid='_'.join(cid)
     orig_atom=bulk_builder(element)
     XC=calc_dict['xc'].split('-')[0]
-    rep_location=cid[0]+'_'+cid[1]+'/'+XC+'_results_report.txt'
+    rep_location=cid+'/'+XC+'_results_report.txt'
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
@@ -38,7 +39,7 @@ def bulk_energy(element,gpaw_calc,
     db_final=connect('final_database'+'/'+'bulk_'+calc_dict['xc']+'.db')
     atoms=bulk_builder(element)
     atoms.set_calculator(gpaw_calc)
-    opt.relax_single(atoms,cid[1],XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
+    opt.relax_single(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
