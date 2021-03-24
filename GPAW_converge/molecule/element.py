@@ -1,5 +1,6 @@
 from gpaw import GPAW
 from ase.build import molecule,bulk
+from ase import Atoms
 import GPAW_converge.molecule.optimizer as opt
 from ase.db import connect
 
@@ -33,8 +34,20 @@ def mol_builder(element,uc_size):
     mol.set_pbc([False,False,False])
     return mol
 
+def bulk_builder(element,uc_size):
+    atoms=Atoms(element)
+    pos = atoms.get_positions()
+    xl = max(pos[:,0])-min(pos[:,0])+uc_size
+    yl = max(pos[:,1])-min(pos[:,1])+uc_size
+    zl = max(pos[:,2])-min(pos[:,2])+uc_size
+    maxlength=max([xl,yl,zl])
+    atoms.set_cell((maxlength,maxlength,maxlength))
+    atoms.center()
+    atoms.set_pbc([False,False,False])
+    return atoms
+
 def atoms_builder(element,uc_size):
-    atoms=bulk(element)
+    atoms=Atoms(element)
     pos = atoms.get_positions()
     xl = max(pos[:,0])-min(pos[:,0])+uc_size
     yl = max(pos[:,1])-min(pos[:,1])+uc_size
