@@ -51,15 +51,14 @@ def create_mol_dir(mol_name):
 
 def create_xc_dir(cid,sub_dir=['PBE,BEEF']):
     current_dir=os.getcwd()
-    for i in cid:
-        os.chdir(current_dir+'/'+i)
-        for j in sub_dir:
-            if os.path.isdir(j):
-                print('WARNING: (cid={}) {} directory already exists!'.format(i,j))
-                continue
-            else:
-                os.makedirs(j)
-                print('(cid={}) {} directory created!'.format(i,j))
+    os.chdir(current_dir+'/'+cid)
+    for j in sub_dir:
+        if os.path.isdir(j):
+            print('WARNING: (cid={}) {} directory already exists!'.format(cid,j))
+            continue
+        else:
+            os.makedirs(j)
+            print('(cid={}) {} directory created!'.format(cid,j))
     os.chdir(current_dir)
 
 def mol_pubchem_grabber(cid):
