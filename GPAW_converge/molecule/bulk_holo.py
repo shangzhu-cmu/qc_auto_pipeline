@@ -40,8 +40,12 @@ def homo_lumo(element,gpaw_calc,relax_xc,
     atoms=db_opt.get_atoms(name=element)
     atoms.set_calculator(gpaw_calc)
     #(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
-    #parprint(atoms.get_potential_energy())
-    print(gpaw_calc.get_homo_lumo())
+    new_energy=atoms.get_potential_energy()
+    with open('test.txt','w+') as file:
+        file.write(element+'\n')
+        for i in range(len(new_energy)):
+            file.write(str(newenergy[i])+'\n')
+    gpaw_calc.get_homo_lumo())
     (homo,lumo)=gpaw_calc.get_homo_lumo()
     
     id=db_final.reserve(name=element)
