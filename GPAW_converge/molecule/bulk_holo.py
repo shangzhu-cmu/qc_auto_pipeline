@@ -41,7 +41,9 @@ def homo_lumo(element,gpaw_calc,relax_xc,
     atoms.set_calculator(gpaw_calc)
     #(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
     #parprint(atoms.get_potential_energy())
-    (homo,lumo)=calc.get_homo_lumo()
+    print(gpaw_calc.get_homo_lumo())
+    (homo,lumo)=gpaw_calc.get_homo_lumo()
+    
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
