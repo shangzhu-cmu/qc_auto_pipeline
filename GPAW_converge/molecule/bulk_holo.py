@@ -16,7 +16,7 @@ def homo_lumo(element,gpaw_calc,relax_xc,
                     solver_fmax=0.01,
                     solver_maxstep=0.04):
     calc_dict=gpaw_calc.__dict__['parameters']
-    cid=element.split('_')[-2:-1]
+    cid=element.split('_')[-2:]
     cid='_'.join(cid)
     parprint(cid)
     rep_location=cid+'/'+'homo-lumo'+'_results_report.txt'
