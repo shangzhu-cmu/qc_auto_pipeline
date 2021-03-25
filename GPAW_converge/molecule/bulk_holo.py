@@ -34,13 +34,14 @@ def homo_lumo(element,gpaw_calc,relax_xc,
             parprint('\t'+'magmom: '+str(init_magmom),file=f)
     f.close()
     #connecting to databse
+    print(element)
     db_opt=connect('final_database'+'/'+'bulk_'+relax_xc+'.db')
     db_holo=connect('final_database'+'/'+'homo_lumo.db')
     atoms=db_opt.get_atoms(name=element)
     atoms.set_calculator(gpaw_calc)
     #(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
-    print(atoms.get_potential_energy)
-    (homo,lumo)=atoms.get_homo_lumo()
+    print(atoms.get_potential_energy())
+    (homo,lumo)=calc.get_homo_lumo()
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
