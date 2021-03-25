@@ -38,37 +38,17 @@ def homo_lumo(element,gpaw_calc,relax_xc,
     db_opt=connect('final_database'+'/'+'bulk_'+relax_xc+'.db')
     db_holo=connect('final_database'+'/'+'homo_lumo.db')
     atoms=db_opt.get_atoms(name=element)
-    #atoms.set_calculator(gpaw_calc)
+    atoms.set_calculator(gpaw_calc)
     #(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
-    atoms.calc.set(txt='test.txt')
-    new_energy=atoms.get_potential_energy()
-    # with open('test.txt','w+') as file:
-    #     file.write(element+'\n')
-    #     for i in range(len(new_energy)):
-    #         file.write(str(new_energy[i])+'\n')
-    #gpaw_calc.get_homo_lumo()
+    opt.SPE_calc(atoms,name=cid+'/'+'homo-lumo'+'/'+calc_dict['xc'].split('-')[0])
     (homo,lumo)=gpaw_calc.get_homo_lumo()
-    
-    id=db_final.reserve(name=element)
+    id=db_holo.reserve(name=element)
     if id is None:
-        id=db_final.get(name=element).id
-        db_final.update(id=id,atoms=atoms,name=element,
+        id=db_holo.get(name=element).id
+        db_holo.update(id=id,atoms=atoms,name=element,homo=homo,lumo=lumo,
                         h=calc_dict['h'],sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],spin=calc_dict['spinpol'],
                         kpts=str(','.join(map(str, calc_dict['kpts']))))
     else:
-        db_final.write(atoms,id=id,name=element,
+        db_holo.write(atoms,id=id,name=element,homo=homo,lumo=lumo,
                         h=calc_dict['h'],sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],spin=calc_dict['spinpol'],
                         kpts=str(','.join(map(str, calc_dict['kpts']))))
-
-def mol_builder(element):
-    location='input_xyz'+'/'+element+'.xyz'
-    atoms=read(location)
-    pos = atoms.get_positions()
-    xl = max(pos[:,0])-min(pos[:,0])+15
-    yl = max(pos[:,1])-min(pos[:,1])+15
-    zl = max(pos[:,2])-min(pos[:,2])+15
-    maxlength=max([xl,yl,zl])
-    atoms.set_cell((maxlength,maxlength,maxlength))
-    atoms.center()
-    atoms.set_pbc([False,False,False])
-    return atoms
