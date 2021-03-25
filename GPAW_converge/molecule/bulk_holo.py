@@ -45,7 +45,7 @@ def homo_lumo(element,gpaw_calc,relax_xc,
         file.write(element+'\n')
         for i in range(len(new_energy)):
             file.write(str(newenergy[i])+'\n')
-    gpaw_calc.get_homo_lumo())
+    gpaw_calc.get_homo_lumo()
     (homo,lumo)=gpaw_calc.get_homo_lumo()
     
     id=db_final.reserve(name=element)
