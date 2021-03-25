@@ -71,3 +71,7 @@ def relax_single(atoms,name,xc,fmax=0.01, maxstep=0.04, replay_traj=None):
             file.write(gpwname+'\n')
             for i in range(len(ens_material)):
                 file.write(str(ens_material[i])+'\n')
+
+def SPE_calc(atoms,name):
+    atoms.calc.set(txt=name+'.txt')
+    atoms.get_potential_energy()
