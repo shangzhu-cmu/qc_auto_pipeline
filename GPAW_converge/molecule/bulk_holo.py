@@ -19,7 +19,8 @@ def homo_lumo(element,gpaw_calc,relax_xc,
     cid=element.split('_')[-2:]
     cid='_'.join(cid)
     print(cid)
-    rep_location=cid+'/'+'homo-lumo'+'_results_report.txt'
+    #rep_location=cid+'/'+'homo-lumo'+'_results_report.txt'
+    rep_location='test.txt'
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
