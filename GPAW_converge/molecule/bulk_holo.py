@@ -18,9 +18,7 @@ def homo_lumo(element,gpaw_calc,relax_xc,
     calc_dict=gpaw_calc.__dict__['parameters']
     cid=element.split('_')[-2:]
     cid='_'.join(cid)
-    print(cid)
-    #rep_location=cid+'/'+'homo-lumo'+'_results_report.txt'
-    rep_location='test.txt'
+    rep_location=cid+'/'+'homo-lumo'+'_results_report.txt'
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
@@ -35,7 +33,6 @@ def homo_lumo(element,gpaw_calc,relax_xc,
             parprint('\t'+'magmom: '+str(init_magmom),file=f)
     f.close()
     #connecting to databse
-    print(element)
     db_opt=connect('final_database'+'/'+'bulk_'+relax_xc+'.db')
     db_holo=connect('final_database'+'/'+'homo_lumo.db')
     atoms=db_opt.get_atoms(name=element)
