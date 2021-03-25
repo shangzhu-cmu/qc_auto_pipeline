@@ -11,7 +11,7 @@ from ase.io import read, write
 from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
-def homo_lumo(element,gpaw_calc,relax_xc
+def homo_lumo(element,gpaw_calc,relax_xc,
                     init_magmom=0,
                     solver_fmax=0.01,
                     solver_maxstep=0.04):
@@ -24,8 +24,6 @@ def homo_lumo(element,gpaw_calc,relax_xc
     with paropen(rep_location,'a') as f:
         parprint('Parameters:',file=f)
         parprint('\t'+'Materials: '+element,file=f)
-        parprint('\t'+'Lattice constants: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[:3],decimals=5))+'Ang',file=f)    
-        parprint('\t'+'Lattice angles: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[3:],decimals=5))+'Degree',file=f)
         parprint('\t'+'xc: '+calc_dict['xc'].split('-')[0],file=f)
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
