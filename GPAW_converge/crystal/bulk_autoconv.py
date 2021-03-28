@@ -2,7 +2,7 @@ from gpaw import GPAW,Mixer,Davidson
 from ase.build import bulk
 from ase.db import connect
 import os
-import optimizer as opt
+import GPAW_converge.crystal.optimizer as opt
 from ase.parallel import parprint
 import numpy as np
 import sys

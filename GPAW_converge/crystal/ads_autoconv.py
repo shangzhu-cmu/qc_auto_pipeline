@@ -4,7 +4,7 @@ from ase.build import surface
 from ase.io import write,read
 from ase.db import connect
 import os
-import optimizer as opt
+import GPAW_converge.crystal.optimizer as opt
 from ase.parallel import parprint,paropen,world
 import numpy as np
 import re
