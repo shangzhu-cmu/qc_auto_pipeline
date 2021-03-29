@@ -54,7 +54,6 @@ def ads_auto_select(element,
     with paropen(rep_location,'a') as f:
         parprint('Ads Site(Ang)\t\t\tAds Energy(eV)',file=f)
     f.close()
-    parprint(fils)
     for file_loc in fils:
         ads_slab=read(file_loc)
         # kpts=kdens2mp(ads_slab,kptdensity=k_density,even=True)
