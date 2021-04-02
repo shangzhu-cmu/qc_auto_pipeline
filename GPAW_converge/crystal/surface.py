@@ -79,7 +79,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='pymatgen',max_ind=1,uni
         layers_ls=[]
         for n,slab in enumerate(slab_RM):
             #temp save for analysis
-            os.makedirs(element+'/raw_surf/',exist_ok=True)
+            os.makedirs(element+'/raw_surf',exist_ok=True)
             surf_location=element+'/raw_surf/'+str(ind)+'_temp'+'.cif'
             CifWriter(slab).write_file(surf_location)
             slab_ase=read(surf_location)
