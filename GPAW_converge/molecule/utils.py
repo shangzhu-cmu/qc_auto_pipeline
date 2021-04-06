@@ -30,18 +30,20 @@ def create_mol_dir(mol_name):
     cid_i_ls=[]
     if num_of_conformer==1:
         cid_i=cid+'_'+'0'
+        os.makedirs(cid_i,exist_ok=True)
         if os.path.isdir(cid_i):
             print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
-        os.makedirs(cid_i,exist_ok=True)
-        print('{}(cid={}) directory created!'.format(mol_name,cid_i))
+        else:
+            print('{}(cid={}) directory created!'.format(mol_name,cid_i))
         cid_i_ls.append(cid_i)
     else:
         for i in range(1,num_of_conformer+1):
             cid_i=cid+'_'+str(i)
+            os.makedirs(cid_i,exist_ok=True)
             if os.path.isdir(cid_i):
                 print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
-            os.makedirs(cid_i,exist_ok=True)
-            print('{}(cid={}) directory created!'.format(mol_name,cid_i))
+            else:
+                print('{}(cid={}) directory created!'.format(mol_name,cid_i))
             cid_i_ls.append(cid_i)
     return cid_i_ls
 
@@ -70,14 +72,15 @@ def mol_pubchem_grabber(cid):
     c=pcp.get_compounds(pure_cid,'cid')
     synonyms_name=(c[0].synonyms)[0]
     mol_name=synonyms_name.lower().replace(' ','-')
-    if len(mol)>1:
+    if len(mol)==1:
         mol.write(mol_name+'_'+str(pure_cid)+'_'+'0'+'.xyz',format='xyz')
         print("'"+str(pure_cid)+'0'+"'",'input xyz is saved successfully!')
         os.chdir(current_dir)
-    for i,mol_i in enumerate(mol):
-        mol_i.write(mol_name+'_'+str(pure_cid)+'_'+str(i+1)+'.xyz',format='xyz')
-        print("'"+str(pure_cid)+'_'+str(i+1)+"'",'input xyz is saved successfully!')
-        os.chdir(current_dir)
+    else:
+        for i,mol_i in enumerate(mol):
+            mol_i.write(mol_name+'_'+str(pure_cid)+'_'+str(i+1)+'.xyz',format='xyz')
+            print("'"+str(pure_cid)+'_'+str(i+1)+"'",'input xyz is saved successfully!')
+            os.chdir(current_dir)
 
 
 def create_converg_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
