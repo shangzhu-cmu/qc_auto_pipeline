@@ -32,20 +32,17 @@ def create_mol_dir(mol_name):
         cid_i=cid+'_'+'0'
         if os.path.isdir(cid_i):
             print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
-        else:
-            os.makedirs(cid_i,exist_ok=True)
-            print('{}(cid={}) directory created!'.format(mol_name,cid_i))
-            cid_i_ls.append(cid_i)
+        os.makedirs(cid_i,exist_ok=True)
+        print('{}(cid={}) directory created!'.format(mol_name,cid_i))
+        cid_i_ls.append(cid_i)
     else:
         for i in range(1,num_of_conformer+1):
             cid_i=cid+'_'+str(i)
             if os.path.isdir(cid_i):
                 print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
-                continue
-            else:
-                os.makedirs(cid_i,exist_ok=True)
-                print('{}(cid={}) directory created!'.format(mol_name,cid_i))
-                cid_i_ls.append(cid_i)
+            os.makedirs(cid_i,exist_ok=True)
+            print('{}(cid={}) directory created!'.format(mol_name,cid_i))
+            cid_i_ls.append(cid_i)
     return cid_i_ls
 
 def create_xc_dir(cid,sub_dir=['PBE,BEEF']):
