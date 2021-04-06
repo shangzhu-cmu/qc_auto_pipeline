@@ -73,10 +73,14 @@ def mol_pubchem_grabber(cid):
     c=pcp.get_compounds(pure_cid,'cid')
     synonyms_name=(c[0].synonyms)[0]
     mol_name=synonyms_name.lower().replace(' ','-')
-    #for mol_i in mol:
-    mol.write(mol_name+'_'+str(cid_i)+'.xyz',format='xyz')
-    print("'"+str(cid_i)+"'",'input xyz is saved successfully!')
-    os.chdir(current_dir)
+    if len(mol)>1:
+        mol.write(mol_name+'_'+str(pure_cid)+'_'+'0'+'.xyz',format='xyz')
+        print("'"+str(pure_cid)+'0'+"'",'input xyz is saved successfully!')
+        os.chdir(current_dir)
+    for i,mol_i in enumerate(mol):
+        mol_i.write(mol_name+'_'+str(pure_cid)+'_'+str(i+1)+'.xyz',format='xyz')
+        print("'"+str(pure_cid)+'_'+str(i+1)+"'",'input xyz is saved successfully!')
+        os.chdir(current_dir)
 
 
 def create_converg_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
