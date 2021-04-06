@@ -78,6 +78,7 @@ def surf_creator(element,ind,layers,vacuum_layer,option='pymatgen',max_ind=1,uni
         if plot:
             fig=plt.figure(figsize=(8,8))
         layers_ls=[]
+        surf_location='.'
         for n,slab in enumerate(slab_RM):
             #temp save for analysis
             os.makedirs(element+'/raw_surf',exist_ok=True)
