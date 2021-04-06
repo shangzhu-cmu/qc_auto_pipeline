@@ -32,9 +32,8 @@ def create_mol_dir(mol_name):
         cid_i=cid+'_'+'0'
         if os.path.isdir(cid_i):
             print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
-            sys.exit()
         else:
-            os.makedirs(cid_i)
+            os.makedirs(cid_i,exist_ok=True)
             print('{}(cid={}) directory created!'.format(mol_name,cid_i))
             cid_i_ls.append(cid_i)
     else:
@@ -44,7 +43,7 @@ def create_mol_dir(mol_name):
                 print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
                 continue
             else:
-                os.makedirs(cid_i)
+                os.makedirs(cid_i,exist_ok=True)
                 print('{}(cid={}) directory created!'.format(mol_name,cid_i))
                 cid_i_ls.append(cid_i)
     return cid_i_ls
