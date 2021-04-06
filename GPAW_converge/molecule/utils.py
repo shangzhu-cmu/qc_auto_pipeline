@@ -75,12 +75,11 @@ def mol_pubchem_grabber(cid):
     if len(mol)==1:
         mol.write(mol_name+'_'+str(pure_cid)+'_'+'0'+'.xyz',format='xyz')
         print("'"+str(pure_cid)+'0'+"'",'input xyz is saved successfully!')
-        os.chdir(current_dir)
     else:
         for i,mol_i in enumerate(mol):
             mol_i.write(mol_name+'_'+str(pure_cid)+'_'+str(i+1)+'.xyz',format='xyz')
             print("'"+str(pure_cid)+'_'+str(i+1)+"'",'input xyz is saved successfully!')
-            os.chdir(current_dir)
+    os.chdir(current_dir)
 
 
 def create_converg_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
