@@ -73,7 +73,7 @@ def mol_pubchem_grabber(cid):
     synonyms_name=(c[0].synonyms)[0]
     mol_name=synonyms_name.lower().replace(' ','-')
     if len(mol)==1:
-        mol.write(mol_name+'_'+str(pure_cid)+'_'+'0'+'.xyz',format='xyz')
+        mol[0].write(mol_name+'_'+str(pure_cid)+'_'+'0'+'.xyz',format='xyz')
         print("'"+str(pure_cid)+'0'+"'",'input xyz is saved successfully!')
     else:
         for i,mol_i in enumerate(mol):
