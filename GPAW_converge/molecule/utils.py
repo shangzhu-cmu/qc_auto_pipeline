@@ -25,7 +25,6 @@ def create_mol_dir(mol_name):
     current_dir=os.getcwd()
     os.chdir(current_dir)
     c=pcp.get_compounds(mol_name,'name')
-    print(c)
     cid=str(c[0].cid)
     num_of_conformer=len(available_conformer_search(cid,'cid'))
     cid_i_ls=[]
