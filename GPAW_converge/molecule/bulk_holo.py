@@ -16,15 +16,16 @@ def homo_lumo(element,gpaw_calc,relax_xc,
                     solver_fmax=0.01,
                     solver_maxstep=0.04):
     calc_dict=gpaw_calc.__dict__['parameters']
+    xc=calc_dict['xc']
     cid=element.split('_')[-2:]
     cid='_'.join(cid)
-    rep_location=cid+'/'+'homo-lumo'+'_results_report.txt'
+    rep_location=cid+'/'+'HOLO_'+xc+'_results_report.txt'
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
         parprint('Parameters:',file=f)
         parprint('\t'+'Materials: '+element,file=f)
-        parprint('\t'+'xc: '+calc_dict['xc'].split('-')[0],file=f)
+        parprint('\t'+'xc: '+xc.split('-')[0],file=f)
         parprint('\t'+'h: '+str(calc_dict['h']),file=f)
         parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
         parprint('\t'+'sw: '+str(calc_dict['occupations']),file=f)
@@ -34,7 +35,7 @@ def homo_lumo(element,gpaw_calc,relax_xc,
     f.close()
     #connecting to databse
     db_opt=connect('final_database'+'/'+'bulk_'+relax_xc+'.db')
-    db_holo=connect('final_database'+'/'+'homo_lumo.db')
+    db_holo=connect('final_database'+'/'+'HOLO_'+xc+'.db')
     atoms=db_opt.get_atoms(name=element)
     atoms.set_calculator(gpaw_calc)
     #(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
