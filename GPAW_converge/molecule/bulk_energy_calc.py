@@ -11,6 +11,7 @@ from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
 def bulk_energy(element,gpaw_calc,
+                    sub_dir,
                     init_magmom=0,
                     solver_fmax=0.01,
                     solver_maxstep=0.04):
@@ -19,7 +20,7 @@ def bulk_energy(element,gpaw_calc,
     cid='_'.join(cid)
     orig_atom=bulk_builder(element)
     XC=calc_dict['xc'].split('-')[0]
-    rep_location=cid+'/'+XC+'_results_report.txt'
+    rep_location=cid+'/'+sub_dir+'_results_report.txt'
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
@@ -36,10 +37,10 @@ def bulk_energy(element,gpaw_calc,
             parprint('\t'+'magmom: '+str(init_magmom),file=f)
     f.close()
     #connecting to databse
-    db_final=connect('final_database'+'/'+'bulk_'+calc_dict['xc'].split('-')[0]+'.db')
+    db_final=connect('final_database'+'/'+'bulk_'+sub_dir+'.db')
     atoms=bulk_builder(element)
     atoms.set_calculator(gpaw_calc)
-    opt.relax_single(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
+    opt.relax_single(atoms,cid,sub_dir,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
