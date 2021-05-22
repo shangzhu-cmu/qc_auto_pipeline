@@ -12,14 +12,14 @@ from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
 def homo_lumo(element,gpaw_calc,relax_xc,
-                    init_magmom=0,
-                    solver_fmax=0.01,
-                    solver_maxstep=0.04):
+                    init_magmom=0,sub_dir=None):
     calc_dict=gpaw_calc.__dict__['parameters']
-    xc=calc_dict['xc']
+    if sub_dir is None:
+        xc=calc_dict['xc']
+        sub_dir = xc
     cid=element.split('_')[-2:]
     cid='_'.join(cid)
-    rep_location=cid+'/'+'HOLO_'+xc+'_results_report.txt'
+    rep_location=cid+'/'+'HOLO_'+sub_dir+'_results_report.txt'
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
     with paropen(rep_location,'a') as f:
@@ -35,11 +35,11 @@ def homo_lumo(element,gpaw_calc,relax_xc,
     f.close()
     #connecting to databse
     db_opt=connect('final_database'+'/'+'bulk_'+relax_xc+'.db')
-    db_holo=connect('final_database'+'/'+'HOLO_'+xc+'.db')
+    db_holo=connect('final_database'+'/'+'HOLO_'+sub_dir+'.db')
     atoms=db_opt.get_atoms(name=element)
     atoms.set_calculator(gpaw_calc)
     #(atoms,cid,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
-    opt.SPE_calc(atoms,name=cid+'/'+'homo-lumo'+'/'+calc_dict['xc'].split('-')[0])
+    opt.SPE_calc(atoms,name=cid+'/'+'homo-lumo'+'/'+sub_dir.split('-')[0])
     (homo,lumo)=gpaw_calc.get_homo_lumo()
     id=db_holo.reserve(name=element)
     if id is None:

@@ -11,7 +11,7 @@ from ase.parallel import paropen, parprint, world
 from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
 def bulk_energy(element,gpaw_calc,
-                    sub_dir,
+                    sub_dir=None,
                     init_magmom=0,
                     solver_fmax=0.01,
                     solver_maxstep=0.04):
@@ -19,7 +19,9 @@ def bulk_energy(element,gpaw_calc,
     cid=element.split('_')[-2:]
     cid='_'.join(cid)
     orig_atom=bulk_builder(element)
-    XC=calc_dict['xc'].split('-')[0]
+    if sub_dir is None:
+        XC=calc_dict['xc'].split('-')[0]
+        sub_dir=XC
     rep_location=cid+'/'+sub_dir+'_results_report.txt'
     if world.rank==0 and os.path.isfile(rep_location):
         os.remove(rep_location)
