@@ -14,8 +14,8 @@ from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 def homo_lumo(element,gpaw_calc,relax_xc,
                     init_magmom=0,sub_dir=None):
     calc_dict=gpaw_calc.__dict__['parameters']
+    xc=calc_dict['xc']
     if sub_dir is None:
-        xc=calc_dict['xc']
         sub_dir = xc
     cid=element.split('_')[-2:]
     cid='_'.join(cid)
