@@ -4,10 +4,11 @@ from ase import Atoms
 import GPAW_converge.molecule.optimizer as opt
 from ase.db import connect
 
-def ele_calc(atoms,element,gpaw_calc,uc_size=15,solver_fmax=0.01,solver_maxstep=0.04):
+def ele_calc(atoms,element,gpaw_calc,init_mag=0,uc_size=15,solver_fmax=0.01,solver_maxstep=0.04):
     calc_dict=gpaw_calc.__dict__['parameters']
     XC=calc_dict['xc'].split('-')[0]
     atoms.set_calculator(gpaw_calc)
+    atoms.set_initial_magnetic_moments(init_mag)
     opt.relax_single(atoms,element,XC,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
     db_element=connect('final_database'+'/'+'element_'+calc_dict['xc']+'.db')
     id=db_element.reserve(name=element)
