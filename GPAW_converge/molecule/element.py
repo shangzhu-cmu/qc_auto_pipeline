@@ -4,7 +4,7 @@ from ase import Atoms
 import GPAW_converge.molecule.optimizer as opt
 from ase.db import connect
 
-def ele_calc(atoms,element,gpaw_calc,init_mag=0,uc_size=15,solver_fmax=0.01,solver_maxstep=0.04):
+def ele_calc(atoms,element,gpaw_calc,init_mag=[0],uc_size=15,solver_fmax=0.01,solver_maxstep=0.04):
     calc_dict=gpaw_calc.__dict__['parameters']
     XC=calc_dict['xc'].split('-')[0]
     atoms.set_calculator(gpaw_calc)
