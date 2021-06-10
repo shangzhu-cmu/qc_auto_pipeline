@@ -74,5 +74,6 @@ def relax_single(atoms,name,xc,fmax=0.01, maxstep=0.04, replay_traj=None):
 
 def SPE_calc(atoms,name):
     atoms.calc.set(txt=name+'.txt')
+    atoms.calc.attach(atoms.calc.write, 5, name+'.gpw', mode='all')
     atoms.get_potential_energy()
     atoms.calc.write(name+'.gpw')
