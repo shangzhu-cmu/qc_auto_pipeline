@@ -47,7 +47,7 @@ def create_mol_dir(mol_name):
             cid_i_ls.append(cid_i)
     return cid_i_ls
 
-def create_xc_dir(cid,sub_dir):
+def create_mol_sub_dir(cid,sub_dir):
     current_dir=os.getcwd()
     os.chdir(current_dir+'/'+cid)
     for j in sub_dir:
