@@ -47,7 +47,7 @@ def create_mol_dir(mol_name):
             cid_i_ls.append(cid_i)
     return cid_i_ls
 
-def create_xc_dir(cid,sub_dir=['PBE,BEEF']):
+def create_xc_dir(cid,sub_dir):
     current_dir=os.getcwd()
     os.chdir(current_dir+'/'+cid)
     for j in sub_dir:
@@ -80,23 +80,3 @@ def mol_pubchem_grabber(cid):
             mol_i.write(mol_name+'_'+str(pure_cid)+'_'+str(i+1)+'.xyz',format='xyz')
             print("'"+str(pure_cid)+'_'+str(i+1)+"'",'input xyz is saved successfully!')
     os.chdir(current_dir)
-
-
-def create_converg_dir(mol_name,sub_dir=['PBE','BEEF'],convergence=False,parameters=['h','k','sw']):
-    current_dir=os.getcwd()
-    os.chdir(current_dir)
-    c=pcp.get_compounds(mol_name,'name')
-    cid_ls=[str(i) for i in c.cid]
-    for i in cid_ls:
-    #create the orig_cif_data and final_database dir
-        if os.path.isdir(cid):
-            print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid))
-            sys.exit()
-        else:
-            os.makedirs(cid)
-            for i in sub_dir:
-                os.makedirs(cid+'/'+i)
-                if convergence:
-                    for j in parameters:
-                        os.makedirs(cid+'/'+i+'/results_'+j)
-            return int(cid) 
