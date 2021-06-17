@@ -1,48 +1,30 @@
 from gpaw import GPAW,Mixer,Davidson
-from ase.build import bulk
 from ase.db import connect
 import os
 import GPAW_converge.molecule.optimizer as opt
 from ase.parallel import parprint
 import numpy as np
-import sys
-from ase.io import read, write
 from ase.parallel import paropen, parprint, world
-from ase.calculators.calculator import kptdensity2monkhorstpack as kdens2mp
 
 def bulk_energy(element,gpaw_calc,
                     sub_dir=None,
                     init_magmom=0,
                     solver_fmax=0.01,
-                    solver_maxstep=0.04):
+                    solver_maxstep=0.04,
+                    box_size=15):
+
     calc_dict=gpaw_calc.__dict__['parameters']
     cid=element.split('_')[-2:]
     cid='_'.join(cid)
-    orig_atom=bulk_builder(element)
     XC=calc_dict['xc'].split('-')[0]
     if sub_dir is None:
         sub_dir=XC
-    rep_location=cid+'/'+sub_dir+'_results_report.txt'
-    if world.rank==0 and os.path.isfile(rep_location):
-        os.remove(rep_location)
-    with paropen(rep_location,'a') as f:
-        parprint('Parameters:',file=f)
-        parprint('\t'+'Materials: '+element,file=f)
-        parprint('\t'+'Lattice constants: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[:3],decimals=5))+'Ang',file=f)    
-        parprint('\t'+'Lattice angles: '+str(np.round(orig_atom.get_cell_lengths_and_angles()[3:],decimals=5))+'Degree',file=f)
-        parprint('\t'+'xc: '+XC,file=f)
-        parprint('\t'+'h: '+str(calc_dict['h']),file=f)
-        parprint('\t'+'kpts: '+str(calc_dict['kpts']),file=f)
-        parprint('\t'+'sw: '+str(calc_dict['occupations']),file=f)
-        parprint('\t'+'spin polarized: '+str(calc_dict['spinpol']),file=f)
-        if calc_dict['spinpol']:
-            parprint('\t'+'magmom: '+str(init_magmom),file=f)
-    f.close()
-    #connecting to databse
-    db_final=connect('final_database'+'/'+'bulk_'+sub_dir+'.db')
-    atoms=bulk_builder(element)
+    
+    atoms=bulk_builder(element,box_size)
     atoms.set_calculator(gpaw_calc)
     opt.relax_single(atoms,cid,sub_dir,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
+    
+    db_final=connect('final_database'+'/'+'bulk_'+sub_dir+'.db')
     id=db_final.reserve(name=element)
     if id is None:
         id=db_final.get(name=element).id
@@ -55,13 +37,13 @@ def bulk_energy(element,gpaw_calc,
                         kpts=str(','.join(map(str, calc_dict['kpts']))))
 
 
-def bulk_builder(element):
+def bulk_builder(element,box_size):
     location='input_xyz'+'/'+element+'.xyz'
     atoms=read(location)
     pos = atoms.get_positions()
-    xl = max(pos[:,0])-min(pos[:,0])+15
-    yl = max(pos[:,1])-min(pos[:,1])+15
-    zl = max(pos[:,2])-min(pos[:,2])+15
+    xl = max(pos[:,0])-min(pos[:,0])+box_size
+    yl = max(pos[:,1])-min(pos[:,1])+box_size
+    zl = max(pos[:,2])-min(pos[:,2])+box_size
     maxlength=max([xl,yl,zl])
     atoms.set_cell((maxlength,maxlength,maxlength))
     atoms.center()
