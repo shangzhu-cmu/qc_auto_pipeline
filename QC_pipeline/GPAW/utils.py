@@ -41,7 +41,7 @@ def create_mol_dir(mol_name):
     else:
         for i in range(1,num_of_conformer+1):
             cid_i=cid+'_'+str(i)
-            os.makedirs(cid_i,exist_ok=True)
+            os.makedirs('results/'+cid_i,exist_ok=True)
             if os.path.isdir(cid_i):
                 print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
             else:
