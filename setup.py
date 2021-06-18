@@ -6,7 +6,7 @@ with open(file="README.md", mode="r") as readme_handle:
     long_description = readme_handle.read()
 
 setup(
-    name='AutoConverge',
+    name='QC_auto_pipeline',
     author='Kian Pu',
     author_email='jiankunp@andrew.cmu.edu',
     # Define the version of this library.
@@ -19,12 +19,12 @@ setup(
     url='https://github.com/kianpu34593/AutoConverge',
     license='MIT',
     install_requires=[
-        "numpy==1.19.5",
-        "ase==3.20.1",
-        "gpaw==20.10.0",
-        "autocat==0.0.1",
-        "pymatgen==2020.12.31",
-        "pubchempy==1.0.4",
+        "numpy>=1.19.5",
+        "ase>=3.20.1",
+        "gpaw>=20.10.0",
+        "autocat>=0.0.1",
+        "pymatgen>=2020.12.31",
+        "pubchempy>=1.0.4",
     ],
     keywords='DFT,GPAW,convergence test,ase',
     #package_dir={"": "GPAW_converge"},
