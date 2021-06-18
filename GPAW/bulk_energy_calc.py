@@ -1,71 +1,111 @@
-from gpaw import GPAW,Mixer,Davidson
+from gpaw import restart
 from ase.db import connect
-import os
-import GPAW_converge.molecule.optimizer as opt
-from ase.parallel import parprint
+import GPAW.optimizer as opt
 import numpy as np
-from ase.parallel import paropen, parprint, world
+from ase.parallel import paropen
+from ase.io import read
+class GPAW_mol_calculator:
+    def __init__(self,element):
+        self.element=element
+        
+    def relax_mol(self,
+                calculator,
+                sub_dir=None,
+                init_magmom=0,
+                solver_fmax=0.01,
+                solver_maxstep=0.04,
+                ):
 
-def bulk_energy(element,gpaw_calc,
-                    sub_dir=None,
-                    init_magmom=0,
-                    solver_fmax=0.01,
-                    solver_maxstep=0.04,
-                    box_size=15):
+        calc_dict=calculator.__dict__['parameters']
+        cid=self.element.split('_')[-2:]
+        cid='_'.join(cid)
 
-    calc_dict=gpaw_calc.__dict__['parameters']
-    cid=element.split('_')[-2:]
-    cid='_'.join(cid)
-    XC=calc_dict['xc'].split('-')[0]
-    if sub_dir is None:
-        sub_dir=XC
-    
-    atoms=bulk_builder(element,box_size)
-    atoms.set_calculator(gpaw_calc)
-    opt.relax_single(atoms,cid,sub_dir,fmax=solver_fmax, maxstep=solver_maxstep, replay_traj=None)
-    
-    db_final=connect('final_database'+'/'+'bulk_'+sub_dir+'.db')
-    id=db_final.reserve(name=element)
-    if id is None:
-        id=db_final.get(name=element).id
-        db_final.update(id=id,atoms=atoms,name=element,
-                        h=calc_dict['h'],sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],spin=calc_dict['spinpol'],
-                        kpts=str(','.join(map(str, calc_dict['kpts']))))
-    else:
-        db_final.write(atoms,id=id,name=element,
-                        h=calc_dict['h'],sw=calc_dict['occupations']['width'],xc=calc_dict['xc'],spin=calc_dict['spinpol'],
-                        kpts=str(','.join(map(str, calc_dict['kpts']))))
+        if sub_dir is None:
+            sub_dir=calc_dict['xc']
+        
+        self.atoms.set_calculator(calculator)
+        if calc_dict['spinpol'] == True:
+            self.atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(self.atoms)))
 
+        self.file_dir_name=opt.relax_single(self.atoms,cid,sub_dir,solver_fmax,solver_maxstep)
+        self.database_save('relaxed_'+sub_dir)
+        # return self.atoms
 
-def bulk_builder(element,box_size):
-    location='input_xyz'+'/'+element+'.xyz'
-    atoms=read(location)
-    pos = atoms.get_positions()
-    xl = max(pos[:,0])-min(pos[:,0])+box_size
-    yl = max(pos[:,1])-min(pos[:,1])+box_size
-    zl = max(pos[:,2])-min(pos[:,2])+box_size
-    maxlength=max([xl,yl,zl])
-    atoms.set_cell((maxlength,maxlength,maxlength))
-    atoms.center()
-    atoms.set_pbc([False,False,False])
-    return atoms
+    def homo_lumo_calc(self,
+                    calculator=None,
+                    file_name=None,
+                    mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
+                    add_bands=15, 
+                    above_lumo_percent=0.3, #percentage of the range above lumo
+                    ):
+        calc_dict=calculator.__dict__['parameters']
+        cid=self.element.split('_')[-2:]
+        cid='_'.join(cid)
+        if file_name is None:
+            file_name = calc_dict['xc']
+        if mode == 'occupied':
+            self.atoms.set_calculator(calculator)
+            opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'occupied')
+        elif mode == 'add_bands':
+            file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'occupied'
+            nbands=nbands_finder(file_prev+'txt')
+            self.atoms, calculator = restart(file_prev+'.gpw',nbands=nbands+add_bands)
+            self.atoms.set_calculator(calculator)
+            opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'add_bands')
+        elif mode == 'unoccupied':
+            file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'add_bands'
+            eigen_arr=aboveLUMO_finder(file_prev+'txt')
+            aboveLUMO=np.abs(max(eigen_arr)-min(eigen_arr))*above_lumo_percent
+            self.atoms, calculator = restart(file_prev+'.gpw')
+            calculator['parameters']['convergence']['bands']='CBM+'+str(aboveLUMO)
+            self.atoms.set_calculator(calculator)
+            opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'unoccupied')
+            self.database_save('HOLO_'+file_name)
+        else:
+            raise NameError('mode not definied. Available modes: occupied, add_bands, unoccupied')
+        
+    def database_save(self,name):
+        db_final=connect('results'+'final_database'+'/'+name+'.db')
+        id=db_final.reserve(name=self.element)
+        if id is None:
+            id=db_final.get(name=self.element).id
+            db_final.update(id=id,atoms=self.atoms,name=self.element,
+                            gpw_dir=self.file_dir_name+'.gpw')
+        else:
+            db_final.write(self.atoms,id=id,name=self.element,
+                            gpw_dir=self.file_dir_name+'.gpw')
 
-def temp_output_printer(db,iters,key,location):
-    fst_r=db.get(iters-1)
-    snd_r=db.get(iters)
-    trd_r=db.get(iters+1)
-    with paropen(location,'a') as f:
-        parprint('Optimizing parameter: '+key,file=f)
-        parprint('\t'+'1st: '+str(fst_r[key])+' 2nd: '+str(snd_r[key])+' 3rd: '+str(trd_r[key]),file=f)
-        parprint('\t'+'2nd-1st: '+str(np.round(abs(snd_r['energy']-fst_r['energy']),decimals=5))+'eV',file=f)
-        parprint('\t'+'3rd-1st: '+str(np.round(abs(trd_r['energy']-fst_r['energy']),decimals=5))+'eV',file=f)
-        parprint('\t'+'3rd-2nd: '+str(np.round(abs(trd_r['energy']-snd_r['energy']),decimals=5))+'eV',file=f)
-    f.close()
+    def bulk_builder(self,box_size):
+        location='input_xyz'+'/'+self.element+'.xyz'
+        self.atoms=read(location)
+        pos = self.atoms.get_positions()
+        xl = max(pos[:,0])-min(pos[:,0])+box_size
+        yl = max(pos[:,1])-min(pos[:,1])+box_size
+        zl = max(pos[:,2])-min(pos[:,2])+box_size
+        maxlength=max([xl,yl,zl])
+        self.atoms.set_cell((maxlength,maxlength,maxlength))
+        self.atoms.center()
+        self.atoms.set_pbc([False,False,False])
+        return self.atoms
 
-def mp2kdens(atoms,kpts):
-    recipcell=atoms.get_reciprocal_cell()
-    kptdensity_ls=[]
-    for i in range(len(kpts)):
-        kptdensity = kpts[i]/(2 * np.pi * np.sqrt((recipcell[i]**2).sum()))
-        kptdensity_ls.append(np.round(kptdensity,decimals=4))
-    return kptdensity_ls
+def nbands_finder(file_name):
+    file = paropen(file_name,'r')
+    for line in file:
+        line = line.split()
+        if not line:
+            continue
+        if len(line) >= 5:
+            if line[0] == 'Number' and line[1] == 'of' and line[2] == 'bands' and line[3] == 'in' and line[4] == 'calculation:':
+                return int(line[-1])
+
+def aboveLUMO_finder(file_name):
+    file = paropen(file_name,'r')
+    eigen=[]
+    for line in file:
+        line = line.split()
+        if not line:
+            continue
+        if len(line) >= 3:
+            if line[2] == '0.00000':
+                eigen.append(float(line[1]))
+    return np.array(eigen)

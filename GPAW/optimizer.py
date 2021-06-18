@@ -1,12 +1,9 @@
 from ase.optimize import BFGS
-from gpaw import GPAW
-from ase.io import read,write
 import numpy as np
 from ase.dft.bee import BEEFEnsemble
 
-
-def relax_single(atoms,name,xc,fmax=0.01, maxstep=0.04):
-    file_dir_name=name+'/'+xc+'/'+'mol'
+def relax_single(atoms,name,sub_dir,fmax=0.01, maxstep=0.04):
+    file_dir_name='results/'+name+'/'+sub_dir+'/'+'mol'
     atoms.calc.set(txt=file_dir_name+'.txt')
     dyn=BFGS(atoms=atoms,trajectory=file_dir_name+'.traj',logfile = file_dir_name+'.log',restart=file_dir_name+'qn.pckl',maxstep=maxstep)
     dyn.run(fmax=fmax)
@@ -19,9 +16,9 @@ def relax_single(atoms,name,xc,fmax=0.01, maxstep=0.04):
             file.write(file_dir_name+'\n')
             for i in range(len(ens_material)):
                 file.write(str(ens_material[i])+'\n')
+    return file_dir_name
 
 def SPE_calc(atoms,name):
-    atoms.calc.set(txt=name+'.txt')
-    atoms.calc.attach(atoms.calc.write, 5, name+'.gpw', mode='all')
+    atoms.calc.set(txt='results/'+name+'.txt')
     atoms.get_potential_energy()
-    atoms.calc.write(name+'.gpw')
+    atoms.calc.write('results/'+name+'.gpw')

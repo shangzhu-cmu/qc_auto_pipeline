@@ -11,15 +11,17 @@ def create_big_dir():
     os.chdir(current_dir)
     #create the orig_cif_data and final_database dir
     if os.path.isdir('input_xyz'):
-        print("WARNING: input_xyz directory already exists!")
-        sys.exit()
+        print("WARNING: input_xyz/ directory already exists!")
     else:
         os.makedirs('input_xyz')
     if os.path.isdir('final_database'):
-        print("WARNING: final_database directory already exists!")
-        sys.exit()
+        print("WARNING: final_database/ directory already exists!")
     else:
         os.makedirs('final_database')
+    if os.path.isdir('results'):
+        print("WARNING: results/ directory already exists!")
+    else:
+        os.makedirs('results') 
 
 def create_mol_dir(mol_name):
     current_dir=os.getcwd()
@@ -30,7 +32,7 @@ def create_mol_dir(mol_name):
     cid_i_ls=[]
     if num_of_conformer==1:
         cid_i=cid+'_'+'0'
-        os.makedirs(cid_i,exist_ok=True)
+        os.makedirs('results/'+cid_i,exist_ok=True)
         if os.path.isdir(cid_i):
             print("WARNING: {}(cid={}) directory already exists!".format(mol_name,cid_i))
         else:
@@ -49,7 +51,7 @@ def create_mol_dir(mol_name):
 
 def create_mol_sub_dir(cid,sub_dir):
     current_dir=os.getcwd()
-    os.chdir(current_dir+'/'+cid)
+    os.chdir(current_dir+'/'+'results/'+cid)
     for j in sub_dir:
         if os.path.isdir(j):
             print('WARNING: (cid={}) {} directory already exists!'.format(cid,j))
