@@ -65,7 +65,7 @@ class GPAW_mol_calculator:
             raise NameError('mode not definied. Available modes: occupied, add_bands, unoccupied')
         
     def database_save(self,name):
-        db_final=connect('results'+'final_database'+'/'+name+'.db')
+        db_final=connect('final_database'+'/'+name+'.db')
         id=db_final.reserve(name=self.element)
         if id is None:
             id=db_final.get(name=self.element).id
