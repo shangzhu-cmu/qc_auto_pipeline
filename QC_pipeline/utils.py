@@ -1,10 +1,6 @@
 import os
-import sys
-import pubchempy as pcp
 from ase.data.pubchem import available_conformer_search,pubchem_atoms_conformer_search
-
-def pause():
-    input('Press <ENTER> to continue...')
+import pubchempy as pcp
 
 def create_big_dir():
     current_dir=os.getcwd()
@@ -69,8 +65,7 @@ def mol_pubchem_grabber(cid):
     try:
         mol=pubchem_atoms_conformer_search(cid=pure_cid)
     except:
-        print("ERROR: Can't find '{}' in PubChem Database.".format(str(cid)))
-        sys.exit()
+        ValueError("ERROR: Can't find '{}' in PubChem Database.".format(str(cid_i)))
     c=pcp.get_compounds(pure_cid,'cid')
     synonyms_name=(c[0].synonyms)[0]
     mol_name=synonyms_name.lower().replace(' ','-')

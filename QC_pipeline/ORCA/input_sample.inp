@@ -1,0 +1,7 @@
+
+!B3LYP 6-31G**
+%scf
+ TolE 1e-6
+ TolRMSP 1e-6
+end
+* xyzfile 0 1 /home/jiankunp/juliachem_benchmark/orca_calc/xyz_opt/test.xyz
