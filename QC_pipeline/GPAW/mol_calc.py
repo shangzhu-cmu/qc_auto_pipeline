@@ -1,6 +1,6 @@
 from gpaw import restart
 from ase.db import connect
-import GPAW.optimizer as opt
+import QC_pipeline.GPAW.optimizer as opt
 import numpy as np
 from ase.parallel import paropen
 from ase.io import read
