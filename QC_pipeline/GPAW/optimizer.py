@@ -19,6 +19,7 @@ def relax_single(atoms,name,sub_dir,fmax=0.01, maxstep=0.04):
     return file_dir_name
 
 def SPE_calc(atoms,name):
-    atoms.calc.set(txt='results/'+name+'.txt')
+    file_path='results/'+name
+    atoms.calc.set(txt=file_path+'.txt')
     atoms.get_potential_energy()
-    atoms.calc.write('results/'+name+'.gpw')
+    atoms.calc.write(file_path+'.gpw')
