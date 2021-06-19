@@ -45,13 +45,13 @@ class GPAW_mol_calculator:
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_occupied')
         elif mode == 'add_bands':
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_occupied'
-            nbands=nbands_finder(file_prev+'txt')
+            nbands=nbands_finder(file_prev+'.txt')
             self.atoms, calculator = restart(file_prev+'.gpw',nbands=nbands+add_bands)
             self.atoms.set_calculator(calculator)
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands')
         elif mode == 'unoccupied':
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands'
-            eigen_arr=aboveLUMO_finder(file_prev+'txt')
+            eigen_arr=aboveLUMO_finder(file_prev+'.txt')
             aboveLUMO=np.abs(max(eigen_arr)-min(eigen_arr))*above_lumo_percent
             self.atoms, calculator = restart(file_prev+'.gpw')
             calculator['parameters']['convergence']['bands']='CBM+'+str(aboveLUMO)
