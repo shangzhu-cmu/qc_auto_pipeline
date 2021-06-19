@@ -33,16 +33,13 @@ class GPAW_mol_calculator:
 
     def homo_lumo_calc(self,
                     calculator=None,
-                    file_name=None,
+                    file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
                     add_bands=15, 
                     above_lumo_percent=0.3, #percentage of the range above lumo
                     ):
-        calc_dict=calculator.__dict__['parameters']
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
-        if file_name is None:
-            file_name = calc_dict['xc']
         if mode == 'occupied':
             self.atoms.set_calculator(calculator)
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_occupied')
