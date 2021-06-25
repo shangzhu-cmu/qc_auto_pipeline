@@ -27,7 +27,8 @@ class GPAW_mol_calculator:
         if calc_dict['spinpol'] == True:
             self.atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(self.atoms)))
 
-        self.file_dir_name=opt.relax_single(self.atoms,cid,sub_dir,solver_fmax,solver_maxstep)
+        opt.relax_single(self.atoms,cid,sub_dir,solver_fmax,solver_maxstep)
+        self.file_dir_name='results/'+self.element+'/'+sub_dir+'/'+'mol'
         self.database_save('relaxed_'+sub_dir)
         # return self.atoms
 
@@ -62,6 +63,7 @@ class GPAW_mol_calculator:
             raise NameError('mode not definied. Available modes: occupied, add_bands, unoccupied')
         
     def database_save(self,name):
+        
         db_final=connect('final_database'+'/'+name+'.db')
         id=db_final.reserve(name=self.element)
         if id is None:
