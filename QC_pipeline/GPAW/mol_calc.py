@@ -34,7 +34,6 @@ class GPAW_mol_calculator:
 
     def homo_lumo_calc(self,
                     relax_sub_dir,
-                    xc,
                     calculator=None,
                     file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
@@ -46,6 +45,8 @@ class GPAW_mol_calculator:
         if mode == 'occupied':
             file_prev='results/'+cid+'/'+relax_sub_dir+'/'+'mol.gpw'
             self.atoms = restart(file_prev+'.gpw')[0]
+            if calculator == None:
+                raise RuntimeError('No HOMO LUMO Calculator.')
             self.atoms.set_calculator(calculator)
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_occupied')
         elif mode == 'add_bands':
