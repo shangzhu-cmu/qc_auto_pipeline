@@ -43,7 +43,7 @@ class GPAW_mol_calculator:
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
         if mode == 'occupied':
-            file_prev='results/'+cid+'/'+relax_sub_dir+'/'+'mol.gpw'
+            file_prev='results/'+cid+'/'+relax_sub_dir+'/'+'mol'
             self.atoms = restart(file_prev+'.gpw')[0]
             if calculator == None:
                 raise RuntimeError('No HOMO LUMO Calculator.')
