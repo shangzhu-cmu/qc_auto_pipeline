@@ -27,8 +27,8 @@ class GPAW_mol_calculator:
         if calc_dict['spinpol'] == True:
             self.atoms.set_initial_magnetic_moments(init_magmom*np.ones(len(self.atoms)))
 
-        opt.relax_single(self.atoms,cid,sub_dir,solver_fmax,solver_maxstep)
-        self.file_dir_name='results/'+self.element+'/'+sub_dir+'/'+'mol'
+        self.file_dir_nameopt.relax_single(self.atoms,cid,sub_dir,solver_fmax,solver_maxstep)
+        #self.file_dir_name='results/'+self.element+'/'+sub_dir+'/'+'mol'
         self.database_save('relaxed_'+sub_dir)
         # return self.atoms
 
@@ -65,7 +65,7 @@ class GPAW_mol_calculator:
             self.atoms, calculator = restart(file_prev+'.gpw')
             calculator.__dict__['parameters']['convergence']['bands']='CBM+'+str(aboveLUMO)
             self.atoms.set_calculator(calculator)
-            opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
+            self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
             self.database_save('HOLO_'+file_name)
         else:
             raise NameError('mode not definied. Available modes: occupied, add_bands, unoccupied')
