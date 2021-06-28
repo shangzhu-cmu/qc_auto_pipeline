@@ -65,7 +65,6 @@ class GPAW_mol_calculator:
             self.atoms, calculator = restart(file_prev+'.gpw')#convergence['bands']='CBM+'+str(aboveLUMO))
             #calculator.__dict__['parameters']['convergence']['bands']='CBM+'+str(aboveLUMO)
             self.atoms.set_calculator(calculator)
-            parprint(calculator.__dict__)
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
             self.database_save('HOLO_'+file_name)
         else:
