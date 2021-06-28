@@ -33,7 +33,7 @@ class GPAW_mol_calculator:
         # return self.atoms
 
     def homo_lumo_calc(self,
-                    relax_sub_dir,
+                    relax_sub_dir=None,
                     calculator=None,
                     file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
@@ -43,7 +43,10 @@ class GPAW_mol_calculator:
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
         if mode == 'occupied':
-            file_prev='results/'+cid+'/'+relax_sub_dir+'/'+'mol'
+            if relax_sub_dir==None:
+                raise RuntimeError('relax_sub_dir = None: Did not specify molecule relax .gpw file directory.')
+            else:
+                file_prev='results/'+cid+'/'+relax_sub_dir+'/'+'mol'
             self.atoms = restart(file_prev+'.gpw')[0]
             if calculator == None:
                 raise RuntimeError('No HOMO LUMO Calculator.')
