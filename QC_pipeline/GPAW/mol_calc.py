@@ -63,7 +63,7 @@ class GPAW_mol_calculator:
             eigen_arr=aboveLUMO_finder(file_prev+'.txt')
             aboveLUMO=np.abs(max(eigen_arr)-min(eigen_arr))*above_lumo_percent
             self.atoms, calculator = restart(file_prev+'.gpw')
-            calculator['parameters']['convergence']['bands']='CBM+'+str(aboveLUMO)
+            calculator.__dict__['parameters']['convergence']['bands']='CBM+'+str(aboveLUMO)
             self.atoms.set_calculator(calculator)
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
             self.database_save('HOLO_'+file_name)
