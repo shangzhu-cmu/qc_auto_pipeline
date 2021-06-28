@@ -1,6 +1,7 @@
 from ase.optimize import BFGS
 import numpy as np
 from ase.dft.bee import BEEFEnsemble
+from ase.parallel import parprint
 
 def relax_single(atoms,name,sub_dir,fmax=0.01, maxstep=0.04):
     file_dir_name='results/'+name+'/'+sub_dir+'/'+'mol'
@@ -22,6 +23,7 @@ def relax_single(atoms,name,sub_dir,fmax=0.01, maxstep=0.04):
 def SPE_calc(atoms,name):
     file_path='results/'+name
     atoms.calc.set(txt=file_path+'.txt')
+    parprint(atoms.calc)
     atoms.get_potential_energy()
     atoms.calc.write(file_path+'.gpw')
     return file_path
