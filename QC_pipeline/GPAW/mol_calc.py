@@ -39,7 +39,7 @@ class GPAW_mol_calculator:
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
                     add_bands=15, 
                     above_lumo_percent=0.3, #percentage of the range above lumo
-                    ):
+                    convergence_criteria=None):
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
         if mode == 'occupied':
@@ -62,8 +62,11 @@ class GPAW_mol_calculator:
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands'
             eigen_arr=aboveLUMO_finder(file_prev+'.txt')
             aboveLUMO=np.abs(max(eigen_arr)-min(eigen_arr))*above_lumo_percent
-            self.atoms, calculator = restart(file_prev+'.gpw')#convergence['bands']='CBM+'+str(aboveLUMO))
-            #calculator.__dict__['parameters']['convergence']['bands']='CBM+'+str(aboveLUMO)
+            if convergence_criteria == None:
+                raise RuntimeError('Specify convergence criteria in unoccupied mode.')
+            else:
+                convergence_criteria['bands']='CBM+'+str(aboveLUMO)
+                self.atoms, calculator = restart(file_prev+'.gpw',convergence=convergence_criteria)
             self.atoms.set_calculator(calculator)
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
             self.database_save('HOLO_'+file_name)
