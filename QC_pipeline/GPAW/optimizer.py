@@ -3,7 +3,6 @@ import numpy as np
 from ase.dft.bee import BEEFEnsemble
 
 def relax_single(atoms,name,sub_dir,fmax=0.01, maxstep=0.04):
-    calc=atoms.calc
     file_dir_name='results/'+name+'/'+sub_dir+'/'+'mol'
     atoms.calc.set(txt=file_dir_name+'.txt')
     dyn=BFGS(atoms=atoms,trajectory=file_dir_name+'.traj',logfile = file_dir_name+'.log',restart=file_dir_name+'qn.pckl',maxstep=maxstep)
@@ -17,6 +16,7 @@ def relax_single(atoms,name,sub_dir,fmax=0.01, maxstep=0.04):
             file.write(file_dir_name+'\n')
             for i in range(len(ens_material)):
                 file.write(str(ens_material[i])+'\n')
+    return file_dir_name
     
 
 def SPE_calc(atoms,name):
@@ -24,3 +24,4 @@ def SPE_calc(atoms,name):
     atoms.calc.set(txt=file_path+'.txt')
     atoms.get_potential_energy()
     atoms.calc.write(file_path+'.gpw')
+    return file_path
