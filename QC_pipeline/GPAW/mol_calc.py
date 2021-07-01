@@ -37,7 +37,8 @@ class GPAW_mol_calculator:
                     calculator=None,
                     file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
-                    add_convergence_bands=15, 
+                    add_convergence_bands=15,
+                    pbc_condition=False, 
                     convergence_criteria=None):
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
@@ -49,6 +50,10 @@ class GPAW_mol_calculator:
             self.atoms = restart(file_prev+'.gpw')[0]
             if calculator == None:
                 raise RuntimeError('No HOMO LUMO Calculator.')
+            if pbc_condition:
+                self.atoms.pbc=[1,1,1]
+            else:
+                self.atoms.pbc=[0,0,0]
             self.atoms.set_calculator(calculator)
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_occupied')
         elif mode == 'add_bands':
