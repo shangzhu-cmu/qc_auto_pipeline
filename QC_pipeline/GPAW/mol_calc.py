@@ -1,4 +1,4 @@
-from gpaw import restart
+from gpaw import restart,Davidson
 from ase.db import connect
 import QC_pipeline.GPAW.optimizer as opt
 import numpy as np
@@ -37,8 +37,7 @@ class GPAW_mol_calculator:
                     calculator=None,
                     file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
-                    add_bands=15, 
-                    above_lumo_percent=0.3, #percentage of the range above lumo
+                    add_convergence_bands=15, 
                     convergence_criteria=None):
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
@@ -55,23 +54,29 @@ class GPAW_mol_calculator:
         elif mode == 'add_bands':
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_occupied'
             nbands=nbands_finder(file_prev+'.txt')
-            self.atoms, calculator = restart(file_prev+'.gpw',nbands=nbands+add_bands)
-            self.atoms.set_calculator(calculator)
-            opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands')
-        elif mode == 'unoccupied':
-            file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands'
-            eigen_arr=aboveLUMO_finder(file_prev+'.txt')
-            aboveLUMO=np.abs(max(eigen_arr)-min(eigen_arr))*above_lumo_percent
             if convergence_criteria == None:
                 raise RuntimeError('Specify convergence criteria in unoccupied mode.')
             else:
-                convergence_criteria['bands']='CBM+'+str(aboveLUMO)
-                self.atoms, calculator = restart(file_prev+'.gpw',convergence=convergence_criteria)
-            self.atoms.set_calculator(calculator)
-            self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
+                convergence_criteria['bands']=nbands+add_convergence_bands
+            self.atoms, calculator = restart(file_prev+'.gpw')
+            calc_bands=calculator.fixed_density(nbands=int((nbands+add_convergence_bands)*1.5),convergence=convergence_criteria, eigensolver=Davidson(3))
+            self.atoms.set_calculator(calc_bands)
+            self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied')
             self.database_save('HOLO_'+file_name)
+        # elif mode == 'unoccupied':
+        #     file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands'
+        #     eigen_arr=aboveLUMO_finder(file_prev+'.txt')
+        #     aboveLUMO=np.abs(max(eigen_arr)-min(eigen_arr))*above_lumo_percent
+        #     if convergence_criteria == None:
+        #         raise RuntimeError('Specify convergence criteria in unoccupied mode.')
+        #     else:
+        #         convergence_criteria['bands']='CBM+'+str(aboveLUMO)
+        #         self.atoms, calculator = restart(file_prev+'.gpw',convergence=convergence_criteria)
+        #     self.atoms.set_calculator(calculator)
+        #     self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
+        #     self.database_save('HOLO_'+file_name)
         else:
-            raise NameError('mode not definied. Available modes: occupied, add_bands, unoccupied')
+            raise NameError('mode not definied. Available modes: occupied, add_bands_unoccupied.')
         
     def database_save(self,name):
         

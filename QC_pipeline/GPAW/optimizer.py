@@ -24,6 +24,5 @@ def SPE_calc(atoms,name):
     file_path='results/'+name
     atoms.calc.set(txt=file_path+'.txt')
     atoms.get_potential_energy()
-    parprint(atoms.get_potential_energy())
     atoms.calc.write(file_path+'.gpw')
     return file_path
