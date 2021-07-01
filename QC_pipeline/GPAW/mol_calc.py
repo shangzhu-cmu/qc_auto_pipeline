@@ -38,7 +38,6 @@ class GPAW_mol_calculator:
                     file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
                     add_convergence_bands=15,
-                    pbc_condition=False, 
                     convergence_criteria=None):
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
@@ -50,10 +49,6 @@ class GPAW_mol_calculator:
             self.atoms = restart(file_prev+'.gpw')[0]
             if calculator == None:
                 raise RuntimeError('No HOMO LUMO Calculator.')
-            if pbc_condition:
-                self.atoms.pbc=[1,1,1]
-            else:
-                self.atoms.pbc=[0,0,0]
             self.atoms.set_calculator(calculator)
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_occupied')
         elif mode == 'add_bands':
@@ -95,7 +90,7 @@ class GPAW_mol_calculator:
             db_final.write(self.atoms,id=id,name=self.element,
                             gpw_dir=self.file_dir_name+'.gpw')
 
-    def bulk_builder(self,box_size):
+    def bulk_builder(self,box_size,pbc_condition=None):
         location='input_xyz'+'/'+self.element+'.xyz'
         self.atoms=read(location)
         pos = self.atoms.get_positions()
@@ -105,7 +100,10 @@ class GPAW_mol_calculator:
         maxlength=max([xl,yl,zl])
         self.atoms.set_cell((maxlength,maxlength,maxlength))
         self.atoms.center()
-        self.atoms.set_pbc([False,False,False])
+        if pbc_condition:
+            self.atoms.set_pbc([pbc_condition]*3)
+        else:
+            self.atoms.set_pbc([False,False,False])
         return self.atoms
 
 def nbands_finder(file_name):
