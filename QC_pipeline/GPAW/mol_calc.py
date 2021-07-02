@@ -74,7 +74,7 @@ class GPAW_mol_calculator:
                 convergence_criteria['bands']=str(unoccupied_bands[number_of_unoccupied_bands_converged])#'CBM+'+str(aboveLUMO)
                 self.atoms, calculator = restart(file_prev+'.gpw',convergence=convergence_criteria)
             calc_bands=calculator.fixed_density(nbands=int(nbands*2.5),
-                                                txt='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied.txt')
+                                                txt='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied.txt')
             self.atoms.set_calculator(calc_bands)
             parprint(self.atoms.calc)
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
