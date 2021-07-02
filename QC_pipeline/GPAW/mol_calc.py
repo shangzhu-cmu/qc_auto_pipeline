@@ -1,4 +1,4 @@
-from gpaw import restart,Davidson,RMMDIIS
+from gpaw import restart,Davidson,RMMDIIS,Mixer
 from ase.db import connect
 import QC_pipeline.GPAW.optimizer as opt
 import numpy as np
@@ -58,10 +58,10 @@ class GPAW_mol_calculator:
                 raise RuntimeError('Specify convergence criteria in unoccupied mode.')
             else:
                 convergence_criteria['bands']=nbands+add_convergence_bands
-            self.atoms, calculator = restart(file_prev+'.gpw')
+            self.atoms, calculator = restart(file_prev+'.gpw',Mixer=(0.4,3,1))
             calc_bands=calculator.fixed_density(nbands=int((nbands+add_convergence_bands)*2.5),
                                                 convergence=convergence_criteria, 
-                                                eigensolver=Davidson(3),
+                                                eigensolver=RMMDIIS(3),
                                                 txt='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied.txt')
             self.atoms.set_calculator(calc_bands)
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied')
