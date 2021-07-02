@@ -1,4 +1,4 @@
-from gpaw import restart,Davidson,RMMDIIS,Mixer
+from gpaw import restart,Davidson,RMMDIIS,Mixer,CG
 from ase.db import connect
 import QC_pipeline.GPAW.optimizer as opt
 import numpy as np
@@ -76,7 +76,7 @@ class GPAW_mol_calculator:
             calc_bands=calculator.fixed_density(nbands=int(nbands*2.5),
                                                 txt='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied.txt',
                                                 convergence=convergence_criteria,
-                                                eigensolver=Davidson(3))
+                                                eigensolver=CG(niter=5, rtol=0.20))
             self.atoms.set_calculator(calc_bands)
             parprint(self.atoms.calc)
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
