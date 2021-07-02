@@ -58,7 +58,7 @@ class GPAW_mol_calculator:
                 raise RuntimeError('Specify convergence criteria in unoccupied mode.')
             else:
                 convergence_criteria['bands']=nbands+add_convergence_bands
-            self.atoms, calculator = restart(file_prev+'.gpw',Mixer=(0.4,3,1))
+            self.atoms, calculator = restart(file_prev+'.gpw',mixer=Mixer(0.4))
             calc_bands=calculator.fixed_density(nbands=int((nbands+add_convergence_bands)*2.5),
                                                 convergence=convergence_criteria, 
                                                 eigensolver=RMMDIIS(3),
