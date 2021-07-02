@@ -37,7 +37,7 @@ class GPAW_mol_calculator:
                     calculator=None,
                     file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
-                    add_convergence_bands=10,
+                    #add_convergence_bands=10,
                     number_of_unoccupied_bands_converged=5,
                     convergence_criteria=None):
         cid=self.element.split('_')[-2:]
@@ -80,7 +80,7 @@ class GPAW_mol_calculator:
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
             self.database_save('HOLO_'+file_name)
         else:
-            raise NameError('mode not definied. Available modes: occupied, add_bands_unoccupied.')
+            raise NameError('mode not definied. Available modes: occupied, add_bands, unoccupied.')
         
     def database_save(self,name):
         
