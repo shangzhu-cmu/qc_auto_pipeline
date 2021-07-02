@@ -1,4 +1,4 @@
-from gpaw import restart,Davidson
+from gpaw import restart,Davidson,RMMDIIS
 from ase.db import connect
 import QC_pipeline.GPAW.optimizer as opt
 import numpy as np
@@ -37,7 +37,7 @@ class GPAW_mol_calculator:
                     calculator=None,
                     file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
-                    add_convergence_bands=15,
+                    add_convergence_bands=10,
                     convergence_criteria=None):
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
@@ -59,7 +59,8 @@ class GPAW_mol_calculator:
             else:
                 convergence_criteria['bands']=nbands+add_convergence_bands
             self.atoms, calculator = restart(file_prev+'.gpw')
-            calc_bands=calculator.fixed_density(nbands=int((nbands+add_convergence_bands)*2.5),convergence=convergence_criteria, eigensolver=Davidson(3))
+            calc_bands=calculator.fixed_density(nbands=int((nbands+add_convergence_bands)*2.5),convergence=convergence_criteria, eigensolver=RMMDIIS(3))
+            calc_bands.set(txt=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied')
             self.atoms.set_calculator(calc_bands)
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied')
             self.database_save('HOLO_'+file_name)
