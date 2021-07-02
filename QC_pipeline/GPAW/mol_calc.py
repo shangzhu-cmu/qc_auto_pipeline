@@ -68,10 +68,10 @@ class GPAW_mol_calculator:
             #nbands=nbands_finder(file_prev+'.txt')
             unoccupied_bands=aboveLUMO_finder(file_prev+'.txt')
             nbands=nbands_finder(file_prev+'.txt')
-            parprint('results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied.txt')
             if convergence_criteria == None:
                 raise RuntimeError('Specify convergence criteria in unoccupied mode.')
             else:
+                parprint(unoccupied_bands)
                 convergence_criteria['bands']=str(unoccupied_bands[number_of_unoccupied_bands_converged])#'CBM+'+str(aboveLUMO)
                 self.atoms, calculator = restart(file_prev+'.gpw')
             calc_bands=calculator.fixed_density(nbands=int(nbands*2.5),
