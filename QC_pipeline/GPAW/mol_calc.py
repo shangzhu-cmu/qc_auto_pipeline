@@ -59,7 +59,8 @@ class GPAW_mol_calculator:
             #     raise RuntimeError('Specify convergence criteria in unoccupied mode.')
             # else:
             #     convergence_criteria['bands']=nbands+add_convergence_bands
-            self.atoms, calculator = restart(file_prev+'.gpw',nbands=int(nbands*2))
+            self.atoms, calculator = restart(file_prev+'.gpw',nbands=int(nbands*2),
+                                            occupations={'name': 'fermi-dirac', 'width': 0.01})
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands')
         elif mode == 'unoccupied':
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands'
@@ -76,7 +77,7 @@ class GPAW_mol_calculator:
             calc_bands=calculator.fixed_density(nbands=int(nbands*2.5),
                                                 txt='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied.txt',
                                                 convergence=convergence_criteria,
-                                                occupations={'name': 'methfessel-paxton', 'width': 0.1, 'order': 1})
+                                                )
             self.atoms.set_calculator(calc_bands)
             parprint(self.atoms.calc)
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
