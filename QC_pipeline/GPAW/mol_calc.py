@@ -38,6 +38,7 @@ class GPAW_mol_calculator:
                     file_name='mol',
                     mode='occupied',#TWO OTHER MODE: "add_bands", "unoccupied"
                     add_convergence_bands=10,
+                    number_of_unoccupied_bands_converged=5,
                     convergence_criteria=None):
         cid=self.element.split('_')[-2:]
         cid='_'.join(cid)
@@ -54,30 +55,30 @@ class GPAW_mol_calculator:
         elif mode == 'add_bands':
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_occupied'
             nbands=nbands_finder(file_prev+'.txt')
+            # if convergence_criteria == None:
+            #     raise RuntimeError('Specify convergence criteria in unoccupied mode.')
+            # else:
+            #     convergence_criteria['bands']=nbands+add_convergence_bands
+            self.atoms, calculator = restart(file_prev+'.gpw',nbands=nbands*1.5)
+            self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands')
+        elif mode == 'unoccupied':
+            file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands'
+            # eigen_arr=aboveLUMO_finder(file_prev+'.txt')
+            # aboveLUMO=np.abs(max(eigen_arr)-min(eigen_arr))*above_lumo_percent
+            #nbands=nbands_finder(file_prev+'.txt')
+            unoccupied_bands=aboveLUMO_finder(file_name)
+            nbands=nbands_finder(file_prev+'.txt')
             if convergence_criteria == None:
                 raise RuntimeError('Specify convergence criteria in unoccupied mode.')
             else:
-                convergence_criteria['bands']=nbands+add_convergence_bands
-            self.atoms, calculator = restart(file_prev+'.gpw',mixer=Mixer(0.4,3,1))
-            calc_bands=calculator.fixed_density(nbands=int((nbands+add_convergence_bands)*2.5),
-                                                convergence=convergence_criteria, 
-                                                eigensolver=RMMDIIS(5),
+                convergence_criteria['bands']=str(unoccupied_bands[number_of_unoccupied_bands_converged])#'CBM+'+str(aboveLUMO)
+                self.atoms, calculator = restart(file_prev+'.gpw',convergence=convergence_criteria)
+            calc_bands=calculator.fixed_density(nbands=int(nbands*2.5),
                                                 txt='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied.txt')
             self.atoms.set_calculator(calc_bands)
-            self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied')
+            parprint(self.atoms.calc)
+            self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
             self.database_save('HOLO_'+file_name)
-        # elif mode == 'unoccupied':
-        #     file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands'
-        #     eigen_arr=aboveLUMO_finder(file_prev+'.txt')
-        #     aboveLUMO=np.abs(max(eigen_arr)-min(eigen_arr))*above_lumo_percent
-        #     if convergence_criteria == None:
-        #         raise RuntimeError('Specify convergence criteria in unoccupied mode.')
-        #     else:
-        #         convergence_criteria['bands']='CBM+'+str(aboveLUMO)
-        #         self.atoms, calculator = restart(file_prev+'.gpw',convergence=convergence_criteria)
-        #     self.atoms.set_calculator(calculator)
-        #     self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
-        #     self.database_save('HOLO_'+file_name)
         else:
             raise NameError('mode not definied. Available modes: occupied, add_bands_unoccupied.')
         
@@ -121,12 +122,12 @@ def nbands_finder(file_name):
 
 def aboveLUMO_finder(file_name):
     file = paropen(file_name,'r')
-    eigen=[]
+    unoccupied_bands=[]
     for line in file:
         line = line.split()
         if not line:
             continue
         if len(line) >= 3:
             if line[2] == '0.00000':
-                eigen.append(float(line[1]))
-    return np.array(eigen)
+                unoccupied_bands.append(int(line[0]))
+    return np.array(unoccupied_bands)
