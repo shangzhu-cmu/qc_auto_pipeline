@@ -59,7 +59,7 @@ class GPAW_mol_calculator:
             else:
                 convergence_criteria['bands']=nbands+add_convergence_bands
             self.atoms, calculator = restart(file_prev+'.gpw',mixer=Mixer(0.4))
-            calc_bands=calculator.fixed_density(nbands=int((nbands+add_convergence_bands)*2.5),
+            calc_bands=calculator.fixed_density(nbands=int((nbands+add_convergence_bands)*3),
                                                 convergence=convergence_criteria, 
                                                 eigensolver=RMMDIIS(3),
                                                 txt='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands_unoccupied.txt')
