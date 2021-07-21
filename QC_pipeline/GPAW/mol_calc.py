@@ -106,7 +106,7 @@ class GPAW_mol_calculator:
             else:
                 db_final.write(self.atoms,id=id,name=self.element,
                                 homo=self.atoms.get_homo_lumo()[0],
-                                homo=self.atoms.get_homo_lumo()[1])
+                                lumo=self.atoms.get_homo_lumo()[1])
 
     def bulk_builder(self,box_size,pbc_condition=None):
         location='input_xyz'+'/'+self.element+'.xyz'
