@@ -31,7 +31,7 @@ class GPAW_mol_calculator:
 
         self.file_dir_name=opt.relax_single(self.atoms,cid,sub_dir,solver_fmax,solver_maxstep)
         #self.file_dir_name='results/'+self.element+'/'+sub_dir+'/'+'mol'
-        self.database_save('relaxed_'+sub_dir)
+        self.database_save('relaxed_'+sub_dir,option='pot_energy')
         # return self.atoms
 
     def homo_lumo_calc(self,
@@ -83,22 +83,30 @@ class GPAW_mol_calculator:
                                                 )
             self.atoms.set_calculator(calc_bands)
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied',save_gpw=False)
-            self.database_save('HOLO_'+file_name)
+            self.database_save('HOLO_'+file_name,option='homo-lumo')
             os.remove(file_prev+'.gpw')
         else:
             raise NameError('mode not definied. Available modes: occupied, add_bands, unoccupied.')
         
-    def database_save(self,name):
-        
+    def database_save(self,name,option):
         db_final=connect('final_database'+'/'+name+'.db')
         id=db_final.reserve(name=self.element)
-        if id is None:
-            id=db_final.get(name=self.element).id
-            db_final.update(id=id,atoms=self.atoms,name=self.element,
-                            gpw_dir=self.file_dir_name+'.gpw')
-        else:
-            db_final.write(self.atoms,id=id,name=self.element,
-                            gpw_dir=self.file_dir_name+'.gpw')
+        if option == 'pot_energy':   
+            if id is None:
+                id=db_final.get(name=self.element).id
+                db_final.update(id=id,atoms=self.atoms,name=self.element)
+            else:
+                db_final.write(self.atoms,id=id,name=self.element)
+        elif option == 'homo-lumo':
+            if id is None:
+                id=db_final.get(name=self.element).id
+                db_final.update(id=id,atoms=self.atoms,name=self.element,
+                                homo=self.atoms.get_homo_lumo()[0],
+                                lumo=self.atoms.get_homo_lumo()[1])
+            else:
+                db_final.write(self.atoms,id=id,name=self.element,
+                                homo=self.atoms.get_homo_lumo()[0],
+                                homo=self.atoms.get_homo_lumo()[1])
 
     def bulk_builder(self,box_size,pbc_condition=None):
         location='input_xyz'+'/'+self.element+'.xyz'
