@@ -4,6 +4,8 @@ import QC_pipeline.GPAW.optimizer as opt
 import numpy as np
 from ase.parallel import paropen, parprint
 from ase.io import read
+import os
+
 class GPAW_mol_calculator:
     def __init__(self,element):
         self.element=element
@@ -52,6 +54,7 @@ class GPAW_mol_calculator:
                 raise RuntimeError('No HOMO LUMO Calculator.')
             self.atoms.set_calculator(calculator)
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_occupied')
+            os.remove(file_prev+'.gpw')
         elif mode == 'add_bands':
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_occupied'
             nbands=nbands_finder(file_prev+'.txt')
@@ -60,8 +63,8 @@ class GPAW_mol_calculator:
             # else:
             #     convergence_criteria['bands']=nbands+add_convergence_bands
             self.atoms, calculator = restart(file_prev+'.gpw',nbands=int(nbands*bands_multiplier))
-            
             self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands')
+            os.remove(file_prev+'.gpw')
         elif mode == 'unoccupied':
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_add_bands'
             # eigen_arr=aboveLUMO_finder(file_prev+'.txt')
@@ -79,8 +82,9 @@ class GPAW_mol_calculator:
                                                 convergence=convergence_criteria,
                                                 )
             self.atoms.set_calculator(calc_bands)
-            self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied')
+            self.file_dir_name=opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_unoccupied',save_gpw=False)
             self.database_save('HOLO_'+file_name)
+            os.remove(file_prev+'.gpw')
         else:
             raise NameError('mode not definied. Available modes: occupied, add_bands, unoccupied.')
         
