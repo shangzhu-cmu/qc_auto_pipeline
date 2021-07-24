@@ -49,13 +49,13 @@ class GPAW_mol_calculator:
                 raise RuntimeError('relax_sub_dir = None: Did not specify molecule relax .gpw file directory.')
             else:
                 file_prev='results/'+cid+'/'+relax_sub_dir+'/'+'mol'
-            self.atoms = restart(file_prev+'.gpw')[0]
+            self.atoms = read(file_prev+'.traj')
             if calculator == None:
                 raise RuntimeError('No HOMO LUMO Calculator.')
             self.atoms.set_calculator(calculator)
             opt.SPE_calc(self.atoms,name=cid+'/'+'homo-lumo'+'/'+file_name+'_occupied')
-            if world.rank == 0:
-                os.remove(file_prev+'.gpw')
+            #if world.rank == 0:
+                #os.remove(file_prev+'.gpw')
         elif mode == 'add_bands':
             file_prev='results/'+cid+'/'+'homo-lumo'+'/'+file_name+'_occupied'
             nbands=nbands_finder(file_prev+'.txt')

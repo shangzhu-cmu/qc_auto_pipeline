@@ -8,7 +8,7 @@ def relax_single(atoms,name,sub_dir,fmax=0.01, maxstep=0.04):
     atoms.calc.set(txt=file_dir_name+'.txt')
     dyn=BFGS(atoms=atoms,trajectory=file_dir_name+'.traj',logfile = file_dir_name+'.log',restart=file_dir_name+'qn.pckl',maxstep=maxstep)
     dyn.run(fmax=fmax)
-    atoms.calc.write(file_dir_name+'.gpw')
+    #atoms.calc.write(file_dir_name+'.gpw')
     #Writing ensemble energies to file 
     if atoms.calc.get_xc_functional()=='BEEF-vdW':
         ens = BEEFEnsemble(atoms.calc)
